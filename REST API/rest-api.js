@@ -26,6 +26,7 @@ const server_root = "http://localhost:" + port;
 
 var users = {};
 var albuns = {};
+var photos = {};
 
 /***************************************************************/
 /*  Helper Functions                                           */
@@ -184,6 +185,45 @@ app.route("user/:userID/album")
     .delete(function(req, res){
         res.status(405).send("Cannot delete the entire collection.");
     });
+    
+/***************************************************************/
+/*  Handling invidual itens                                    */
+/*                                                             */
+/*  URL:    /user/:userID/album/:albumID                       */
+/*                                                             */
+/*  GET     return specific album                              */
+/*  POST    update album                                       */
+/*  PUT     overwrite existing / create new                    */
+/*  DELETE  delete album                                       */
+/***************************************************************/
+
+//ainda não implementado
+
+/***************************************************************/
+/*  Handling Collection Photos                                 */
+/*                                                             */
+/*  URL:    /user/:userID/album/:albumID/photo                 */
+/*                                                             */
+/*  GET     return all photos                                  */
+/*  POST    upload new photo                                   */
+/*  PUT     not allowed                                        */
+/*  DELETE  not allowed                                        */
+/***************************************************************/
+
+//ainda não implementado
+
+/***************************************************************/
+/*  Handling invidual itens                                    */
+/*                                                             */
+/*  URL:    /user/:userID/album/:albumID/photo/:idPhoto        */
+/*                                                             */
+/*  GET     return specific photo                              */
+/*  POST    update photo                                       */
+/*  PUT     overwrite existing / create new                    */
+/*  DELETE  delete photo                                       */
+/***************************************************************/
+
+//ainda não implementado
 
 /***************************************************************/
 /*  Starting...                                                */
