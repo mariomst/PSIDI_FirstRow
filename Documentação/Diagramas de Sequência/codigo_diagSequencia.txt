@@ -1,0 +1,80 @@
+/******************************************************************************************************************/
+/*Textos para geração dos diagramas de sequência no web sequence diagrams (https://www.websequencediagrams.com/#) */
+/*Caso necessidade de alterar os diagramas...                                                                     */
+/******************************************************************************************************************/
+
+// 01 - Criação de albuns
+
+title Criação de álbuns
+
+alt Autenticação no Website    
+    Utilizador ->+ Website: Autenticação
+    Website -->- Utilizador: Inicio de sessão
+else Caso o utilizador não esteja registado
+    Website -> Utilizador: Apresentação do formulário de registo
+    Utilizador ->+ Website: Registação 
+    Website ->+ Utilizadores: Criação de novo utilizador
+    Utilizadores -->- Website: Retornar mensagem de criação
+    Website -->- Utilizador: Mensagem de registo
+end
+Utilizador ->+ Website: Criação novo álbum
+Website --> Utilizador: Apresentação do formulário de novo álbum
+Utilizador -> Website: Submissão informações do novo álbum
+Website ->+ Álbum: Criação de novo álbum
+Álbum -->- Website: Retornar mensagem de criação
+Website -->- Utilizador: Apresentação do novo álbum 
+
+// 02 - Upload de fotos
+
+title Upload de fotos
+
+Utilizador ->+ Website: Autenticação
+Website -->- Utilizador: Inicio de sessão
+Utilizador ->+ Website: Escolher álbum pretendido
+Website ->+ Álbum: Adquirir álbum
+Álbum ->- Website: Retornar álbum
+Website -->- Utilizador: Apresentar álbum e opções de edição
+Utilizador ->+ Website: Upload de nova fotografia no álbum
+Website ->+ Álbum: Atualização do álbum com nova fotografia
+Álbum -->- Website: Retornar álbum atualizado
+Website -->- Utilizador: Apresentar álbum atualizado
+
+// 03 - Criação de álbuns de impressão
+
+title Criação de álbuns de impressão
+
+Utilizador ->+ Website: Criação de álbum de impressão
+Website ->+ Álbum: Obter todos as fotografias dos álbuns "normais"
+Álbum -->- Website: Retornar fotografias dos álbuns existentes
+Website --> Utilizador: Apresentar todas as fotografias para selecção
+Utilizador -> Website: Selecção de fotografias pretendidas
+Utilizador -> Website: Indicação de informações para o álbum
+Website ->+ Álbum: Geração de um álbum de impressão
+Álbum -->- Website: Retornar álbum criado
+Website -->- Utilizador: Exportação do álbum em formato PDF
+
+// 04 - Encomenda de álbuns
+
+title Encomenda de álbuns
+  
+Utilizador ->+ Website: Autenticação
+Website -->- Utilizador: Inicio de sessão
+
+Utilizador ->+ Website: Selecionar opção "Encomenda de álbuns"
+Website ->+ Álbum: Obter todos as fotografias dos álbuns
+Álbum -->- Website: Retornar fotografias dos álbuns existentes
+Website --> Utilizador: Apresentar todas as fotografias para selecção
+Utilizador -> Website: Selecção de fotografias pretendidas
+Utilizador -> Website: Indicação do tema
+Website --> Utilizador: Apresentar o preço a pagar por cada impressão
+Utilizador -> Website: Confirmar encomenda
+Utilizador -> Website: Indicar morada de entrega da encomenda
+Website -> Website: Calcular preço total da encomenda
+Website --> Utilizador: Apresentar preço total a pagar
+Utilizador -> Website: Confirmar encomenda
+Website -->- Utilizador: Apresentar mensagem de encomenda
+
+Utilizador ->+ Website: Verificar estado da encomenda
+Website -> Encomendas: Obter informações da encomenda desejada
+Encomendas --> Website: Retornar informações
+Website --> Utilizador: Apresentar informações do estado da encomenda
