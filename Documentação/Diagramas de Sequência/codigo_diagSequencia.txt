@@ -3,9 +3,9 @@
 /*Caso necessidade de alterar os diagramas...                                                                     */
 /******************************************************************************************************************/
 
-// 01 - Criação de albuns
+// 01 - Autenticação/Registo de Utilizadores
 
-title Criação de álbuns
+title Autenticação/Registo de Utilizadores
 
 alt Autenticação no Website    
     Utilizador ->+ Website: Autenticação
@@ -17,6 +17,11 @@ else Caso o utilizador não esteja registado
     Utilizadores -->- Website: Retornar mensagem de criação
     Website -->- Utilizador: Mensagem de registo
 end
+
+// 02 - Criação de albuns
+
+title Criação de álbuns
+
 Utilizador ->+ Website: Criação novo álbum
 Website --> Utilizador: Apresentação do formulário de novo álbum
 Utilizador -> Website: Submissão informações do novo álbum
@@ -24,12 +29,10 @@ Website ->+ Álbum: Criação de novo álbum
 Álbum -->- Website: Retornar mensagem de criação
 Website -->- Utilizador: Apresentação do novo álbum 
 
-// 02 - Upload de fotos
+// 03 - Upload de fotos
 
 title Upload de fotos
 
-Utilizador ->+ Website: Autenticação
-Website -->- Utilizador: Inicio de sessão
 Utilizador ->+ Website: Escolher álbum pretendido
 Website ->+ Álbum: Adquirir álbum
 Álbum ->- Website: Retornar álbum
@@ -39,7 +42,7 @@ Website ->+ Álbum: Atualização do álbum com nova fotografia
 Álbum -->- Website: Retornar álbum atualizado
 Website -->- Utilizador: Apresentar álbum atualizado
 
-// 03 - Criação de álbuns de impressão
+// 04 - Criação de álbuns de impressão
 
 title Criação de álbuns de impressão
 
@@ -53,13 +56,10 @@ Website ->+ Álbum: Geração de um álbum de impressão
 Álbum -->- Website: Retornar álbum criado
 Website -->- Utilizador: Exportação do álbum em formato PDF
 
-// 04 - Encomenda de álbuns
+// 05 - Encomenda de álbuns
 
 title Encomenda de álbuns
   
-Utilizador ->+ Website: Autenticação
-Website -->- Utilizador: Inicio de sessão
-
 Utilizador ->+ Website: Selecionar opção "Encomenda de álbuns"
 Website ->+ Álbum: Obter todos as fotografias dos álbuns
 Álbum -->- Website: Retornar fotografias dos álbuns existentes
