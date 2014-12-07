@@ -176,8 +176,8 @@ app.route("user/:userID/album")
         //create new album       
         albuns[newID] = createAlbum(newID, req.body.title, req.body.userID, req.body.description, req.body.start_date, req.body.end_date);            
         //send 202 Accepted and Location
-        res.status(201).set('Location', server_root + "/user/" + req.body.userID + "/album/" + newID).send(albuns[newID]);
-        console.log("-> Accepted POST to new resource " + server_root + "/user/" + req.body.userID + "/album/" + newID);  
+        res.status(201).set('Location', server_root + "/user/" + req.userID + "/album/" + newID).send(albuns[newID]);
+        console.log("-> Accepted POST to new resource " + server_root + "/user/" + req.userID + "/album/" + newID);  
     })
     .put(function(req, res){
         res.status(405).send("Cannot overwrite the entire collection.");
@@ -197,7 +197,57 @@ app.route("user/:userID/album")
 /*  DELETE  delete album                                       */
 /***************************************************************/
 
-//ainda não implementado
+app.param('albumID', function(req, res, next, albumID){
+    req.albumID = albumID;
+    return next();
+})
+
+app.route("user/:userID/album/:albumID")
+    .get(function(req, res){
+        var entry = albuns[req.albumID];
+        console.log("-> Requested album: " + req.albumID);
+        if(entry === undefined){
+            res.status(404).send("Album " + req.albumID + " not found.");
+        } else {
+            res.json(entry);
+        }
+    })
+    .post(function(req, res){
+        var entry = albuns[req.albumID];
+        if(entry === undefined){
+            res.status(404).send("Album " + req.albumID + " not found.");
+        } else {
+            entry.title = req.body.title;
+            entry.description = req.body.description;
+            entry.startDate = req.body.start_date;
+            entry.endDate = req.body.end_date;
+            res.json(entry);
+        }
+    })
+    .put(function(req, res){
+        var entry = albuns[req.albumID];
+        if(entry === undefined){
+            entry = createAlbum(req.body.albumID, req.body.title, req.body.userID, req.body.description, req.body.start_date, req.body.end_date);
+            albuns[req.albumID] = entry;
+            res.stats(201).set('Location', server_root + "/user/" + req.albumID).json(entry);
+        } else {
+            entry.title = req.body.title;
+            entry.description = req.body.description;
+            entry.startDate = req.body.start_date;
+            entry.endDate = req.body.end_date;          
+            res.json(entry);
+        }
+    })
+    .delete(function(req, res) {
+		var entry = albuns[req.albumID];
+		if (entry === undefined) {
+			res.status(404).send("Album " + req.albumID + " not found.");
+		}
+		else {
+			delete albuns[req.albumID];
+			res.status(204).send("Album " + req.albumID + " deleted.");
+		}
+	});	
 
 /***************************************************************/
 /*  Handling Collection Photos                                 */
