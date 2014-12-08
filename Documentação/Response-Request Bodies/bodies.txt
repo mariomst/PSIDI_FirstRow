@@ -1,0 +1,62 @@
+album response
+{
+    "id": 1,
+    "title": "Vida",
+    "description": "Exemplo de descrição",
+    "startDate": 1418066023321,
+    "endDate": 1418066023321,
+    "owner": 1,
+    "photos": [
+        {
+            "id": 1,
+            "albumId": 1,
+            "photo": "photos/41kjb2h4bkb.jpg",
+            "date": 1418066023321
+        },
+        {
+            "id": 2,
+            "albumId": 1,
+            "photo": "photos/d89sad798sd.jpg",
+            "date": 1418066023321
+        }
+    ]
+}
+
+album request
+{
+    "title": "Vida",
+    "description": "Exemplo de descrição",
+    "startDate": 1418066023321,
+    "endDate": 1418066023321,
+    "owner": 1
+}
+
+user response
+{
+    "id": 1,
+    "username": "ricardo",
+    "password": "123456"
+}
+
+user request
+{
+    "username": "ricardo",
+    "password": "123456"
+}
+
+photo response
+{
+    "id": 1,
+    "photo": "photos/d89sad798sd.jpg",
+    "description": "Exemplo de descrição",
+    "date": 1418066023321,
+	"albumId": 1
+}
+
+photo request
+{
+    "photo": "photos/d89sad798sd.jpg",
+    "description": "Exemplo de descrição",
+    "date": 1418066023321,
+	"albumId": 1
+}
