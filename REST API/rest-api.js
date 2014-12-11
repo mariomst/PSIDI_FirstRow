@@ -51,7 +51,7 @@ function createAlbum(newID, title, userID, description, start_date, end_date){
     };
 }
 
-function uploadPhoto(albumID, photo, description, date){}
+function uploadPhoto(newID, albumID, photo, description, date){}
 
 function albumsforprinting_pdf(){}
 
@@ -260,7 +260,38 @@ app.route("user/:userID/album/:albumID")
 /*  DELETE  not allowed                                        */
 /***************************************************************/
 
-//ainda não implementado
+app.route("user/:userID/album/:albumID/photo")
+    .get(function(req, res){
+        var entry = photos[req.albumID];
+        console.log("-> Requested album: " + req.albumID);
+        if(entry === undefined){
+            res.status(404).send("Album " + req.albumID + " not found.");
+        } else {
+            var albumPhotos = {};
+            for(var p in photos){
+                if(photos[p].albumID === req.albumID){
+                    albumPhotos[p] = photos[p];
+                }
+            }
+            res.json(albumPhotos);
+        }        
+    })
+    .post(function(req, res){
+        //generate random ID
+        const newID = "p" + (Math.random()*1000).toString().substr(1,4);   
+        //upload new photo       
+        //instruções de upload no metódo uploadPhoto. Verificar isto depois.
+        photos[newID] = uploadPhoto(newID, req.body.albumID, req.body.photo, req.body.description, req.body.date);            
+        //send 202 Accepted and Location
+        res.status(201).set('Location', server_root + "/user/" + req.userID + "/album/" + req.albumID + "/photo/" + newID).send(photos[newID]);
+        console.log("-> Accepted POST to new resource " + server_root + "/user/" + req.userID + "/album/" + req.albumID + "/photo/" + newID);  
+    })
+    .put(function(req, res){
+        res.status(405).send("Cannot overwrite the entire collection.");
+    })
+    .delete(function(req, res){
+        res.status(405).send("Cannot delete the entire collection.");
+    });
 
 /***************************************************************/
 /*  Handling invidual itens                                    */
@@ -273,7 +304,55 @@ app.route("user/:userID/album/:albumID")
 /*  DELETE  delete photo                                       */
 /***************************************************************/
 
-//ainda não implementado
+//uploadPhoto(albumID, photo, description, date)
+
+app.param('photoID', function(req, res, next, albumID){
+    req.photoID = photoID;
+    return next();
+})
+
+app.route("user/:userID/album/:albumID/photo/:photoID")
+    .get(function(req, res){
+        var entry = photos[req.photoID];
+        console.log("-> Requested photo: " + req.photoID);
+        if(entry === undefined){
+            res.status(404).send("Photo: " + req.photoID + " not found.");
+        } else {
+            res.json(entry);
+        }
+    })
+    .post(function(req, res){
+        var entry = photos[req.photoID];
+        if(entry === undefined){
+            res.status(404).send("Photo: " + req.photoID + " not found.");
+        } else {
+            //chamada da instrução de upload de photos
+            uploadPhoto(req.photoID, req.body.albumID, req.body.photo, req.body.description, req.body.date);
+            res.json(entry);
+        }
+    })
+    .put(function(req, res){
+        var entry = photos[req.photoID];
+        if(entry === undefined){
+            entry = uploadPhoto(req.body.photoID, req.body.albumID, req.body.photo, req.body.description, req.body.date);
+            photos[req.photoID] = entry;
+            res.stats(201).set('Location', server_root + "/user/" + req.albumID).json(entry);
+        } else {
+            //chamada da instrução de upload de photos
+            uploadPhoto(req.photoID, req.body.albumID, req.body.photo, req.body.description, req.body.date);          
+            res.json(entry);
+        }
+    })
+    .delete(function(req, res) {
+		var entry = photos[req.photoID];
+		if (entry === undefined) {
+			res.status(404).send("Photo: " + req.photoID + " not found.");
+		}
+		else {
+			delete photos[req.photoID];
+			res.status(204).send("Photo: " + req.photoID + " deleted.");
+		}
+	});	
 
 /***************************************************************/
 /*  Starting...                                                */
