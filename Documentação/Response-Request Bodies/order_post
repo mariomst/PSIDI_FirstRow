@@ -1,0 +1,40 @@
+/user/:uID/order
+POST
+====Request Body====
+{
+    "printPrice": 29.75,
+    "transportPrice": 5.25,
+    "address": "Avenida da Liberdade",
+    "printAlbum": 1,
+    "confirmed": true,
+    "state": "Delivered to carrier"
+}
+====Response Body====
+{
+    "id": 1,
+    "printPrice": 29.75,
+    "transportPrice": 5.25,
+    "address": "Avenida da Liberdade",
+    "printAlbum": {
+        "id": 1,
+        "theme": "Férias",
+        "title": "Melhores das férias",
+        "message": "I will get a Triforce, like I said",
+        "photos": [
+            {
+                "id": 1,
+                "albumId": 1,
+                "photo": "photos/41kjb2h4bkb.jpg",
+                "date": 1418066023321
+            },
+            {
+                "id": 2,
+                "albumId": 1,
+                "photo": "photos/d89sad798sd.jpg",
+                "date": 1418066023321
+            }
+        ]
+    },
+    "confirmed": true,
+    "state": "Delivered to carrier"
+}
