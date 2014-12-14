@@ -1,0 +1,11 @@
+Remote Façade - Com este padrão podemos facilitar a obtenção de, por exemplo, álbuns integrando as fotografias no documento que será enviado para a App.
+
+Data Transport Object - Este padrão será usado em conjunto com o Remote Façade para ir buscar informação a diferentes coleções através de apenas um pedido.
+
+Service Layer - 
+
+Document Processor - Tanto no backoffice, como no PrinterShop, no Carrier e na App serão utilizados contratos de documentos, em vez de contratos do tipo RPC. 
+
+Idempotent operation - 
+
+Web/Worker roles - Em toda o backoffice, a aceitação de pedidos delegará os mesmo para um "worker" que tratará os mesmos.
