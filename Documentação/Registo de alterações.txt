@@ -1,0 +1,12 @@
+Registo de alterações
+
+	- Alterar o ver encomenda e o criar álbum para impressão
+		(O backoffice define um orçamento fixo de transporte e custo de fotos)
+		
+		- Alterar o criar album para impressão para enviar apenas um POST
+		
+	- Separar o criar encomenda de processar encomenda
+	- Associar o URI ao módulo respetivo
+	- No método /distance, colocar o verdadeiro que vamos utilizar (fazer o mesmo para os recursos externos)
+	- Colocar descrições nos módulos da API
+	- Inserir notificações na API e nos diagramas
