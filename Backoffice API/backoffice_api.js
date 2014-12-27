@@ -161,23 +161,77 @@ function showAllUsers(){
     });
 }
 
+function createAlbum(newID, title, userID, description, start_date, end_date){
+	//função para criar um novo album na db.	
+	var query = "INSERT INTO ALBUNS (albumID, title, userID, description, start_date, end_date) VALUES (?,?,?,?,?,?)";
+	
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+	
+	//criar novo álbum
+	db.serialize(function(){
+		console.log("Info: A criar álbum com as seguintes informações");
+		console.log("-> albumID: " + newID);
+		console.log("-> title: " + title);
+		console.log("-> userID: " + userID);
+		console.log("-> description: " + description);
+		console.log("-> start_date: " + start_date);
+		console.log("-> end_date: " + end_date);
+		
+		db.run(query, newID, title, userID, description, start_date, end_date);
+		
+		console.log("Info: Álbum criado");
+		
+		db.close();
+	});
+}
+
+function getUserAlbuns(userID, result){
+	//função para obter todos os álbuns de um determinado utilizador
+	var query = "SELECT * FROM ALBUNS WHERE userID=\"" + userID + "\"";
+	
+	//array para armazenar os ids de cada album
+	var albuns = [];
+	
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+	
+	//obter todos os álbuns de um utilizador.
+    db.each(query, function(err, row){
+        if (err) {
+            throw err;
+        }
+        
+        if(row != null)
+        {
+            albuns.push(row.albumID);
+        }      
+    });
+    
+    result(albuns);
+}
+
+/***************************************************************/
+/*  Tests			                                           */
+/***************************************************************/
+
 function testes(){
     
     var userIDTeste = "u" + (Math.random()*1000).toString().substr(1,4);
     var userTeste = "mario";
-    var passTeste = "teste123";    
+    var passTeste = "teste123";        
     
-    console.log("\nTeste -> Criar um novo utilizador:");    
+    console.log("\nTeste #1 -> Criar um novo utilizador:");    
     createUser(userIDTeste,userTeste,passTeste);
     
     setTimeout(function () {
-        console.log("\nTeste -> Mostrar todos os utilizadores:");    
+        console.log("\nTeste #2 -> Mostrar todos os utilizadores:");    
         showAllUsers();
     }, 1500);
     
     findUser(userTeste, function(user){
         setTimeout(function () {
-            console.log("\nTeste -> Procurar um utilizador especifico:");
+            console.log("\nTeste #3 -> Procurar um utilizador especifico:");
             if(user == ""){
                 console.log("Info: Utilizador " + userTeste + " não foi encontrado.");
             } else {
@@ -188,7 +242,7 @@ function testes(){
     
     login(userTeste, passTeste, function(result){
         setTimeout(function () {
-            console.log("\nTeste -> Realizar login:");
+            console.log("\nTeste #4 -> Realizar login:");
             
             if(result == "true"){
                 console.log("Info: Utilizador autenticado.");
@@ -197,6 +251,31 @@ function testes(){
             }
         }, 2500);
     });
+    
+    var albumID = "a" + (Math.random()*1000).toString().substr(1,4);
+    var title = "Album Teste";
+    var userID = "u00.7";
+    var description = "Album criado para testar as funcoes";
+    var start_date = "01-01-2000";
+    var end_date = "01-12-2000";
+    
+    setTimeout(function(){
+    	console.log("\nTeste #5 -> Criar um novo album");
+    	createAlbum(albumID, title, userID, description, start_date, end_date)
+    }, 3000);
+    
+    getUserAlbuns(userID, function(result){
+    	setTimeout(function(){
+    		console.log("\nTeste #6 -> Obter albuns de um utilizador");
+    		
+    		if(result.length > 0){
+    			for(var i = 0; i < result.length; i++){
+    				console.log("AlbumID: " + result[i]);
+    			}
+    		}
+    	}, 3500);    	
+    });
+    
 }
 
 /***************************************************************/
