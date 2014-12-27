@@ -55,92 +55,147 @@ db.close();
 /***************************************************************/
 
 function createUser(newID, user, password){
-
-    var db = new sqlite3.Database(file);    
+    //função para criar um novo utilizador na db.
+    var query = "INSERT INTO USERS (userID, user, password) VALUES (?,?,?)"; 
     
     findUser(user, function(res){
-        if(res == ""){
-            //Criar novo utilizador
-            db.serialize(function(){
-                console.log("Creating user with the following informations:");
-                console.log("userID: " + newID);
-                console.log("user: " + user);
-                console.log("password: " + password);
-                db.run("INSERT INTO USERS (userID, user, password) VALUES (?,?,?)", newID, user, password);
-                console.log("\n-> User created");
-            });
-        } else {
-            console.log("\nError: User already exists.");
-        }
-    });
+        //timeout necessário para dar tempo a db responder à query.
+        setTimeout(function () {
+            if(res === 0){
+                var db = new sqlite3.Database(file);  
+                //Criar novo utilizador
+                db.serialize(function(){
+                    console.log("Info: A criar utilizador com as seguintes informações");
+                    console.log("-> userID: " + newID);
+                    console.log("-> user: " + user);
+                    console.log("-> password: " + password);
                     
-    db.close();
+                    db.run(query, newID, user, password);
+                    
+                    console.log("Info: Utilizador criado.");
+                });
+                db.close();
+            } else {
+                console.log("Erro: Utilizador já existe.");             
+            }                        
+        }, 1000);
+    }); 
 }
 
 function findUser(usr,res){
-
+    //função para procurar um determinado utilizador na db
     var db = new sqlite3.Database(file);
-
-    var userRes = "";
-    var passwordRes = "";
+    var query = "SELECT * FROM USERS WHERE user=\""+usr+"\"";
+    var flag = 0;
     
-    db.each("SELECT * FROM USERS WHERE user=\""+usr+"\"", function(err, row) {
+    console.log("Info: A verificar se já existe utilizador");
+    
+    db.get(query, function(err, row) {
         if (err) {
             throw err;
         }
         
-        if(row != null)
+        if(row.user === usr)
         {
-            userRes = row.user;
-            res(userRes);
-        }         
+            flag = 1;
+            res(flag);                    
+        } else {
+            flag = 0;
+            res(flag);
+        }     
     });
     
-    if(res.userRes == undefined){
-        userRes = "";
-        res(userRes);
-    }
-
     db.close();
+}
+
+function login(user, password, result){
+    //função para validar os dados inseridos pelo utilizador    
+    var db = new sqlite3.Database(file);
+    
+    var userRes = "";
+    var passwordRes = "";
+    var query = "SELECT * FROM USERS WHERE user=\""+user+"\"";
+    
+    //procurar utilizador na db
+    db.get(query, function(err, res){
+        
+        //caso ocorra algum erro
+        if (err) {
+            throw err;
+        }
+        
+        //caso encontre
+        if(res !== null){
+            userRes = res.user;
+            passwordRes = res.password;
+        }
+    });
+       
+    //fechar a db
+    db.close();
+    
+    //timeout necessário para dar tempo a db responder à query.
+    setTimeout(function () {           
+        //comparar o que encontrou na DB com o que foi inserido pelo utilizador
+        if(user === userRes && password === passwordRes){
+            result("true");
+        } else {
+            result("false");
+        }    
+    }, 1000);
 }
 
 function showAllUsers(){
     var db = new sqlite3.Database(file);
+    var query = "SELECT * FROM USERS";
 
-    db.each("SELECT * FROM USERS", function(err, row){
+    db.each(query, function(err, row){
         if (err) {
             throw err;
         }
         
         if(row != null)
         {
-            console.log("ID: " + row.userID + "; User: " + row.user + "; Password: " + row.password);
+            console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
         }      
     });
 }
 
 function testes(){
     
-    var userIDTeste = "u3";
-    var userTeste = "cat2";
-    var passTeste = "cat123";
+    var userIDTeste = "u" + (Math.random()*1000).toString().substr(1,4);
+    var userTeste = "mario";
+    var passTeste = "teste123";    
     
-    console.log("\nTeste: Criar um novo utilizador:");
+    console.log("\nTeste -> Criar um novo utilizador:");    
+    createUser(userIDTeste,userTeste,passTeste);
     
-    createUser(userIDTeste,userTeste,passTeste);     
+    setTimeout(function () {
+        console.log("\nTeste -> Mostrar todos os utilizadores:");    
+        showAllUsers();
+    }, 1500);
     
-    console.log("\nTeste: Mostrar todos os utilizadores:");
-    
-    showAllUsers();
-    
-    console.log("\nTeste: Procurar um utilizador especifico:");
-       
     findUser(userTeste, function(user){
-        if(user == ""){
-            console.log("User: " + userTeste + " was not found");
-        } else {
-            console.log("User: " + userTeste + " was found");
-        }
+        setTimeout(function () {
+            console.log("\nTeste -> Procurar um utilizador especifico:");
+            if(user == ""){
+                console.log("Info: Utilizador " + userTeste + " não foi encontrado.");
+            } else {
+                console.log("Info: Utilizador " + userTeste + " encontrado");
+            }
+        }, 2000);
+    });
+    
+    login(userTeste, passTeste, function(result){
+        setTimeout(function () {
+            console.log("\nTeste -> Realizar login:");
+            
+            if(result == "true"){
+                console.log("Info: Utilizador autenticado.");
+            } else {
+                console.log("Info: Autenticação falhou.");
+            }
+        }, 2500);
     });
 }
 
@@ -174,9 +229,9 @@ app.route("/signup")
 /*  Starting...                                                */
 /***************************************************************/
 
-app.listen(port, function(){
+/*app.listen(port, function(){
     console.log("Listening on " + port);
-});
+});*/
 
 /***************************************************************/
 /*  Testes dos métodos pela consola...                         */
