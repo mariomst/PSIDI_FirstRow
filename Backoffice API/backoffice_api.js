@@ -142,7 +142,7 @@ function login(user, password, result){
         } else {
             result("false");
         }    
-    }, 1000);
+    }, 500);
 }
 
 function showAllUsers(){
@@ -208,7 +208,40 @@ function getUserAlbuns(userID, result){
         }      
     });
     
+    db.close();
+    
     result(albuns);
+}
+
+function getAlbum(albumID, result){
+	//função para obter as informações do álbum
+	var query = "SELECT * FROM ALBUNS WHERE albumID=\"" + albumID + "\"";
+	
+	//array para armazenar as informações do álbum
+	var album = [];
+	
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+	
+	//obter o álbum
+	db.get(query, function(err, row){
+		if(err) {
+			throw err;
+		}			
+		
+		if(row != null){
+			album.push(row.albumID);
+			album.push(row.title);
+			album.push(row.userID);
+			album.push(row.description);
+			album.push(row.start_date);
+			album.push(row.end_date);
+		}
+	});
+	
+	db.close();
+	
+	result(album);
 }
 
 /***************************************************************/
@@ -259,10 +292,12 @@ function testes(){
     var start_date = "01-01-2000";
     var end_date = "01-12-2000";
     
+    var albuns = [];
+    
     setTimeout(function(){
     	console.log("\nTeste #5 -> Criar um novo album");
     	createAlbum(albumID, title, userID, description, start_date, end_date)
-    }, 3000);
+    }, 3500);
     
     getUserAlbuns(userID, function(result){
     	setTimeout(function(){
@@ -271,11 +306,32 @@ function testes(){
     		if(result.length > 0){
     			for(var i = 0; i < result.length; i++){
     				console.log("AlbumID: " + result[i]);
+    				albuns.push(result[i]);
     			}
+    		} else {
+    			console.log("Info: O utilizador com id " + userID + " não tem albuns.");
     		}
-    	}, 3500);    	
-    });
+    	}, 4500);   
+    });    
     
+    setTimeout(function(){
+    	console.log("\nTeste #7 -> Apresentar informacoes de cada album");
+    	if(albuns.length > 0){
+    		for(var i = 0; i < albuns.length; i++){
+    			getAlbum(albuns[i], function(result2){
+    				setTimeout(function(){
+    					console.log("Album:");
+    					console.log("AlbumID: " + result2[0]);
+    					console.log("Title: " + result2[1]);
+    					console.log("UserID: " + result2[2]);
+    					console.log("Description: " + result2[3]);
+    					console.log("Start Date: " + result2[4]);
+    					console.log("End Date: " + result2[5] + "\n");    					
+    				}, 5000)
+    			})
+    		}
+    	}
+    }, 5500);
 }
 
 /***************************************************************/
