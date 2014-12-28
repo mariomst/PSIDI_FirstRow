@@ -98,7 +98,7 @@ app.route("/user")
     
 app.param('userID', function(req, res, next, userID){
     req.userID = userID;
-    return next();
+    return next()
 })
 
 app.route("/user/:userID")

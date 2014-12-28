@@ -42,8 +42,8 @@ var db = new sqlite3.Database(file);
 db.serialize(function(){
     if(!exists){
         console.log("-> Creating tables.");
-        db.run("CREATE TABLE USERS (userID, user, password TEXT)");
-        db.run("CREATE TABLE ALBUNS (albumID, title, userID, description, start_date, end_date TEXT)");
+        db.run("CREATE TABLE USERS (userID INTEGER PRIMARY KEY, user TEXT, password TEXT)");
+        db.run("CREATE TABLE ALBUNS (albumID INTEGER PRIMARY KEY, title TEXT, userID TEXT, description TEXT, start_date TEXT, end_date TEXT)");
         //falta: tabela de fotos
     }   
 });
@@ -54,9 +54,10 @@ db.close();
 /*  Helper Functions                                           */
 /***************************************************************/
 
-function createUser(newID, user, password){
+/** Função testada e funcional **/
+function createUser(user, password, result){
     //função para criar um novo utilizador na db.
-    var query = "INSERT INTO USERS (userID, user, password) VALUES (?,?,?)"; 
+    var query = "INSERT INTO USERS (user, password) VALUES (?,?)"; 
     
     findUser(user, function(res){
         //timeout necessário para dar tempo a db responder à query.
@@ -65,23 +66,25 @@ function createUser(newID, user, password){
                 var db = new sqlite3.Database(file);  
                 //Criar novo utilizador
                 db.serialize(function(){
-                    console.log("Info: A criar utilizador com as seguintes informações");
-                    console.log("-> userID: " + newID);
+                    console.log("Info: A criar utilizador com as seguintes informações");                    
                     console.log("-> user: " + user);
                     console.log("-> password: " + password);
                     
-                    db.run(query, newID, user, password);
+                    db.run(query, user, password);
                     
                     console.log("Info: Utilizador criado.");
+                    result("true");
                 });
                 db.close();
             } else {
-                console.log("Erro: Utilizador já existe.");             
+                console.log("Erro: Utilizador já existe.");  
+                result("false");
             }                        
-        }, 1000);
+        }, 2000);
     }); 
 }
 
+/** Função testada e funcional **/
 function findUser(usr,res){
     //função para procurar um determinado utilizador na db
     var db = new sqlite3.Database(file);
@@ -95,14 +98,20 @@ function findUser(usr,res){
             throw err;
         }
         
-        if(row.user === usr)
+        if(row !== undefined)
         {
-            flag = 1;
-            res(flag);                    
+        	if(row.user === usr)
+        	{
+        		flag = 1;
+        		res(flag);                    
+        	} else {
+        		flag = 0;
+        		res(flag);
+        	}
         } else {
-            flag = 0;
-            res(flag);
-        }     
+        	flag = 0;
+        	res(flag);
+        }
     });
     
     db.close();
@@ -145,9 +154,12 @@ function login(user, password, result){
     }, 500);
 }
 
-function showAllUsers(){
+/** Função testada e funcional **/
+function showAllUsers(result){
     var db = new sqlite3.Database(file);
     var query = "SELECT * FROM USERS";
+    var users = "";
+    var text = "";    
 
     db.each(query, function(err, row){
         if (err) {
@@ -157,13 +169,24 @@ function showAllUsers(){
         if(row != null)
         {
             console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
-        }      
+            users += "<tr><td>" + row.userID + "</td><td>" + row.user + "</td><td>" + row.password + "</td></tr>";            
+        }
+        else{
+        	users += "</table>";
+        }
     });
+    
+    setTimeout(function(){
+    	text = "<table border=\"1\"><tr><td>UserID</td><td>User</td><td>Password</td></tr>";
+    	text += users;
+    	
+    	result(text);
+    },1000);    	
 }
 
-function createAlbum(newID, title, userID, description, start_date, end_date){
+function createAlbum(title, userID, description, start_date, end_date, result){
 	//função para criar um novo album na db.	
-	var query = "INSERT INTO ALBUNS (albumID, title, userID, description, start_date, end_date) VALUES (?,?,?,?,?,?)";
+	var query = "INSERT INTO ALBUNS (title, userID, description, start_date, end_date) VALUES (?,?,?,?,?)";
 	
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
@@ -171,167 +194,55 @@ function createAlbum(newID, title, userID, description, start_date, end_date){
 	//criar novo álbum
 	db.serialize(function(){
 		console.log("Info: A criar álbum com as seguintes informações");
-		console.log("-> albumID: " + newID);
 		console.log("-> title: " + title);
 		console.log("-> userID: " + userID);
 		console.log("-> description: " + description);
 		console.log("-> start_date: " + start_date);
 		console.log("-> end_date: " + end_date);
 		
-		db.run(query, newID, title, userID, description, start_date, end_date);
+		db.run(query, title, userID, description, start_date, end_date);
 		
 		console.log("Info: Álbum criado");
+		
+		result("true");
 		
 		db.close();
 	});
 }
 
 function getUserAlbuns(userID, result){
-	//função para obter todos os álbuns de um determinado utilizador
+	//função para obter as informações do álbum
 	var query = "SELECT * FROM ALBUNS WHERE userID=\"" + userID + "\"";
 	
-	//array para armazenar os ids de cada album
-	var albuns = [];
-	
-	//abrir instância da db.
-	var db = new sqlite3.Database(file);
-	
-	//obter todos os álbuns de um utilizador.
-    db.each(query, function(err, row){
-        if (err) {
-            throw err;
-        }
-        
-        if(row != null)
-        {
-            albuns.push(row.albumID);
-        }      
-    });
-    
-    db.close();
-    
-    result(albuns);
-}
-
-function getAlbum(albumID, result){
-	//função para obter as informações do álbum
-	var query = "SELECT * FROM ALBUNS WHERE albumID=\"" + albumID + "\"";
-	
-	//array para armazenar as informações do álbum
-	var album = [];
+	//tabela html para apresentar os álbuns do utilizador
+	var html_albuns = "";
 	
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
 	
 	//obter o álbum
-	db.get(query, function(err, row){
+	db.each(query, function(err, row){
 		if(err) {
 			throw err;
 		}			
 		
 		if(row != null){
-			album.push(row.albumID);
+			/*album.push(row.albumID);
 			album.push(row.title);
 			album.push(row.userID);
 			album.push(row.description);
 			album.push(row.start_date);
-			album.push(row.end_date);
+			album.push(row.end_date);*/
+			
+			html_albuns += "<tr><td>" + row.albumID + "</td><td>" + row.title + "</td><td>" + row.userID + "</td><td>" + row.description + "</td><td>" + row.start_date + "</td><td>" + row.end_date + "</td></tr>";
 		}
 	});
 	
 	db.close();
 	
-	result(album);
-}
-
-/***************************************************************/
-/*  Tests			                                           */
-/***************************************************************/
-
-function testes(){
-    
-    var userIDTeste = "u" + (Math.random()*1000).toString().substr(1,4);
-    var userTeste = "mario";
-    var passTeste = "teste123";        
-    
-    console.log("\nTeste #1 -> Criar um novo utilizador:");    
-    createUser(userIDTeste,userTeste,passTeste);
-    
-    setTimeout(function () {
-        console.log("\nTeste #2 -> Mostrar todos os utilizadores:");    
-        showAllUsers();
-    }, 1500);
-    
-    findUser(userTeste, function(user){
-        setTimeout(function () {
-            console.log("\nTeste #3 -> Procurar um utilizador especifico:");
-            if(user == ""){
-                console.log("Info: Utilizador " + userTeste + " não foi encontrado.");
-            } else {
-                console.log("Info: Utilizador " + userTeste + " encontrado");
-            }
-        }, 2000);
-    });
-    
-    login(userTeste, passTeste, function(result){
-        setTimeout(function () {
-            console.log("\nTeste #4 -> Realizar login:");
-            
-            if(result == "true"){
-                console.log("Info: Utilizador autenticado.");
-            } else {
-                console.log("Info: Autenticação falhou.");
-            }
-        }, 2500);
-    });
-    
-    var albumID = "a" + (Math.random()*1000).toString().substr(1,4);
-    var title = "Album Teste";
-    var userID = "u00.7";
-    var description = "Album criado para testar as funcoes";
-    var start_date = "01-01-2000";
-    var end_date = "01-12-2000";
-    
-    var albuns = [];
-    
-    setTimeout(function(){
-    	console.log("\nTeste #5 -> Criar um novo album");
-    	createAlbum(albumID, title, userID, description, start_date, end_date)
-    }, 3500);
-    
-    getUserAlbuns(userID, function(result){
-    	setTimeout(function(){
-    		console.log("\nTeste #6 -> Obter albuns de um utilizador");
-    		
-    		if(result.length > 0){
-    			for(var i = 0; i < result.length; i++){
-    				console.log("AlbumID: " + result[i]);
-    				albuns.push(result[i]);
-    			}
-    		} else {
-    			console.log("Info: O utilizador com id " + userID + " não tem albuns.");
-    		}
-    	}, 4500);   
-    });    
-    
-    setTimeout(function(){
-    	console.log("\nTeste #7 -> Apresentar informacoes de cada album");
-    	if(albuns.length > 0){
-    		for(var i = 0; i < albuns.length; i++){
-    			getAlbum(albuns[i], function(result2){
-    				setTimeout(function(){
-    					console.log("Album:");
-    					console.log("AlbumID: " + result2[0]);
-    					console.log("Title: " + result2[1]);
-    					console.log("UserID: " + result2[2]);
-    					console.log("Description: " + result2[3]);
-    					console.log("Start Date: " + result2[4]);
-    					console.log("End Date: " + result2[5] + "\n");    					
-    				}, 5000)
-    			})
-    		}
-    	}
-    }, 5500);
+	setTimeout(function(){
+		result(html_albuns);
+	}, 5000);
 }
 
 /***************************************************************/
@@ -340,6 +251,8 @@ function testes(){
 /*    URL:    /signup                                          */
 /*                                                             */
 /*    POST    Registar utilizador                              */
+/*															   */
+/*	  Estado: Testado e funcional							   */
 /***************************************************************/
 
 app.route("/signup")
@@ -347,11 +260,16 @@ app.route("/signup")
         res.status(405).send("Not allowed.");
     })
     .post(function(req,res){
-        //gerar ID aleatório
-        const newID = "u" + (Math.random()*1000).toString().substr(1,4);
-        createUser(newID, req.body.user, req.body.pass);
-        //falta retornar código caso já exista.
-        res.status(201).set('User created');
+        //chamar função para criar utilizador
+        createUser(req.body.user, req.body.pass, function(result){
+        	setTimeout(function () {        		
+        		if(result === "true"){
+        			res.status(201).send('User created');
+        		} else {
+        			res.status(406).send('User already exists');
+        		}
+        	}, 4000);
+        });
     })
     .put(function(req,res){
         res.status(405).send("Not allowed.");
@@ -361,15 +279,143 @@ app.route("/signup")
     });
 
 /***************************************************************/
+/*    Autenticação de um utilizador                            */
+/*                                                             */
+/*    URL:    /login                                           */
+/*                                                             */
+/*    POST    Autenticar utilizador                            */
+/*															   */
+/*	  Estado: ainda não implementado						   */
+/***************************************************************/
+
+app.route("/login")
+	.get(function(req,res){
+		res.status(405).send("Not allowed.");
+	})
+	.post(function(req,res){
+		res.status(404).send("Not implemented yet.");
+	})
+	.put(function(req,res){
+		res.status(405).send("Not allowed.");
+	})
+	.delete(function(req,res){
+		res.status(405).send("Not allowed.");
+	});	
+
+/***************************************************************/
+/*    Colecção de utilizadores                                 */
+/*                                                             */
+/*    URL:    /users                                           */
+/*                                                             */
+/*    GET    Retorna todos os utilizadores                     */
+/*															   */
+/*	  Estado: Testado e funcional							   */
+/***************************************************************/
+
+app.route("/users")
+	.get(function(req,res){
+		showAllUsers(function(result){
+			res.status(200).send(result);
+		});
+	})
+	.post(function(req,res){
+		res.status(405).send("Not allowed.");
+	})
+	.put(function(req,res){
+		res.status(405).send("Cannot overwrite the entire collection.");
+	})
+	.delete(function(req,res){
+		res.status(405).send("Cannot delete the entire collection.");
+	});	
+
+/***************************************************************/
+/* 		Utilizadores individuais                               */
+/*                                                             */
+/*  	URL:    /user/:id                                      */
+/*                                                             */
+/*  	GET     retornar utilizador especifico                 */
+/*  	POST    atualizar password do utilizador               */
+/*  	DELETE  apagar utilizador                              */
+/*	  														   */
+/*	  Estado: ainda não implementado						   */
+/***************************************************************/
+
+app.param('userID', function(req, res, next, userID){
+    req.userID = userID;
+    return next()
+})
+
+app.route("/users/:userID")
+    .get(function(req, res){
+    	res.status(404).send("Not implemented yet.");     
+    })
+    .post(function(req, res){
+    	res.status(404).send("Not implemented yet.");     
+    })
+    .put(function(req, res){
+    	res.status(405).send("Not allowed.");
+    })
+    .delete(function(req, res) {
+    	res.status(404).send("Not implemented yet.");     
+	});	
+
+/***************************************************************/
+/*	  Colecção de álbuns		                               */
+/*                                                             */
+/*    URL:    /user/:userID/album                              */
+/*                                                             */
+/*    GET     Retornar todos os álbuns                         */
+/* 	  POST    Criar novo álbum                                 */
+/*  					                                       */
+/*	  Estado: Testado e funcional							   */
+/***************************************************************/	
+
+app.route("/users/:userID/albuns")
+	.get(function(req,res){
+		var html_text = "";
+		var html_albuns = "";
+		
+		getUserAlbuns(req.userID, function(albuns){
+			if(albuns.length > 0){					
+				html_albuns = albuns;
+			}
+		});
+		
+		setTimeout(function () {
+			html_text = "<table border=\"1\"><tr>" +
+					"<td>AlbumID</td>" +
+					"<td>Title</td>" +
+					"<td>UserID</td>" +
+					"<td>Description</td>" +
+					"<td>Start Date</td>" +
+					"<td>End Date</td></tr>";
+			html_text += html_albuns;
+			html_text += "</table>"
+							
+			res.status(200).send(html_text);
+		}, 6000);
+	})
+	.post(function(req,res){        
+        //chamar função para criar álbum
+        createAlbum(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
+        	setTimeout(function () {
+        		if(result === "true"){
+        			res.status(201).send('Album created');
+        		}
+        	}, 4000);
+        });
+    })
+	.put(function(req,res){
+		res.status(405).send("Cannot overwrite the entire collection.");
+	})
+	.delete(function(req,res){
+		res.status(405).send("Cannot delete the entire collection.");
+	});	
+
+/***************************************************************/
 /*  Starting...                                                */
 /***************************************************************/
 
-/*app.listen(port, function(){
+app.listen(port, function(){
     console.log("Listening on " + port);
-});*/
-
-/***************************************************************/
-/*  Testes dos métodos pela consola...                         */
-/***************************************************************/
-
-testes();
+});
