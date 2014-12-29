@@ -32,7 +32,7 @@ var file = "myphotoalbum.db";
 var exists = fs.existsSync(file);
 
 if(!exists){
-    console.log("-> Creating new DB file.");
+    console.log("INFO: Creating new DB file.");
     fs.openSync(file, "w");
 }
 
@@ -41,10 +41,10 @@ var db = new sqlite3.Database(file);
 
 db.serialize(function(){
     if(!exists){
-        console.log("-> Creating tables.");
+        console.log("INFO: Creating tables.\n-> USERS\n->ALBUNS\n->PHOTOS");
         db.run("CREATE TABLE USERS (userID INTEGER PRIMARY KEY, user TEXT, password TEXT)");
-        db.run("CREATE TABLE ALBUNS (albumID INTEGER PRIMARY KEY, title TEXT, userID TEXT, description TEXT, start_date TEXT, end_date TEXT)");
-        //falta: tabela de fotos
+        db.run("CREATE TABLE ALBUNS (albumID INTEGER PRIMARY KEY, title TEXT, userID INTEGER, description TEXT, start_date TEXT, end_date TEXT)");
+        db.run("CREATE TABLE PHOTOS (photoID INTEGER PRIMARY KEY, albumID INTEGER, photo BLOB, description TEXT, date TEXT)");
     }   
 });
 
@@ -66,18 +66,18 @@ function createUser(user, password, result){
                 var db = new sqlite3.Database(file);  
                 //Criar novo utilizador
                 db.serialize(function(){
-                    console.log("Info: A criar utilizador com as seguintes informações");                    
+                    console.log("\nINFO: Creating user with the following information.");                    
                     console.log("-> user: " + user);
                     console.log("-> password: " + password);
                     
                     db.run(query, user, password);
                     
-                    console.log("Info: Utilizador criado.");
+                    console.log("\nINFO: User created.");
                     result("true");
                 });
                 db.close();
             } else {
-                console.log("Erro: Utilizador já existe.");  
+                console.log("\nINFO: User already exists.");  
                 result("false");
             }                        
         }, 2000);
@@ -91,7 +91,7 @@ function findUser(usr,res){
     var query = "SELECT * FROM USERS WHERE user=\""+usr+"\"";
     var flag = 0;
     
-    console.log("Info: A verificar se já existe utilizador");
+    console.log("\nINFO: Checking if there is already the user " + usr + ".");
     
     db.get(query, function(err, row) {
         if (err) {
@@ -117,6 +117,7 @@ function findUser(usr,res){
     db.close();
 }
 
+/** Função testada apenas pela consola mas funcional **/
 function login(user, password, result){
     //função para validar os dados inseridos pelo utilizador    
     var db = new sqlite3.Database(file);
@@ -158,8 +159,11 @@ function login(user, password, result){
 function showAllUsers(result){
     var db = new sqlite3.Database(file);
     var query = "SELECT * FROM USERS";
-    var users = "";
-    var text = "";    
+    var users = [];
+    var user_json = "";
+    var users_json = "";  
+    
+    console.log("\nINFO: Showing all users.");  
 
     db.each(query, function(err, row){
         if (err) {
@@ -169,18 +173,26 @@ function showAllUsers(result){
         if(row != null)
         {
             console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
-            users += "<tr><td>" + row.userID + "</td><td>" + row.user + "</td><td>" + row.password + "</td></tr>";            
-        }
-        else{
-        	users += "</table>";
+            
+            user_json = "{\"userID\":" + row.userID + ",\"user\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
+            
+            users.push(user_json);                        
         }
     });
     
     setTimeout(function(){
-    	text = "<table border=\"1\"><tr><td>UserID</td><td>User</td><td>Password</td></tr>";
-    	text += users;
+    	users_json = "[";
     	
-    	result(text);
+    	for(var i = 0; i < users.length; i++){
+    	    users_json += users[i];
+    	    if(i != (users.length-1)){
+    	        users_json += ",";
+    	    }
+    	}
+    	
+    	users_json += "]";
+    	
+    	result(users_json);
     },1000);    	
 }
 
@@ -212,13 +224,17 @@ function createAlbum(title, userID, description, start_date, end_date, result){
 
 function getUserAlbuns(userID, result){
 	//função para obter as informações do álbum
-	var query = "SELECT * FROM ALBUNS WHERE userID=\"" + userID + "\"";
+	var query = "SELECT * FROM ALBUNS WHERE userID=" + userID;
 	
-	//tabela html para apresentar os álbuns do utilizador
-	var html_albuns = "";
+	//variavéis para armazenar as strings json
+	var albuns = [];
+    var album_json = "";
+    var albuns_json = "";  
 	
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
+	
+	console.log("\nINFO: Getting all albuns of the user with id " + userID + ".");  
 	
 	//obter o álbum
 	db.each(query, function(err, row){
@@ -227,21 +243,28 @@ function getUserAlbuns(userID, result){
 		}			
 		
 		if(row != null){
-			/*album.push(row.albumID);
-			album.push(row.title);
-			album.push(row.userID);
-			album.push(row.description);
-			album.push(row.start_date);
-			album.push(row.end_date);*/
-			
-			html_albuns += "<tr><td>" + row.albumID + "</td><td>" + row.title + "</td><td>" + row.userID + "</td><td>" + row.description + "</td><td>" + row.start_date + "</td><td>" + row.end_date + "</td></tr>";
+            //criar string json para cada album 
+            album_json = "{\"albumID\":" + row.albumID + ",\"title\":\"" + row.title + "\",\"userID\":" + row.userID + ",\"description\":\"" + row.description + "\",\"start_date\":\"" + row.start_date + "\",\"end_date\":\"" + row.end_date + "\"}";
+            //armazenar no array
+            albuns.push(album_json); 
 		}
 	});
 	
 	db.close();
 	
 	setTimeout(function(){
-		result(html_albuns);
+	    albuns_json = "[";
+    	
+    	for(var i = 0; i < albuns.length; i++){
+    	    albuns_json += albuns[i];
+    	    if(i != (albuns.length-1)){
+    	        albuns_json += ",";
+    	    }
+    	}
+    	
+    	albuns_json += "]";    	
+	
+		result(albuns_json);
 	}, 5000);
 }
 
@@ -372,28 +395,9 @@ app.route("/users/:userID")
 
 app.route("/users/:userID/albuns")
 	.get(function(req,res){
-		var html_text = "";
-		var html_albuns = "";
-		
-		getUserAlbuns(req.userID, function(albuns){
-			if(albuns.length > 0){					
-				html_albuns = albuns;
-			}
+	    getUserAlbuns(req.userID, function(result){
+			res.status(200).send(result);
 		});
-		
-		setTimeout(function () {
-			html_text = "<table border=\"1\"><tr>" +
-					"<td>AlbumID</td>" +
-					"<td>Title</td>" +
-					"<td>UserID</td>" +
-					"<td>Description</td>" +
-					"<td>Start Date</td>" +
-					"<td>End Date</td></tr>";
-			html_text += html_albuns;
-			html_text += "</table>"
-							
-			res.status(200).send(html_text);
-		}, 6000);
 	})
 	.post(function(req,res){        
         //chamar função para criar álbum
