@@ -54,6 +54,8 @@ db.close();
 /*  Helper Functions                                           */
 /***************************************************************/
 
+/******** Funções relacionadas com os utilizadores *************/
+
 /** Função testada e funcional **/
 function createUser(user, password, result){
     //função para criar um novo utilizador na db.
@@ -117,7 +119,7 @@ function findUser(usr,res){
     db.close();
 }
 
-/** Função testada apenas pela consola mas funcional **/
+/** Função testada e funcional **/
 function login(user, password, result){
     //função para validar os dados inseridos pelo utilizador    
     var db = new sqlite3.Database(file);
@@ -125,6 +127,8 @@ function login(user, password, result){
     var userRes = "";
     var passwordRes = "";
     var query = "SELECT * FROM USERS WHERE user=\""+user+"\"";
+    
+    console.log("\nINFO: Checking user credentials.");
     
     //procurar utilizador na db
     db.get(query, function(err, res){
@@ -140,10 +144,7 @@ function login(user, password, result){
             passwordRes = res.password;
         }
     });
-       
-    //fechar a db
-    db.close();
-    
+
     //timeout necessário para dar tempo a db responder à query.
     setTimeout(function () {           
         //comparar o que encontrou na DB com o que foi inserido pelo utilizador
@@ -152,6 +153,8 @@ function login(user, password, result){
         } else {
             result("false");
         }    
+        //fechar a db
+        db.close();        
     }, 500);
 }
 
@@ -170,7 +173,7 @@ function showAllUsers(result){
             throw err;
         }
         
-        if(row != null)
+        if(row !== null)
         {
             console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
             
@@ -185,17 +188,112 @@ function showAllUsers(result){
     	
     	for(var i = 0; i < users.length; i++){
     	    users_json += users[i];
-    	    if(i != (users.length-1)){
+    	    if(i !== (users.length-1)){
     	        users_json += ",";
     	    }
     	}
     	
     	users_json += "]";
     	
+    	//fechar a db
+        db.close();
     	result(users_json);
     },1000);    	
 }
 
+/** Função testada e funcional **/
+function getUser(userID, res){
+	//função para obter informações de um determinado utilizador na db.
+	var db = new sqlite3.Database(file);
+	var query = "SELECT * FROM USERS WHERE userID=" + userID;
+	var user_json = "";
+	var result = "";
+	
+	console.log("\nINFO: Getting user information.");
+	
+	db.get(query, function(err, row){
+		if(err) {
+			throw err;
+		} 
+		
+		if(row !== undefined){
+			console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
+			user_json = "{\"userID\":" + row.userID + ",\"user\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
+		}
+	});
+	
+	setTimeout(function(){
+		result = "[" + user_json + "]";
+		res(result);
+		
+		//fechar a db
+        db.close();
+	},1000);
+}
+
+/** Função testada e funcional **/
+function updateUserPass(userID, newPass, res){
+	//função para atualizar a password de um utilizador.
+	var db = new sqlite3.Database(file);
+	var query_select = "SELECT * FROM USERS WHERE userID=" + userID;
+	var query_update = "UPDATE USERS SET password=\""+ newPass +"\" where userID=" + userID; 
+	
+	db.get(query_select, function(err,row){
+		if(err){
+			throw err;
+		}
+		
+		if(row !== null){
+			setTimeout(function(){
+				db.serialize(function(){
+					console.log("\nINFO: Updating user's password.");
+					db.run(query_update);
+					res("true");
+					//fechar a db
+                    db.close();
+				});
+			}, 1000);
+		} else {
+			res("false");
+			//fechar a db
+            db.close();
+		}
+	});	
+}
+
+/** Função testada e funcional **/
+function deleteUser(userID, res){
+    //função para eliminar um utilizador.
+    var db = new sqlite3.Database(file);
+    var query_select = "SELECT * FROM USERS WHERE userID=" + userID;
+    var query_delete = "DELETE FROM USERS WHERE userID=" + userID;
+    
+    db.get(query_select, function(err,row){
+		if(err){
+			throw err;
+		}
+		
+		if(row !== null){
+			setTimeout(function(){
+				db.serialize(function(){
+					console.log("\nINFO: Deleting user.");
+					db.run(query_delete);
+					res("true");
+					//fechar a db
+                    db.close();
+				});
+			}, 1000);
+		} else {
+			res("false");
+			//fechar a db
+            db.close();
+		}
+	});	
+}
+
+/*********** Funções relacionadas com os álbuns ****************/
+
+/** Função testada e funcional **/
 function createAlbum(title, userID, description, start_date, end_date, result){
 	//função para criar um novo album na db.	
 	var query = "INSERT INTO ALBUNS (title, userID, description, start_date, end_date) VALUES (?,?,?,?,?)";
@@ -222,6 +320,7 @@ function createAlbum(title, userID, description, start_date, end_date, result){
 	});
 }
 
+/** Função testada e funcional **/
 function getUserAlbuns(userID, result){
 	//função para obter as informações do álbum
 	var query = "SELECT * FROM ALBUNS WHERE userID=" + userID;
@@ -242,7 +341,7 @@ function getUserAlbuns(userID, result){
 			throw err;
 		}			
 		
-		if(row != null){
+		if(row !== null){
             //criar string json para cada album 
             album_json = "{\"albumID\":" + row.albumID + ",\"title\":\"" + row.title + "\",\"userID\":" + row.userID + ",\"description\":\"" + row.description + "\",\"start_date\":\"" + row.start_date + "\",\"end_date\":\"" + row.end_date + "\"}";
             //armazenar no array
@@ -257,7 +356,7 @@ function getUserAlbuns(userID, result){
     	
     	for(var i = 0; i < albuns.length; i++){
     	    albuns_json += albuns[i];
-    	    if(i != (albuns.length-1)){
+    	    if(i !== (albuns.length-1)){
     	        albuns_json += ",";
     	    }
     	}
@@ -308,7 +407,7 @@ app.route("/signup")
 /*                                                             */
 /*    POST    Autenticar utilizador                            */
 /*															   */
-/*	  Estado: ainda não implementado						   */
+/*	  Estado: Testado e funcional   						   */
 /***************************************************************/
 
 app.route("/login")
@@ -316,7 +415,16 @@ app.route("/login")
 		res.status(405).send("Not allowed.");
 	})
 	.post(function(req,res){
-		res.status(404).send("Not implemented yet.");
+	    //chamar função para autenticar o utilizador
+	    login(req.body.user, req.body.pass, function(result){
+	        setTimeout(function(){
+	            if(result === "true"){
+	                res.status(202).send("Authentication was successful");
+	            } else {
+	                res.status(400).send("Authentication failed, please check username and password");
+	            }	            
+	        }, 4000);
+	    });	  
 	})
 	.put(function(req,res){
 		res.status(405).send("Not allowed.");
@@ -352,15 +460,15 @@ app.route("/users")
 	});	
 
 /***************************************************************/
-/* 		Utilizadores individuais                               */
+/* 	  Utilizadores individuais                                 */
 /*                                                             */
-/*  	URL:    /user/:id                                      */
+/*    URL:    /user/:id                                        */
 /*                                                             */
-/*  	GET     retornar utilizador especifico                 */
-/*  	POST    atualizar password do utilizador               */
-/*  	DELETE  apagar utilizador                              */
+/*    GET     retornar utilizador especifico                   */
+/*    POST    atualizar password do utilizador                 */
+/*    DELETE  apagar utilizador                                */
 /*	  														   */
-/*	  Estado: ainda não implementado						   */
+/*	  Estado: Testado e funcional   						   */
 /***************************************************************/
 
 app.param('userID', function(req, res, next, userID){
@@ -369,17 +477,36 @@ app.param('userID', function(req, res, next, userID){
 })
 
 app.route("/users/:userID")
-    .get(function(req, res){
-    	res.status(404).send("Not implemented yet.");     
+    .get(function(req, res){ 
+    	getUser(req.userID, function(result){
+    		res.status(200).send(result);
+    	});
     })
     .post(function(req, res){
-    	res.status(404).send("Not implemented yet.");     
+    	//chamar função para atualizar password de utilizador
+    	updateUserPass(req.userID, req.body.pass, function(result){
+    		setTimeout(function () {
+    			if(result === "true"){
+    				res.status(200).send('Password was updated');
+    			} else {
+    				res.status(204).send('User was not found');
+    			}
+    		}, 4000);    		
+    	});   	
     })
     .put(function(req, res){
     	res.status(405).send("Not allowed.");
     })
     .delete(function(req, res) {
-    	res.status(404).send("Not implemented yet.");     
+        deleteUser(req.userID, function(result){
+            setTimeout(function(){
+                if(result === "true"){
+                    res.status(200).send('User was deleted');
+                } else {
+                    res.status(204).send('User was not found');
+                }            
+            }, 4000);  
+        });  
 	});	
 
 /***************************************************************/
