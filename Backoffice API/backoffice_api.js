@@ -273,7 +273,7 @@ function deleteUser(userID, res){
 			throw err;
 		}
 		
-		if(row !== null){
+		if(row !== undefined){
 			setTimeout(function(){
 				db.serialize(function(){
 					console.log("\nINFO: Deleting user.");
@@ -322,7 +322,7 @@ function createAlbum(title, userID, description, start_date, end_date, result){
 
 /** Função testada e funcional **/
 function getUserAlbuns(userID, result){
-	//função para obter as informações do álbum
+	//função para obter as informações de todos os álbuns do utilizador
 	var query = "SELECT * FROM ALBUNS WHERE userID=" + userID;
 	
 	//variavéis para armazenar as strings json
@@ -366,6 +366,118 @@ function getUserAlbuns(userID, result){
 		result(albuns_json);
 	}, 5000);
 }
+
+/** Função testada e funcional **/
+function getAlbum(albumID, res){
+    //função para obter as informações de um álbum especifico
+    var query = "SELECT * FROM ALBUNS WHERE albumID=" + albumID;
+    
+    var album_json = "";
+    var result = "";
+    
+    //abrir instância da db.
+	var db = new sqlite3.Database(file);
+	
+	console.log("\nINFO: Getting album of the user.");  
+	
+	//obter o álbum
+	db.get(query, function(err, row){
+		if(err) {
+			throw err;
+		}			
+		
+		if(row !== undefined){
+            //criar string json para o album 
+            console.log("albumID: " + row.albumID + "; Title: " + row.title + "; userID: " + row.userID + "; Description: " + row.description + "; Start Date: " + row.start_date + "; End Date: " + row.end_date);
+            album_json = "{\"albumID\":" + row.albumID + ",\"title\":\"" + row.title + "\",\"userID\":" + row.userID + ",\"description\":\"" + row.description + "\",\"start_date\":\"" + row.start_date + "\",\"end_date\":\"" + row.end_date + "\"}";
+		}
+	});
+	
+	setTimeout(function(){
+		result = "[" + album_json + "]";
+		res(result);
+		
+		//fechar a db
+        db.close();
+	},1000);
+}
+
+/** Função testada e funcional **/
+function updateAlbum(albumID, title, description, start_date, end_date, res){
+    //função para atualizar um álbum
+    var db = new sqlite3.Database(file);
+    var query_select = "SELECT * FROM ALBUNS WHERE albumID=" + albumID;
+    var query_update_title = "UPDATE ALBUNS SET title=\"" + title + "\" where albumID=" + albumID;
+    var query_update_description = "UPDATE ALBUNS SET description=\"" + description + "\" where albumID=" + albumID;
+    var query_update_startDate = "UPDATE ALBUNS SET start_date=\"" + start_date + "\" where albumID=" + albumID;
+    var query_update_endDate = "UPDATE ALBUNS SET end_date=\"" + end_date + "\" where albumID=" + albumID;
+    
+	db.get(query_select, function(err,row){
+		if(err){
+			throw err;
+		}
+		
+		if(row !== null){
+			setTimeout(function(){
+				db.serialize(function(){
+				    if(title !== undefined){
+					    console.log("\nINFO: Updating album's title.");
+					    db.run(query_update_title);
+					}
+					if(description !== undefined){
+					    console.log("\nINFO: Updating album's description.");
+					    db.run(query_update_description);
+					}
+					if(start_date !== undefined){
+					    console.log("\nINFO: Updating album's start_date.");
+					    db.run(query_update_startDate);
+					}
+					if(end_date !== undefined){
+					    console.log("\nINFO: Updating album's end_date.");
+					    db.run(query_update_endDate);
+					}
+					res("true");
+					//fechar a db
+                    db.close();
+				});
+			}, 4000);
+		} else {
+			res("false");
+			//fechar a db
+            db.close();
+		}
+	});
+}
+
+/** Função testada e funcional **/
+function deleteAlbum(albumID, res){
+    //função para eliminar um álbum
+    var db = new sqlite3.Database(file);
+    var query_select = "SELECT * FROM ALBUNS WHERE albumID=" + albumID;
+    var query_delete = "DELETE FROM ALBUNS WHERE albumID=" + albumID;
+    
+    db.get(query_select, function(err,row){
+		if(err){
+			throw err;
+		}
+		
+		if(row !== undefined){
+			setTimeout(function(){
+				db.serialize(function(){
+					console.log("\nINFO: Deleting album.");
+					db.run(query_delete);
+					res("true");
+					//fechar a db
+                    db.close();
+				});
+			}, 1000);
+		} else {
+			res("false");
+			//fechar a db
+            db.close();
+		}
+	});
+}	
 
 /***************************************************************/
 /*    Registo de novos utilizadores.                           */
@@ -462,7 +574,7 @@ app.route("/users")
 /***************************************************************/
 /* 	  Utilizadores individuais                                 */
 /*                                                             */
-/*    URL:    /user/:id                                        */
+/*    URL:    /users/:id                                       */
 /*                                                             */
 /*    GET     retornar utilizador especifico                   */
 /*    POST    atualizar password do utilizador                 */
@@ -512,7 +624,7 @@ app.route("/users/:userID")
 /***************************************************************/
 /*	  Colecção de álbuns		                               */
 /*                                                             */
-/*    URL:    /user/:userID/album                              */
+/*    URL:    /users/:userID/album                             */
 /*                                                             */
 /*    GET     Retornar todos os álbuns                         */
 /* 	  POST    Criar novo álbum                                 */
@@ -542,7 +654,57 @@ app.route("/users/:userID/albuns")
 	.delete(function(req,res){
 		res.status(405).send("Cannot delete the entire collection.");
 	});	
+	
+/***************************************************************/
+/*	  Álbuns individuais		                               */
+/*                                                             */
+/*    URL:    /users/:userID/albuns/:albumID                   */
+/*                                                             */
+/*    GET     retornar álbum especifico                        */
+/*    POST    atualizar álbum especifico                       */
+/*    DELETE  apagar álbum especifico                          */
+/*  					                                       */
+/*	  Estado: Não testado       							   */
+/***************************************************************/
 
+app.param('albumID', function(req, res, next, albumID){
+    req.albumID = albumID;
+    return next()
+})
+
+app.route("/users/:userID/albuns/:albumID")
+    .get(function(req, res){ 
+    	getAlbum(req.albumID, function(result){
+    		res.status(200).send(result);
+    	});
+    })
+    .post(function(req, res){
+    	//chamar função para atualizar um album
+    	updateAlbum(req.albumID, req.body.title, req.body.description, req.body.start_date, req.body.end_date, function(result){
+    	    setTimeout(function(){
+    	        if(result === "true"){
+    				res.status(200).send('Album was updated');
+    			} else {
+    				res.status(204).send('Album was not found');
+    			}
+    	    }, 8000);
+    	});
+    })
+    .put(function(req, res){
+    	res.status(405).send("Not allowed.");
+    })
+    .delete(function(req, res) {
+        deleteAlbum(req.albumID, function(result){
+            setTimeout(function(){
+                if(result === "true"){
+                    res.status(200).send('Album was deleted');
+                } else {
+                    res.status(204).send('Album was not found');
+                }            
+            }, 4000);  
+        });  
+	});	
+	
 /***************************************************************/
 /*  Starting...                                                */
 /***************************************************************/
