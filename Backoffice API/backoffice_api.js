@@ -7,14 +7,23 @@
 /*                                                             */
 /***************************************************************/
 
+/***************************************************************/
+/*  Necessary Modules                                          */
+/***************************************************************/
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var fs = require('fs');
+var multer = require('multer');
+var usersHandler = require('./handlers/users-handler');
+var albunsHandler = require('./handlers/albuns-handler');
+var photosHandler = require('./handlers/photos-handler');
 
 var app = express();
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
+app.use(multer({dest: './photos/'}));
 
 /***************************************************************/
 /*  Data                                                       */
@@ -28,7 +37,7 @@ const server_root = "http://localhost:" + port;
 /*  Baseado no tutorial deste website (http://goo.gl/JxMvRB)   */
 /***************************************************************/
 
-var file = "myphotoalbum.db";
+var file = "./database/myphotoalbum.db";
 var exists = fs.existsSync(file);
 
 if(!exists){
@@ -41,443 +50,15 @@ var db = new sqlite3.Database(file);
 
 db.serialize(function(){
     if(!exists){
-        console.log("INFO: Creating tables.\n-> USERS\n->ALBUNS\n->PHOTOS");
+        console.log("INFO: Creating tables.\n->PUBLICURI\n->USERS\n->ALBUNS\n->PHOTOS");
+        db.run("CREATE TABLE PUBLICURI (uri TEXT, userID INTEGER)");
         db.run("CREATE TABLE USERS (userID INTEGER PRIMARY KEY, user TEXT, password TEXT)");
         db.run("CREATE TABLE ALBUNS (albumID INTEGER PRIMARY KEY, title TEXT, userID INTEGER, description TEXT, start_date TEXT, end_date TEXT)");
-        db.run("CREATE TABLE PHOTOS (photoID INTEGER PRIMARY KEY, albumID INTEGER, photo BLOB, description TEXT, date TEXT)");
+        db.run("CREATE TABLE PHOTOS (photoID INTEGER PRIMARY KEY, albumID INTEGER, photo TEXT, description TEXT, date TEXT)");
     }   
 });
 
 db.close();
-
-/***************************************************************/
-/*  Helper Functions                                           */
-/***************************************************************/
-
-/******** Funções relacionadas com os utilizadores *************/
-
-/** Função testada e funcional **/
-function createUser(user, password, result){
-    //função para criar um novo utilizador na db.
-    var query = "INSERT INTO USERS (user, password) VALUES (?,?)"; 
-    
-    findUser(user, function(res){
-        //timeout necessário para dar tempo a db responder à query.
-        setTimeout(function () {
-            if(res === 0){
-                var db = new sqlite3.Database(file);  
-                //Criar novo utilizador
-                db.serialize(function(){
-                    console.log("\nINFO: Creating user with the following information.");                    
-                    console.log("-> user: " + user);
-                    console.log("-> password: " + password);
-                    
-                    db.run(query, user, password);
-                    
-                    console.log("\nINFO: User created.");
-                    result("true");
-                });
-                db.close();
-            } else {
-                console.log("\nINFO: User already exists.");  
-                result("false");
-            }                        
-        }, 2000);
-    }); 
-}
-
-/** Função testada e funcional **/
-function findUser(usr,res){
-    //função para procurar um determinado utilizador na db
-    var db = new sqlite3.Database(file);
-    var query = "SELECT * FROM USERS WHERE user=\""+usr+"\"";
-    var flag = 0;
-    
-    console.log("\nINFO: Checking if there is already the user " + usr + ".");
-    
-    db.get(query, function(err, row) {
-        if (err) {
-            throw err;
-        }
-        
-        if(row !== undefined)
-        {
-        	if(row.user === usr)
-        	{
-        		flag = 1;
-        		res(flag);                    
-        	} else {
-        		flag = 0;
-        		res(flag);
-        	}
-        } else {
-        	flag = 0;
-        	res(flag);
-        }
-    });
-    
-    db.close();
-}
-
-/** Função testada e funcional **/
-function login(user, password, result){
-    //função para validar os dados inseridos pelo utilizador    
-    var db = new sqlite3.Database(file);
-    
-    var userRes = "";
-    var passwordRes = "";
-    var query = "SELECT * FROM USERS WHERE user=\""+user+"\"";
-    
-    console.log("\nINFO: Checking user credentials.");
-    
-    //procurar utilizador na db
-    db.get(query, function(err, res){
-        
-        //caso ocorra algum erro
-        if (err) {
-            throw err;
-        }
-        
-        //caso encontre
-        if(res !== null){
-            userRes = res.user;
-            passwordRes = res.password;
-        }
-    });
-
-    //timeout necessário para dar tempo a db responder à query.
-    setTimeout(function () {           
-        //comparar o que encontrou na DB com o que foi inserido pelo utilizador
-        if(user === userRes && password === passwordRes){
-            result("true");
-        } else {
-            result("false");
-        }    
-        //fechar a db
-        db.close();        
-    }, 500);
-}
-
-/** Função testada e funcional **/
-function showAllUsers(result){
-    var db = new sqlite3.Database(file);
-    var query = "SELECT * FROM USERS";
-    var users = [];
-    var user_json = "";
-    var users_json = "";  
-    
-    console.log("\nINFO: Showing all users.");  
-
-    db.each(query, function(err, row){
-        if (err) {
-            throw err;
-        }
-        
-        if(row !== null)
-        {
-            console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
-            
-            user_json = "{\"userID\":" + row.userID + ",\"user\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
-            
-            users.push(user_json);                        
-        }
-    });
-    
-    setTimeout(function(){
-    	users_json = "[";
-    	
-    	for(var i = 0; i < users.length; i++){
-    	    users_json += users[i];
-    	    if(i !== (users.length-1)){
-    	        users_json += ",";
-    	    }
-    	}
-    	
-    	users_json += "]";
-    	
-    	//fechar a db
-        db.close();
-    	result(users_json);
-    },1000);    	
-}
-
-/** Função testada e funcional **/
-function getUser(userID, res){
-	//função para obter informações de um determinado utilizador na db.
-	var db = new sqlite3.Database(file);
-	var query = "SELECT * FROM USERS WHERE userID=" + userID;
-	var user_json = "";
-	var result = "";
-	
-	console.log("\nINFO: Getting user information.");
-	
-	db.get(query, function(err, row){
-		if(err) {
-			throw err;
-		} 
-		
-		if(row !== undefined){
-			console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
-			user_json = "{\"userID\":" + row.userID + ",\"user\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
-		}
-	});
-	
-	setTimeout(function(){
-		result = "[" + user_json + "]";
-		res(result);
-		
-		//fechar a db
-        db.close();
-	},1000);
-}
-
-/** Função testada e funcional **/
-function updateUserPass(userID, newPass, res){
-	//função para atualizar a password de um utilizador.
-	var db = new sqlite3.Database(file);
-	var query_select = "SELECT * FROM USERS WHERE userID=" + userID;
-	var query_update = "UPDATE USERS SET password=\""+ newPass +"\" where userID=" + userID; 
-	
-	db.get(query_select, function(err,row){
-		if(err){
-			throw err;
-		}
-		
-		if(row !== null){
-			setTimeout(function(){
-				db.serialize(function(){
-					console.log("\nINFO: Updating user's password.");
-					db.run(query_update);
-					res("true");
-					//fechar a db
-                    db.close();
-				});
-			}, 1000);
-		} else {
-			res("false");
-			//fechar a db
-            db.close();
-		}
-	});	
-}
-
-/** Função testada e funcional **/
-function deleteUser(userID, res){
-    //função para eliminar um utilizador.
-    var db = new sqlite3.Database(file);
-    var query_select = "SELECT * FROM USERS WHERE userID=" + userID;
-    var query_delete = "DELETE FROM USERS WHERE userID=" + userID;
-    
-    db.get(query_select, function(err,row){
-		if(err){
-			throw err;
-		}
-		
-		if(row !== undefined){
-			setTimeout(function(){
-				db.serialize(function(){
-					console.log("\nINFO: Deleting user.");
-					db.run(query_delete);
-					res("true");
-					//fechar a db
-                    db.close();
-				});
-			}, 1000);
-		} else {
-			res("false");
-			//fechar a db
-            db.close();
-		}
-	});	
-}
-
-/*********** Funções relacionadas com os álbuns ****************/
-
-/** Função testada e funcional **/
-function createAlbum(title, userID, description, start_date, end_date, result){
-	//função para criar um novo album na db.	
-	var query = "INSERT INTO ALBUNS (title, userID, description, start_date, end_date) VALUES (?,?,?,?,?)";
-	
-	//abrir instância da db.
-	var db = new sqlite3.Database(file);
-	
-	//criar novo álbum
-	db.serialize(function(){
-		console.log("Info: A criar álbum com as seguintes informações");
-		console.log("-> title: " + title);
-		console.log("-> userID: " + userID);
-		console.log("-> description: " + description);
-		console.log("-> start_date: " + start_date);
-		console.log("-> end_date: " + end_date);
-		
-		db.run(query, title, userID, description, start_date, end_date);
-		
-		console.log("Info: Álbum criado");
-		
-		result("true");
-		
-		db.close();
-	});
-}
-
-/** Função testada e funcional **/
-function getUserAlbuns(userID, result){
-	//função para obter as informações de todos os álbuns do utilizador
-	var query = "SELECT * FROM ALBUNS WHERE userID=" + userID;
-	
-	//variavéis para armazenar as strings json
-	var albuns = [];
-    var album_json = "";
-    var albuns_json = "";  
-	
-	//abrir instância da db.
-	var db = new sqlite3.Database(file);
-	
-	console.log("\nINFO: Getting all albuns of the user with id " + userID + ".");  
-	
-	//obter o álbum
-	db.each(query, function(err, row){
-		if(err) {
-			throw err;
-		}			
-		
-		if(row !== null){
-            //criar string json para cada album 
-            album_json = "{\"albumID\":" + row.albumID + ",\"title\":\"" + row.title + "\",\"userID\":" + row.userID + ",\"description\":\"" + row.description + "\",\"start_date\":\"" + row.start_date + "\",\"end_date\":\"" + row.end_date + "\"}";
-            //armazenar no array
-            albuns.push(album_json); 
-		}
-	});
-	
-	db.close();
-	
-	setTimeout(function(){
-	    albuns_json = "[";
-    	
-    	for(var i = 0; i < albuns.length; i++){
-    	    albuns_json += albuns[i];
-    	    if(i !== (albuns.length-1)){
-    	        albuns_json += ",";
-    	    }
-    	}
-    	
-    	albuns_json += "]";    	
-	
-		result(albuns_json);
-	}, 5000);
-}
-
-/** Função testada e funcional **/
-function getAlbum(albumID, res){
-    //função para obter as informações de um álbum especifico
-    var query = "SELECT * FROM ALBUNS WHERE albumID=" + albumID;
-    
-    var album_json = "";
-    var result = "";
-    
-    //abrir instância da db.
-	var db = new sqlite3.Database(file);
-	
-	console.log("\nINFO: Getting album of the user.");  
-	
-	//obter o álbum
-	db.get(query, function(err, row){
-		if(err) {
-			throw err;
-		}			
-		
-		if(row !== undefined){
-            //criar string json para o album 
-            console.log("albumID: " + row.albumID + "; Title: " + row.title + "; userID: " + row.userID + "; Description: " + row.description + "; Start Date: " + row.start_date + "; End Date: " + row.end_date);
-            album_json = "{\"albumID\":" + row.albumID + ",\"title\":\"" + row.title + "\",\"userID\":" + row.userID + ",\"description\":\"" + row.description + "\",\"start_date\":\"" + row.start_date + "\",\"end_date\":\"" + row.end_date + "\"}";
-		}
-	});
-	
-	setTimeout(function(){
-		result = "[" + album_json + "]";
-		res(result);
-		
-		//fechar a db
-        db.close();
-	},1000);
-}
-
-/** Função testada e funcional **/
-function updateAlbum(albumID, title, description, start_date, end_date, res){
-    //função para atualizar um álbum
-    var db = new sqlite3.Database(file);
-    var query_select = "SELECT * FROM ALBUNS WHERE albumID=" + albumID;
-    var query_update_title = "UPDATE ALBUNS SET title=\"" + title + "\" where albumID=" + albumID;
-    var query_update_description = "UPDATE ALBUNS SET description=\"" + description + "\" where albumID=" + albumID;
-    var query_update_startDate = "UPDATE ALBUNS SET start_date=\"" + start_date + "\" where albumID=" + albumID;
-    var query_update_endDate = "UPDATE ALBUNS SET end_date=\"" + end_date + "\" where albumID=" + albumID;
-    
-	db.get(query_select, function(err,row){
-		if(err){
-			throw err;
-		}
-		
-		if(row !== null){
-			setTimeout(function(){
-				db.serialize(function(){
-				    if(title !== undefined){
-					    console.log("\nINFO: Updating album's title.");
-					    db.run(query_update_title);
-					}
-					if(description !== undefined){
-					    console.log("\nINFO: Updating album's description.");
-					    db.run(query_update_description);
-					}
-					if(start_date !== undefined){
-					    console.log("\nINFO: Updating album's start_date.");
-					    db.run(query_update_startDate);
-					}
-					if(end_date !== undefined){
-					    console.log("\nINFO: Updating album's end_date.");
-					    db.run(query_update_endDate);
-					}
-					res("true");
-					//fechar a db
-                    db.close();
-				});
-			}, 4000);
-		} else {
-			res("false");
-			//fechar a db
-            db.close();
-		}
-	});
-}
-
-/** Função testada e funcional **/
-function deleteAlbum(albumID, res){
-    //função para eliminar um álbum
-    var db = new sqlite3.Database(file);
-    var query_select = "SELECT * FROM ALBUNS WHERE albumID=" + albumID;
-    var query_delete = "DELETE FROM ALBUNS WHERE albumID=" + albumID;
-    
-    db.get(query_select, function(err,row){
-		if(err){
-			throw err;
-		}
-		
-		if(row !== undefined){
-			setTimeout(function(){
-				db.serialize(function(){
-					console.log("\nINFO: Deleting album.");
-					db.run(query_delete);
-					res("true");
-					//fechar a db
-                    db.close();
-				});
-			}, 1000);
-		} else {
-			res("false");
-			//fechar a db
-            db.close();
-		}
-	});
-}	
 
 /***************************************************************/
 /*    Registo de novos utilizadores.                           */
@@ -495,7 +76,7 @@ app.route("/signup")
     })
     .post(function(req,res){
         //chamar função para criar utilizador
-        createUser(req.body.user, req.body.pass, function(result){
+    	usersHandler.createUser(req.body.user, req.body.pass, function(result){
         	setTimeout(function () {        		
         		if(result === "true"){
         			res.status(201).send('User created');
@@ -528,7 +109,7 @@ app.route("/login")
 	})
 	.post(function(req,res){
 	    //chamar função para autenticar o utilizador
-	    login(req.body.user, req.body.pass, function(result){
+		usersHandler.login(req.body.user, req.body.pass, function(result){
 	        setTimeout(function(){
 	            if(result === "true"){
 	                res.status(202).send("Authentication was successful");
@@ -557,7 +138,7 @@ app.route("/login")
 
 app.route("/users")
 	.get(function(req,res){
-		showAllUsers(function(result){
+		usersHandler.showAllUsers(function(result){
 			res.status(200).send(result);
 		});
 	})
@@ -590,13 +171,13 @@ app.param('userID', function(req, res, next, userID){
 
 app.route("/users/:userID")
     .get(function(req, res){ 
-    	getUser(req.userID, function(result){
+    	usersHandler.getUser(req.userID, function(result){
     		res.status(200).send(result);
     	});
     })
     .post(function(req, res){
     	//chamar função para atualizar password de utilizador
-    	updateUserPass(req.userID, req.body.pass, function(result){
+    	usersHandler.updateUserPass(req.userID, req.body.pass, function(result){
     		setTimeout(function () {
     			if(result === "true"){
     				res.status(200).send('Password was updated');
@@ -610,7 +191,7 @@ app.route("/users/:userID")
     	res.status(405).send("Not allowed.");
     })
     .delete(function(req, res) {
-        deleteUser(req.userID, function(result){
+    	usersHandler.deleteUser(req.userID, function(result){
             setTimeout(function(){
                 if(result === "true"){
                     res.status(200).send('User was deleted');
@@ -624,7 +205,7 @@ app.route("/users/:userID")
 /***************************************************************/
 /*	  Colecção de álbuns		                               */
 /*                                                             */
-/*    URL:    /users/:userID/album                             */
+/*    URL:    /users/:userID/albuns                            */
 /*                                                             */
 /*    GET     Retornar todos os álbuns                         */
 /* 	  POST    Criar novo álbum                                 */
@@ -634,13 +215,13 @@ app.route("/users/:userID")
 
 app.route("/users/:userID/albuns")
 	.get(function(req,res){
-	    getUserAlbuns(req.userID, function(result){
+		albunsHandler.getUserAlbuns(req.userID, function(result){
 			res.status(200).send(result);
 		});
 	})
 	.post(function(req,res){        
         //chamar função para criar álbum
-        createAlbum(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
+		albunsHandler.createAlbum(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
         	setTimeout(function () {
         		if(result === "true"){
         			res.status(201).send('Album created');
@@ -664,7 +245,7 @@ app.route("/users/:userID/albuns")
 /*    POST    atualizar álbum especifico                       */
 /*    DELETE  apagar álbum especifico                          */
 /*  					                                       */
-/*	  Estado: Não testado       							   */
+/*	  Estado: Testado e funcional 							   */
 /***************************************************************/
 
 app.param('albumID', function(req, res, next, albumID){
@@ -674,13 +255,13 @@ app.param('albumID', function(req, res, next, albumID){
 
 app.route("/users/:userID/albuns/:albumID")
     .get(function(req, res){ 
-    	getAlbum(req.albumID, function(result){
+    	albunsHandler.getAlbum(req.albumID, function(result){
     		res.status(200).send(result);
     	});
     })
     .post(function(req, res){
     	//chamar função para atualizar um album
-    	updateAlbum(req.albumID, req.body.title, req.body.description, req.body.start_date, req.body.end_date, function(result){
+    	albunsHandler.updateAlbum(req.albumID, req.body.title, req.body.description, req.body.start_date, req.body.end_date, function(result){
     	    setTimeout(function(){
     	        if(result === "true"){
     				res.status(200).send('Album was updated');
@@ -694,7 +275,7 @@ app.route("/users/:userID/albuns/:albumID")
     	res.status(405).send("Not allowed.");
     })
     .delete(function(req, res) {
-        deleteAlbum(req.albumID, function(result){
+    	albunsHandler.deleteAlbum(req.albumID, function(result){
             setTimeout(function(){
                 if(result === "true"){
                     res.status(200).send('Album was deleted');
@@ -703,6 +284,41 @@ app.route("/users/:userID/albuns/:albumID")
                 }            
             }, 4000);  
         });  
+	});	
+
+/***************************************************************/
+/*	  Colecção de fotos			                               */
+/*                                                             */
+/*    URL:    /users/:userID/albuns/:albumID/photos            */
+/*                                                             */
+/*    GET     Retornar todas as fotos de um álbum              */
+/* 	  POST    Upload de uma fotografia                         */
+/*  					                                       */
+/*	  Estado: -												   */
+/***************************************************************/
+
+app.route("/users/:userID/albuns/:albumID/photos")
+	.get(function(req,res){
+		res.status(404).send("Not implemented yet.");
+	})
+	.post(function(req,res){        
+		//chamar função para upload de foto
+		var filename = req.files.displayImage.path;
+		photosHandler.insertPhoto(req.albumID, filename, req.body.description, req.body.date, function(result){
+			setTimeout(function () {
+				if(result === "true"){
+					res.status(201).send('Photo uploaded');
+				} else {
+					res.status(500).send('Error uploading the photo');
+				}
+			}, 10000);
+		});    	
+	})
+	.put(function(req,res){
+		res.status(405).send("Cannot overwrite the entire collection.");
+	})
+	.delete(function(req,res){
+		res.status(405).send("Cannot delete the entire collection.");
 	});	
 	
 /***************************************************************/

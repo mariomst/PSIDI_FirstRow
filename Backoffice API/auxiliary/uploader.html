@@ -1,0 +1,33 @@
+<!-- 
+/***************************************************************/
+/*                                                             */
+/*  Trabalho Prático                                           */
+/*  PSIDI / MEI / ISEP                                         */
+/*  (c) 2014                                                   */
+/*                                                             */
+/***************************************************************/
+
+albumID, filename, description, date, result
+-->
+
+<html>
+	<script>
+		function doPOST() {
+			var form = document.getElementById("myForm");
+			var description = document.getElementById("description").value;
+			var date = document.getElementById("date").value;
+			var action = "http://localhost:2001/users/1/albuns/1/photos/";
+			form.setAttribute("action", action);
+			form.submit();
+		}
+	</script>
+	<body>
+		<h1>Photo Upload HTML Client</h1>
+		<form id="myForm" method="post" enctype="multipart/form-data">
+		<div>Description: <input type="text" name="description" id="description"></div>
+		<div>Date: <input type="text" name="date" id="date"></div>
+  		<input type="file" name="displayImage"><p/>
+  		<input type="submit" onclick="doPOST();">
+  	</form>
+</body>
+</html>
