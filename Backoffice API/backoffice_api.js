@@ -25,11 +25,34 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(multer({dest: './photos/'}));
 
+app.use('*', function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header('Access-Control-Allow-Methods', 'OPTIONS,GET,POST,PUT,DELETE');
+    res.header("Access-Control-Allow-Headers", "Origin, Content-Type, Authorization, X-Requested-With, Accept");
+    if ('OPTIONS' == req.method){
+        return res.sendStatus(200);
+    }
+    next();
+});
+
+//var allowCrossDomain = function(req, res, next) {
+//    res.header('Access-Control-Allow-Origin', "*");
+ //   res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+  //  res.header('Access-Control-Allow-Headers', 'Content-Type');
+    //next();
+//};
+
+//app.configure(function() {
+  //  app.use(allowCrossDomain);
+    //some other code
+//}); 
+
+
 /***************************************************************/
 /*  Data                                                       */
 /***************************************************************/
 
-const port = process.env.PORT || 2001;
+const port = process.env.PORT || 8000;
 const server_root = "http://localhost:" + port;
 
 /***************************************************************/
