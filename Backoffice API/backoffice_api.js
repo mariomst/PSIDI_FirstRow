@@ -16,7 +16,7 @@ var bodyParser = require('body-parser');
 var fs = require('fs');
 var multer = require('multer');
 var usersHandler = require('./handlers/users-handler');
-var albunsHandler = require('./handlers/albuns-handler');
+var albumsHandler = require('./handlers/albums-handler');
 var photosHandler = require('./handlers/photos-handler');
 
 var app = express();
@@ -73,10 +73,10 @@ var db = new sqlite3.Database(file);
 
 db.serialize(function(){
     if(!exists){
-        console.log("INFO: Creating tables.\n->PUBLICURI\n->USERS\n->ALBUNS\n->PHOTOS");
+        console.log("INFO: Creating tables.\n->PUBLICURI\n->USERS\n->ALBUMS\n->PHOTOS");
         db.run("CREATE TABLE PUBLICURI (uri TEXT, userID INTEGER)");
         db.run("CREATE TABLE USERS (userID INTEGER PRIMARY KEY, user TEXT, password TEXT)");
-        db.run("CREATE TABLE ALBUNS (albumID INTEGER PRIMARY KEY, title TEXT, userID INTEGER, description TEXT, start_date TEXT, end_date TEXT)");
+        db.run("CREATE TABLE ALBUMS (albumID INTEGER PRIMARY KEY, title TEXT, userID INTEGER, description TEXT, start_date TEXT, end_date TEXT)");
         db.run("CREATE TABLE PHOTOS (photoID INTEGER PRIMARY KEY, albumID INTEGER, photo TEXT, description TEXT, date TEXT)");
     }   
 });
@@ -134,8 +134,8 @@ app.route("/login")
 	    //chamar função para autenticar o utilizador
 		usersHandler.login(req.body.username, req.body.password, function(result){
 	        setTimeout(function(){
-	            if(result === "true"){
-	                res.status(202).send("Authentication was successful");
+	            if(result !== "false"){
+	                res.status(202).send(result);
 	            } else {
 	                res.status(400).send("Authentication failed, please check username and password");
 	            }	            
@@ -228,7 +228,7 @@ app.route("/users/:userID")
 /***************************************************************/
 /*	  Colecção de álbuns		                               */
 /*                                                             */
-/*    URL:    /users/:userID/albuns                            */
+/*    URL:    /users/:userID/albums                            */
 /*                                                             */
 /*    GET     Retornar todos os álbuns                         */
 /* 	  POST    Criar novo álbum                                 */
@@ -236,15 +236,15 @@ app.route("/users/:userID")
 /*	  Estado: Testado e funcional							   */
 /***************************************************************/	
 
-app.route("/users/:userID/albuns")
+app.route("/users/:userID/albums")
 	.get(function(req,res){
-		albunsHandler.getUserAlbuns(req.userID, function(result){
+		albumsHandler.getUserAlbums(req.userID, function(result){
 			res.status(200).send(result);
 		});
 	})
 	.post(function(req,res){        
         //chamar função para criar álbum
-		albunsHandler.createAlbum(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
+		albumsHandler.createAlbum(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
         	setTimeout(function () {
         		if(result === "true"){
         			res.status(201).send('Album created');
@@ -262,7 +262,7 @@ app.route("/users/:userID/albuns")
 /***************************************************************/
 /*	  Álbuns individuais		                               */
 /*                                                             */
-/*    URL:    /users/:userID/albuns/:albumID                   */
+/*    URL:    /users/:userID/albums/:albumID                   */
 /*                                                             */
 /*    GET     retornar álbum especifico                        */
 /*    POST    atualizar álbum especifico                       */
@@ -276,15 +276,15 @@ app.param('albumID', function(req, res, next, albumID){
     return next()
 })
 
-app.route("/users/:userID/albuns/:albumID")
+app.route("/users/:userID/albums/:albumID")
     .get(function(req, res){ 
-    	albunsHandler.getAlbum(req.albumID, function(result){
+    	albumsHandler.getAlbum(req.albumID, function(result){
     		res.status(200).send(result);
     	});
     })
     .post(function(req, res){
     	//chamar função para atualizar um album
-    	albunsHandler.updateAlbum(req.albumID, req.body.title, req.body.description, req.body.start_date, req.body.end_date, function(result){
+    	albumsHandler.updateAlbum(req.albumID, req.body.title, req.body.description, req.body.start_date, req.body.end_date, function(result){
     	    setTimeout(function(){
     	        if(result === "true"){
     				res.status(200).send('Album was updated');
@@ -298,7 +298,7 @@ app.route("/users/:userID/albuns/:albumID")
     	res.status(405).send("Not allowed.");
     })
     .delete(function(req, res) {
-    	albunsHandler.deleteAlbum(req.albumID, function(result){
+    	albumsHandler.deleteAlbum(req.albumID, function(result){
             setTimeout(function(){
                 if(result === "true"){
                     res.status(200).send('Album was deleted');
@@ -312,7 +312,7 @@ app.route("/users/:userID/albuns/:albumID")
 /***************************************************************/
 /*	  Colecção de fotos			                               */
 /*                                                             */
-/*    URL:    /users/:userID/albuns/:albumID/photos            */
+/*    URL:    /users/:userID/albums/:albumID/photos            */
 /*                                                             */
 /*    GET     Retornar todas as fotos de um álbum              */
 /* 	  POST    Upload de uma fotografia                         */
@@ -320,7 +320,7 @@ app.route("/users/:userID/albuns/:albumID")
 /*	  Estado: -												   */
 /***************************************************************/
 
-app.route("/users/:userID/albuns/:albumID/photos")
+app.route("/users/:userID/albums/:albumID/photos")
 	.get(function(req,res){
 		res.status(404).send("Not implemented yet.");
 	})
@@ -343,6 +343,40 @@ app.route("/users/:userID/albuns/:albumID/photos")
 	.delete(function(req,res){
 		res.status(405).send("Cannot delete the entire collection.");
 	});	
+
+/***************************************************************/
+/*    Fotos individuais                                        */
+/*                                                             */
+/*    URL:    /users/:userID/albums/:albumID/photos/:photoID   */
+/*                                                             */
+/*    GET     retornar foto especifica                         */
+/*    POST    atualizar foto especifica                        */
+/*    DELETE  apagar foto especifica                           */
+/*                                                             */
+/*    Estado: -                                                */
+/***************************************************************/
+
+app.param('photoID', function(req, res, next, photoID){
+    req.photoID = photoID;
+    return next()
+})
+
+app.route("/users/:userID/albums/:albumID/photos/:photoID")
+    .get(function(req, res){ 
+        photosHandler.getPhoto(req.photoID, function(result){
+            res.status(200).send(result);
+        });
+    })
+    .post(function(req, res){
+        res.status(404).send("Not implemented yet.");
+    })
+    .put(function(req, res){
+        res.status(405).send("Not allowed.");
+    })
+    .delete(function(req, res) {
+        res.status(404).send("Not implemented yet.");
+    }); 
+
 	
 /***************************************************************/
 /*  Starting...                                                */

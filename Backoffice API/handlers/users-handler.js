@@ -91,8 +91,10 @@ function login(user, password, result){
     //função para validar os dados inseridos pelo utilizador    
     var db = new sqlite3.Database(file);
     
+    var userID = "";
     var userRes = "";
     var passwordRes = "";
+    var user_json = "";
     var query = "SELECT * FROM USERS WHERE user=\""+user+"\"";
     
     console.log("\nINFO: Checking user credentials.");
@@ -107,6 +109,7 @@ function login(user, password, result){
         
         //caso encontre
         if(res !== undefined){
+            userID = res.userID;
             userRes = res.user;
             passwordRes = res.password;
         }
@@ -116,7 +119,8 @@ function login(user, password, result){
     setTimeout(function () {           
         //comparar o que encontrou na DB com o que foi inserido pelo utilizador
         if(user === userRes && password === passwordRes){
-            result("true");
+            user_json = "{\"userID\":" + userID + ",\"user\":\"" + userRes + "\"}";
+            result(user_json);
         } else {
             result("false");
         }    

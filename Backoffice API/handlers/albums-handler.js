@@ -1,7 +1,7 @@
 /***************************************************************/
 /*                                                             */
 /*  Trabalho Prático                                           */
-/*  Node module to handle albuns resource                      */
+/*  Node module to handle albums resource                      */
 /*  PSIDI / MEI / ISEP                                         */
 /*  (c) 2014                                                   */
 /*                                                             */
@@ -26,7 +26,7 @@ var file = "./database/myphotoalbum.db";
 /** Função testada e funcional **/
 function createAlbum(title, userID, description, start_date, end_date, result){
 	//função para criar um novo album na db.	
-	var query = "INSERT INTO ALBUNS (title, userID, description, start_date, end_date) VALUES (?,?,?,?,?)";
+	var query = "INSERT INTO ALBUMS (title, userID, description, start_date, end_date) VALUES (?,?,?,?,?)";
 	
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
@@ -51,19 +51,19 @@ function createAlbum(title, userID, description, start_date, end_date, result){
 }
 
 /** Função testada e funcional **/
-function getUserAlbuns(userID, result){
+function getUserAlbums(userID, result){
 	//função para obter as informações de todos os álbuns do utilizador
-	var query = "SELECT * FROM ALBUNS WHERE userID=" + userID;
+	var query = "SELECT * FROM ALBUMS WHERE userID=" + userID;
 	
 	//variavéis para armazenar as strings json
-	var albuns = [];
+	var albums = [];
     var album_json = "";
-    var albuns_json = "";  
+    var albums_json = "";  
 	
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
 	
-	console.log("\nINFO: Getting all albuns of the user with id " + userID + ".");  
+	console.log("\nINFO: Getting all albums of the user with id " + userID + ".");  
 	
 	//obter o álbum
 	db.each(query, function(err, row){
@@ -75,32 +75,32 @@ function getUserAlbuns(userID, result){
             //criar string json para cada album 
             album_json = "{\"albumID\":" + row.albumID + ",\"title\":\"" + row.title + "\",\"userID\":" + row.userID + ",\"description\":\"" + row.description + "\",\"start_date\":\"" + row.start_date + "\",\"end_date\":\"" + row.end_date + "\"}";
             //armazenar no array
-            albuns.push(album_json); 
+            albums.push(album_json); 
 		}
 	});
 	
 	db.close();
 	
 	setTimeout(function(){
-	    albuns_json = "[";
+	    albums_json = "[";
     	
-    	for(var i = 0; i < albuns.length; i++){
-    	    albuns_json += albuns[i];
-    	    if(i !== (albuns.length-1)){
-    	        albuns_json += ",";
+    	for(var i = 0; i < albums.length; i++){
+    	    albums_json += albums[i];
+    	    if(i !== (albums.length-1)){
+    	        albums_json += ",";
     	    }
     	}
     	
-    	albuns_json += "]";    	
+    	albums_json += "]";    	
 	
-		result(albuns_json);
+		result(albums_json);
 	}, 5000);
 }
 
 /** Função testada e funcional **/
 function getAlbum(albumID, res){
     //função para obter as informações de um álbum especifico
-    var query = "SELECT * FROM ALBUNS WHERE albumID=" + albumID;
+    var query = "SELECT * FROM ALBUMS WHERE albumID=" + albumID;
     
     var album_json = "";
     var result = "";
@@ -136,11 +136,11 @@ function getAlbum(albumID, res){
 function updateAlbum(albumID, title, description, start_date, end_date, res){
     //função para atualizar um álbum
     var db = new sqlite3.Database(file);
-    var query_select = "SELECT * FROM ALBUNS WHERE albumID=" + albumID;
-    var query_update_title = "UPDATE ALBUNS SET title=\"" + title + "\" where albumID=" + albumID;
-    var query_update_description = "UPDATE ALBUNS SET description=\"" + description + "\" where albumID=" + albumID;
-    var query_update_startDate = "UPDATE ALBUNS SET start_date=\"" + start_date + "\" where albumID=" + albumID;
-    var query_update_endDate = "UPDATE ALBUNS SET end_date=\"" + end_date + "\" where albumID=" + albumID;
+    var query_select = "SELECT * FROM ALBUMS WHERE albumID=" + albumID;
+    var query_update_title = "UPDATE ALBUMS SET title=\"" + title + "\" where albumID=" + albumID;
+    var query_update_description = "UPDATE ALBUMS SET description=\"" + description + "\" where albumID=" + albumID;
+    var query_update_startDate = "UPDATE ALBUMS SET start_date=\"" + start_date + "\" where albumID=" + albumID;
+    var query_update_endDate = "UPDATE ALBUMS SET end_date=\"" + end_date + "\" where albumID=" + albumID;
     
 	db.get(query_select, function(err,row){
 		if(err){
@@ -183,8 +183,8 @@ function updateAlbum(albumID, title, description, start_date, end_date, res){
 function deleteAlbum(albumID, res){
     //função para eliminar um álbum
     var db = new sqlite3.Database(file);
-    var query_select = "SELECT * FROM ALBUNS WHERE albumID=" + albumID;
-    var query_delete = "DELETE FROM ALBUNS WHERE albumID=" + albumID;
+    var query_select = "SELECT * FROM ALBUMS WHERE albumID=" + albumID;
+    var query_delete = "DELETE FROM ALBUMS WHERE albumID=" + albumID;
     
     db.get(query_select, function(err,row){
 		if(err){
@@ -214,7 +214,7 @@ function deleteAlbum(albumID, res){
 /***************************************************************/
 
 exports.createAlbum = createAlbum;
-exports.getUserAlbuns = getUserAlbuns;
+exports.getUserAlbums = getUserAlbums;
 exports.getAlbum = getAlbum;
 exports.updateAlbum = updateAlbum;
 exports.deleteAlbum = deleteAlbum;

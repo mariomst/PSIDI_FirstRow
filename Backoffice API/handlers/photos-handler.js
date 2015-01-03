@@ -27,9 +27,42 @@ var file = "./database/myphotoalbum.db";
 /*  Helper Functions                                           */
 /***************************************************************/
 
-function getPhotos(){}
+function getPhotos(albumID, result){}
 
-function getPhoto(){}
+function getPhoto(photoID, result){
+	//query para obter uma foto específica.
+	var query = "SELECT * FROM PHOTOS WHERE photoID=" + photoID;
+	
+	//para a informação a ser retornada em json.
+	var photo_json = "";
+    var result_json = "";
+    
+    //abrir instância da db.
+	var db = new sqlite3.Database(file);
+	
+	console.log("\nINFO: Getting photo.");  
+
+	//obter a foto
+	db.get(query, function(err, row){
+		if(err) {
+			throw err;
+		}			
+		
+		if(row !== undefined){
+            //criar string json para a foto 
+            console.log("photoID: " + row.photoID + "; albumID: " + row.albumID + "; Filename: " + row.photo + "; Description: " + row.description + "; Date: " + row.date);
+            photo_json = "{\"photoID\":" + row.photoID + ",\"albumID\":\"" + row.albumID + "\",\"photo\":" + row.photo + ",\"description\":\"" + row.description + "\",\"date\":\"" + row.date + "\"}";
+		}
+	});
+	
+	setTimeout(function(){
+		result_json = "[" + photo_json + "]";
+		result(result_json);
+		
+		//fechar a db
+        db.close();
+	},1000);
+}
 
 function insertPhoto(albumID, filename, description, date, result){
 	//query de inserção de fotos.
@@ -79,9 +112,9 @@ function insertPhoto(albumID, filename, description, date, result){
 	fs.unlinkSync('./photos/' + ext);
 }
 
-function updatePhoto(){}
+function updatePhoto(photoID, description, date, result){}
 
-function deletePhoto(){}
+function deletePhoto(photoID, result){}
 
 /***************************************************************/
 /*  Module Exports		                                       */
