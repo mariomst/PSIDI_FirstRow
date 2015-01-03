@@ -99,7 +99,7 @@ app.route("/signup")
     })
     .post(function(req,res){
         //chamar função para criar utilizador
-    	usersHandler.createUser(req.body.user, req.body.pass, function(result){
+    	usersHandler.createUser(req.body.username, req.body.password, function(result){
         	setTimeout(function () {        		
         		if(result === "true"){
         			res.status(201).send('User created');
@@ -132,7 +132,7 @@ app.route("/login")
 	})
 	.post(function(req,res){
 	    //chamar função para autenticar o utilizador
-		usersHandler.login(req.body.user, req.body.pass, function(result){
+		usersHandler.login(req.body.username, req.body.password, function(result){
 	        setTimeout(function(){
 	            if(result === "true"){
 	                res.status(202).send("Authentication was successful");
@@ -200,7 +200,7 @@ app.route("/users/:userID")
     })
     .post(function(req, res){
     	//chamar função para atualizar password de utilizador
-    	usersHandler.updateUserPass(req.userID, req.body.pass, function(result){
+    	usersHandler.updateUserPass(req.userID, req.body.password, function(result){
     		setTimeout(function () {
     			if(result === "true"){
     				res.status(200).send('Password was updated');

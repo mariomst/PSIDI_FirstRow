@@ -106,7 +106,7 @@ function login(user, password, result){
         }
         
         //caso encontre
-        if(res !== null){
+        if(res !== undefined){
             userRes = res.user;
             passwordRes = res.password;
         }
