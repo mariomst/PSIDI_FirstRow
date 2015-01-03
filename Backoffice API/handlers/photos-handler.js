@@ -7,8 +7,6 @@
 /*                                                             */
 /***************************************************************/
 
-const ROOT_DIR = __dirname; 
-
 /***************************************************************/
 /*  Necessary Modules                                          */
 /***************************************************************/
@@ -27,7 +25,52 @@ var file = "./database/myphotoalbum.db";
 /*  Helper Functions                                           */
 /***************************************************************/
 
-function getPhotos(albumID, result){}
+function getPhotos(albumID, result){
+	//query para obter fotos de um album específico.
+	var query = "SELECT * FROM PHOTOS WHERE albumID=" + albumID;
+	
+	//variavéis para armazenar as strings json
+	var photos = [];
+    var photo_json = "";
+    var photos_json = "";  
+	
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+	
+	console.log("\nINFO: Getting all photos from album.");  
+	
+	//obter as photos
+	db.each(query, function(err, row){
+		if(err) {
+			throw err;
+		}			
+		
+		if(row !== undefined){
+            //criar string json para cada foto 
+            photo_json = "{\"photoID\":" + row.photoID + ",\"albumID\":\"" + row.albumID + "\",\"photo\":\"" + row.photo + "\",\"description\":\"" + row.description + "\",\"date\":\"" + row.date + "\"}";
+            //armazenar no array
+            photos.push(photo_json); 
+		}
+	});
+		
+	setTimeout(function(){
+	    photos_json = "[";
+    	
+    	for(var i = 0; i < photos.length; i++){
+    	    photos_json += photos[i];
+    	    if(i !== (photos.length-1)){
+    	        photos_json += ",";
+    	    }
+    	}
+    	
+    	photos_json += "]";    	
+	
+		result(photos_json);
+
+		//fechar a db
+		db.close();
+	}, 5000);
+}
 
 function getPhoto(photoID, result){
 	//query para obter uma foto específica.
@@ -51,7 +94,7 @@ function getPhoto(photoID, result){
 		if(row !== undefined){
             //criar string json para a foto 
             console.log("photoID: " + row.photoID + "; albumID: " + row.albumID + "; Filename: " + row.photo + "; Description: " + row.description + "; Date: " + row.date);
-            photo_json = "{\"photoID\":" + row.photoID + ",\"albumID\":\"" + row.albumID + "\",\"photo\":" + row.photo + ",\"description\":\"" + row.description + "\",\"date\":\"" + row.date + "\"}";
+            photo_json = "{\"photoID\":" + row.photoID + ",\"albumID\":\"" + row.albumID + "\",\"photo\":\"" + row.photo + "\",\"description\":\"" + row.description + "\",\"date\":\"" + row.date + "\"}";
 		}
 	});
 	
@@ -112,9 +155,91 @@ function insertPhoto(albumID, filename, description, date, result){
 	fs.unlinkSync('./photos/' + ext);
 }
 
-function updatePhoto(photoID, description, date, result){}
+function updatePhoto(photoID, description, date, result){
+	//queries para atualizar informações de uma foto
+    var query_select = "SELECT * FROM PHOTOS WHERE photoID=" + photoID;
+    var query_update_description = "UPDATE PHOTOS SET description=\"" + description + "\" where photoID=" + photoID;
+    var query_update_date = "UPDATE PHOTOS SET date=\"" + date + "\" where photoID=" + photoID;
 
-function deletePhoto(photoID, result){}
+    //abrir instância da db
+	var db = new sqlite3.Database(file);
+    
+    //executar query
+	db.get(query_select, function(err,row){
+		if(err){
+			throw err;
+		}
+		
+		if(row !== undefined){
+			setTimeout(function(){
+				db.serialize(function(){				    
+					if(description !== undefined){
+					    console.log("\nINFO: Updating photos's description.");
+					    db.run(query_update_description);
+					}		
+					if(date !== undefined){
+					    console.log("\nINFO: Updating photos's date.");
+					    db.run(query_update_date);
+					}			
+					result("true");
+					//fechar a db
+                    db.close();
+				});
+			}, 4000);
+		} else {
+			result("false");
+			//fechar a db
+            db.close();
+		}
+	});	
+}
+
+function deletePhoto(photoID, result){
+	//queries para a eliminação de uma foto
+	var query_select = "SELECT * FROM PHOTOS WHERE photoID=" + photoID;
+    var query_delete = "DELETE FROM PHOTOS WHERE photoID=" + photoID;
+
+    //abrir instância da db
+	var db = new sqlite3.Database(file);
+
+	//directorio do ficheiro para a eliminação.
+	var dir = "./photos/";
+	var albumID = "";	
+	var photo = "";
+
+	//executar query
+    db.get(query_select, function(err,row){
+		if(err){
+			throw err;
+		}
+		
+		//se encontrar a foto
+		if(row !== undefined){
+			setTimeout(function(){
+				db.serialize(function(){
+					console.log("\nINFO: Deleting photo.");
+					db.run(query_delete);
+					result("true");
+					//fechar a db
+                    db.close();
+				});
+
+				//criar diretorio para eliminar a photo.
+				albumID = row.albumID;
+				photo = row.photo;
+				dir = dir + albumID + photo;
+
+				//eliminar o ficheiro
+				fs.unlinkSync(dir);
+
+			}, 3000);
+		} else {
+			result("false");
+			//fechar a db
+            db.close();
+		}
+	});
+}
 
 /***************************************************************/
 /*  Module Exports		                                       */

@@ -23,7 +23,6 @@ var file = "./database/myphotoalbum.db";
 /*  Helper Functions                                           */
 /***************************************************************/
 
-/** Função testada e funcional **/
 function createUser(user, password, result){
     //função para criar um novo utilizador na db.
     var query = "INSERT INTO USERS (user, password) VALUES (?,?)"; 

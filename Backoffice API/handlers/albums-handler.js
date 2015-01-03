@@ -23,7 +23,6 @@ var file = "./database/myphotoalbum.db";
 /*  Helper Functions                                           */
 /***************************************************************/
 
-/** Função testada e funcional **/
 function createAlbum(title, userID, description, start_date, end_date, result){
 	//função para criar um novo album na db.	
 	var query = "INSERT INTO ALBUMS (title, userID, description, start_date, end_date) VALUES (?,?,?,?,?)";
@@ -50,7 +49,6 @@ function createAlbum(title, userID, description, start_date, end_date, result){
 	});
 }
 
-/** Função testada e funcional **/
 function getUserAlbums(userID, result){
 	//função para obter as informações de todos os álbuns do utilizador
 	var query = "SELECT * FROM ALBUMS WHERE userID=" + userID;
@@ -71,7 +69,7 @@ function getUserAlbums(userID, result){
 			throw err;
 		}			
 		
-		if(row !== null){
+		if(row !== undefined){
             //criar string json para cada album 
             album_json = "{\"albumID\":" + row.albumID + ",\"title\":\"" + row.title + "\",\"userID\":" + row.userID + ",\"description\":\"" + row.description + "\",\"start_date\":\"" + row.start_date + "\",\"end_date\":\"" + row.end_date + "\"}";
             //armazenar no array
@@ -97,7 +95,6 @@ function getUserAlbums(userID, result){
 	}, 5000);
 }
 
-/** Função testada e funcional **/
 function getAlbum(albumID, res){
     //função para obter as informações de um álbum especifico
     var query = "SELECT * FROM ALBUMS WHERE albumID=" + albumID;
@@ -132,7 +129,6 @@ function getAlbum(albumID, res){
 	},1000);
 }
 
-/** Função testada e funcional **/
 function updateAlbum(albumID, title, description, start_date, end_date, res){
     //função para atualizar um álbum
     var db = new sqlite3.Database(file);
@@ -147,7 +143,7 @@ function updateAlbum(albumID, title, description, start_date, end_date, res){
 			throw err;
 		}
 		
-		if(row !== null){
+		if(row !== undefined){
 			setTimeout(function(){
 				db.serialize(function(){
 				    if(title !== undefined){
@@ -179,7 +175,6 @@ function updateAlbum(albumID, title, description, start_date, end_date, res){
 	});
 }
 
-/** Função testada e funcional **/
 function deleteAlbum(albumID, res){
     //função para eliminar um álbum
     var db = new sqlite3.Database(file);

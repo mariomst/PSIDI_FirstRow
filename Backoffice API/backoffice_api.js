@@ -47,6 +47,12 @@ app.use('*', function(req, res, next) {
     //some other code
 //}); 
 
+/***************************************************************/
+/* Directório das fotos                                        */
+/***************************************************************/
+
+const photos_dir = __dirname + "/photos/";
+
 
 /***************************************************************/
 /*  Data                                                       */
@@ -326,7 +332,9 @@ app.route("/users/:userID/albums/:albumID")
 
 app.route("/users/:userID/albums/:albumID/photos")
 	.get(function(req,res){
-		res.status(404).send("Not implemented yet.");
+		photosHandler.getPhotos(req.albumID, function(result){
+            res.status(200).send(result);
+        });
 	})
 	.post(function(req,res){        
 		//chamar função para upload de foto
@@ -369,16 +377,32 @@ app.route("/users/:userID/albums/:albumID/photos/:photoID")
     .get(function(req, res){ 
         photosHandler.getPhoto(req.photoID, function(result){
             res.status(200).send(result);
-        });
+        }); 
     })
     .post(function(req, res){
-        res.status(404).send("Not implemented yet.");
+        photosHandler.updatePhoto(req.photoID, req.body.description, req.body.date, function(result){
+            setTimeout(function(){
+                if(result === "true"){
+                    res.status(200).send("Photo's information was updated");
+                } else {
+                    res.status(204).send('Photo was not found');
+                }
+            }, 8000);
+        });
     })
     .put(function(req, res){
         res.status(405).send("Not allowed.");
     })
     .delete(function(req, res) {
-        res.status(404).send("Not implemented yet.");
+        photosHandler.deletePhoto(req.albumID, function(result){
+            setTimeout(function(){
+                if(result === "true"){
+                    res.status(200).send('Photo was deleted');
+                } else {
+                    res.status(204).send('Photo was not found');
+                }            
+            }, 4000);  
+        });  
     }); 
 
 	
