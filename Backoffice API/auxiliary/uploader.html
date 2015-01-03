@@ -16,7 +16,7 @@ albumID, filename, description, date, result
 			var form = document.getElementById("myForm");
 			var description = document.getElementById("description").value;
 			var date = document.getElementById("date").value;
-			var action = "http://localhost:2001/users/1/albuns/1/photos/";
+			var action = "http://localhost:8000/users/1/albums/1/photos/";
 			form.setAttribute("action", action);
 			form.submit();
 		}
