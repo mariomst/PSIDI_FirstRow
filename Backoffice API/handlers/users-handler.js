@@ -42,6 +42,7 @@ function createUser(user, password, result){
                     db.run(query, user, password);
                     
                     console.log("\nINFO: User created.");
+                    
                     result("true");
                 });
                 db.close();
@@ -53,7 +54,6 @@ function createUser(user, password, result){
     }); 
 }
 
-/** Função testada e funcional **/
 function findUser(usr,res){
     //função para procurar um determinado utilizador na db
     var db = new sqlite3.Database(file);
@@ -86,7 +86,6 @@ function findUser(usr,res){
     db.close();
 }
 
-/** Função testada e funcional **/
 function login(user, password, result){
     //função para validar os dados inseridos pelo utilizador    
     var db = new sqlite3.Database(file);
@@ -119,7 +118,7 @@ function login(user, password, result){
     setTimeout(function () {           
         //comparar o que encontrou na DB com o que foi inserido pelo utilizador
         if(user === userRes && password === passwordRes){
-            user_json = "{\"userID\":" + userID + ",\"user\":\"" + userRes + "\"}";
+            user_json = "{\"userID\":" + userID + ",\"username\":\"" + userRes + "\"}";
             result(user_json);
         } else {
             result("false");
@@ -129,7 +128,6 @@ function login(user, password, result){
     }, 500);
 }
 
-/** Função testada e funcional **/
 function showAllUsers(result){
     var db = new sqlite3.Database(file);
     var query = "SELECT * FROM USERS";
@@ -148,7 +146,7 @@ function showAllUsers(result){
         {
             console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
             
-            user_json = "{\"userID\":" + row.userID + ",\"user\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
+            user_json = "{\"userID\":" + row.userID + ",\"username\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
             
             users.push(user_json);                        
         }
@@ -172,7 +170,6 @@ function showAllUsers(result){
     },1000);    	
 }
 
-/** Função testada e funcional **/
 function getUser(userID, res){
 	//função para obter informações de um determinado utilizador na db.
 	var db = new sqlite3.Database(file);
@@ -189,7 +186,7 @@ function getUser(userID, res){
 		
 		if(row !== undefined){
 			console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
-			user_json = "{\"userID\":" + row.userID + ",\"user\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
+			user_json = "{\"userID\":" + row.userID + ",\"username\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
 		}
 	});
 	
@@ -202,7 +199,39 @@ function getUser(userID, res){
 	},1000);
 }
 
-/** Função testada e funcional **/
+function getUserbyName(username, result){
+    //query para obter um user específico.
+    var query = "SELECT * FROM USERS WHERE user=\"" + username + "\"";
+
+    //strings json para retornar
+    var user_json = "";
+    var result_json = "";
+
+    console.log("\nINFO: Getting user information.");
+
+    //abrir instância da db.
+    var db = new sqlite3.Database(file);
+
+    db.get(query, function(err, row){
+        if(err) {
+            throw err;
+        } 
+        
+        if(row !== undefined){
+            console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
+            user_json = "{\"userID\":" + row.userID + ",\"username\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
+        }
+    });
+    
+    setTimeout(function(){
+        result_json = "[" + user_json + "]";
+        result(result_json);
+        
+        //fechar a db
+        db.close();
+    },1000);
+}
+
 function updateUserPass(userID, newPass, res){
 	//função para atualizar a password de um utilizador.
 	var db = new sqlite3.Database(file);
@@ -232,7 +261,6 @@ function updateUserPass(userID, newPass, res){
 	});	
 }
 
-/** Função testada e funcional **/
 function deleteUser(userID, res){
     //função para eliminar um utilizador.
     var db = new sqlite3.Database(file);
@@ -271,5 +299,6 @@ exports.findUser = findUser;
 exports.login = login;
 exports.showAllUsers = showAllUsers;
 exports.getUser = getUser;
+exports.getUserbyName = getUserbyName;
 exports.updateUserPass = updateUserPass;
 exports.deleteUser = deleteUser;

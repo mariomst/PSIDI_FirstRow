@@ -102,7 +102,11 @@ app.route("/signup")
     	usersHandler.createUser(req.body.username, req.body.password, function(result){
         	setTimeout(function () {        		
         		if(result === "true"){
-        			res.status(201).send('User created');
+        			usersHandler.getUserbyName(req.body.username, function(result){
+                        setTimeout(function(){
+                            res.status(201).send(result);
+                        }, 2000)
+                    })
         		} else {
         			res.status(406).send('User already exists');
         		}
