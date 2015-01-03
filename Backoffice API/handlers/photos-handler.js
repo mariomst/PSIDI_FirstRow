@@ -107,7 +107,7 @@ function getPhoto(photoID, result){
 	},1000);
 }
 
-function insertPhoto(albumID, filename, description, date, result){
+function insertPhoto(albumID, filename, description, date, photos_dir, result){
 	//query de inserção de fotos.
 	var query = "INSERT INTO PHOTOS (albumID, photo, description, date) VALUES (?,?,?,?)";
 	
@@ -133,15 +133,17 @@ function insertPhoto(albumID, filename, description, date, result){
 	});	
 	
 	//upload da foto para a pasta	
-	var albumPath =  "./photos/" + albumID;
-	var photoPath = albumPath + ext;
+	var oldPath = photos_dir + ext;
+	var newPath =  photos_dir + albumID + ext;
+	var albumPath = photos_dir + albumID;
+	//var photoPath = albumPath + ext;
 	
 	//criar pasta com o id do album
 	mkdirp(albumPath, function(err) {});
 	
 	setTimeout(function(){
-		console.log("INFO: Uploading photo to " + photoPath);
-		fs.writeFile(photoPath, filename, function(err){
+		console.log("INFO: Uploading photo to " + newPath);
+		fs.rename(oldPath, newPath, function(err){
 			if(!err){				
 				result("true");
 			} else {
@@ -149,10 +151,10 @@ function insertPhoto(albumID, filename, description, date, result){
 				result("false");
 			}
 		});
-	}, 5000);
+	}, 8000);
 	
 	//apagar ficheiro repetido
-	fs.unlinkSync('./photos/' + ext);
+	//fs.unlinkSync('./photos/' + ext);
 }
 
 function updatePhoto(photoID, description, date, result){

@@ -339,7 +339,7 @@ app.route("/users/:userID/albums/:albumID/photos")
 	.post(function(req,res){        
 		//chamar função para upload de foto
 		var filename = req.files.displayImage.path;
-		photosHandler.insertPhoto(req.albumID, filename, req.body.description, req.body.date, function(result){
+		photosHandler.insertPhoto(req.albumID, filename, req.body.description, req.body.date, photos_dir, function(result){
 			setTimeout(function () {
 				if(result === "true"){
 					res.status(201).send('Photo uploaded');
