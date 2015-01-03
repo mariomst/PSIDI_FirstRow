@@ -219,7 +219,7 @@ function getUserbyName(username, result){
         
         if(row !== undefined){
             console.log("ID: " + row.userID + "; Utilizador: " + row.user);
-            user_json = "{\"userID\":" + row.userID + ",\"username\":\"" + row.user + "\""}";
+            user_json = "{\"userID\":" + row.userID + ",\"username\":\"" + row.user + "\"}";
         }
     });
     
