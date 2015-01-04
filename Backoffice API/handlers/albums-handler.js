@@ -121,8 +121,8 @@ function getAlbum(albumID, res){
 	});
 	
 	setTimeout(function(){
-		result = "[" + album_json + "]";
-		res(result);
+		//result = "[" + album_json + "]";
+		res(album_json);
 		
 		//fechar a db
         db.close();
@@ -131,7 +131,17 @@ function getAlbum(albumID, res){
 
 function getAlbumWithInfo(title, userID, description, start_date, end_date, result){
 	//query para obter um album específico
-	var query = "SELECT * FROM ALBUMS WHERE userID=" + userID + " AND title=\""+ title + "\" AND description=\"" + description + "\" AND start_date=" + start_date + " AND end_date=" + end_date;
+	var query = "SELECT * FROM ALBUMS WHERE userID=" + userID + " AND title=\""+ title + "\"";
+
+	if(description !== undefined){
+		query = query + " AND description=\"" + description + "\"";
+	}
+	if(start_date !== undefined){
+		query = query + " AND start_date=" + start_date;
+	}
+	if(end_date !== undefined){
+		query = query + " AND end_date=" + end_date;
+	}
 
 	//variavéis para armazenar as strings json
 	var album_json = "";
@@ -156,8 +166,8 @@ function getAlbumWithInfo(title, userID, description, start_date, end_date, resu
 	});
 
 	setTimeout(function(){
-		result_json = "[" + album_json + "]";
-		result(result_json);
+		//result_json = "[" + album_json + "]";
+		result(album_json);
 		
 		//fechar a db
         db.close();
