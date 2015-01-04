@@ -129,6 +129,41 @@ function getAlbum(albumID, res){
 	},1000);
 }
 
+function getAlbumWithInfo(title, userID, description, start_date, end_date, result){
+	//query para obter um album específico
+	var query = "SELECT * FROM ALBUMS WHERE userID=" + userID + " AND title=\""+ title + "\" AND description=\"" + description + "\" AND start_date=" + start_date + " AND end_date=" + end_date;
+
+	//variavéis para armazenar as strings json
+	var album_json = "";
+	var result_json = "";
+
+	//abrir instância da db
+	var db = new sqlite3.Database(file);
+
+	console.log("\nINFO: Getting album of a user.");  
+
+	//obter o álbum
+	db.get(query, function(err, row){
+		if(err) {
+			throw err;
+		}			
+		
+		if(row !== undefined){
+            //criar string json para o album 
+            console.log("albumID: " + row.albumID + "; Title: " + row.title + "; userID: " + row.userID + "; Description: " + row.description + "; Start Date: " + row.start_date + "; End Date: " + row.end_date);
+            album_json = "{\"albumID\":" + row.albumID + ",\"title\":\"" + row.title + "\",\"userID\":" + row.userID + ",\"description\":\"" + row.description + "\",\"start_date\":\"" + row.start_date + "\",\"end_date\":\"" + row.end_date + "\"}";
+		}
+	});
+
+	setTimeout(function(){
+		result_json = "[" + album_json + "]";
+		result(result_json);
+		
+		//fechar a db
+        db.close();
+	},1000);
+}
+
 function updateAlbum(albumID, title, description, start_date, end_date, res){
     //função para atualizar um álbum
     var db = new sqlite3.Database(file);
@@ -211,5 +246,6 @@ function deleteAlbum(albumID, res){
 exports.createAlbum = createAlbum;
 exports.getUserAlbums = getUserAlbums;
 exports.getAlbum = getAlbum;
+exports.getAlbumWithInfo = getAlbumWithInfo;
 exports.updateAlbum = updateAlbum;
 exports.deleteAlbum = deleteAlbum;

@@ -82,8 +82,8 @@ db.serialize(function(){
         console.log("INFO: Creating tables.\n->PUBLICURI\n->USERS\n->ALBUMS\n->PHOTOS");
         db.run("CREATE TABLE PUBLICURI (uri TEXT, userID INTEGER)");
         db.run("CREATE TABLE USERS (userID INTEGER PRIMARY KEY, user TEXT, password TEXT)");
-        db.run("CREATE TABLE ALBUMS (albumID INTEGER PRIMARY KEY, title TEXT, userID INTEGER, description TEXT, start_date TEXT, end_date TEXT)");
-        db.run("CREATE TABLE PHOTOS (photoID INTEGER PRIMARY KEY, albumID INTEGER, photo TEXT, description TEXT, date TEXT)");
+        db.run("CREATE TABLE ALBUMS (albumID INTEGER PRIMARY KEY, title TEXT, userID INTEGER, description TEXT, start_date LONG, end_date LONG)");
+        db.run("CREATE TABLE PHOTOS (photoID INTEGER PRIMARY KEY, albumID INTEGER, photo TEXT, description TEXT, date LONG)");
     }   
 });
 
@@ -257,7 +257,12 @@ app.route("/users/:userID/albums")
 		albumsHandler.createAlbum(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
         	setTimeout(function () {
         		if(result === "true"){
-        			res.status(201).send('Album created');
+        			//res.status(201).send('Album created');
+                    albumsHandler.getAlbumWithInfo(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
+                        setTimeout(function(){
+                            res.status(201).send(result);
+                        }, 2000)
+                    });
         		}
         	}, 4000);
         });
