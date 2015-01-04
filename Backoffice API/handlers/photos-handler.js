@@ -110,9 +110,17 @@ function getPhoto(photoID, result){
 function insertPhoto(albumID, filename, description, date, photos_dir, result){
 	//query de inserção de fotos.
 	var query = "INSERT INTO PHOTOS (albumID, photo, description, date) VALUES (?,?,?,?)";
-	
+
+	console.log(filename);
+
 	//remover photos/ do filename
 	var ext = filename.substr(filename.lastIndexOf('/'));
+
+	//upload da foto para a pasta	
+	var oldPath = "./photos" + ext;
+	var newPath =  "./photos/" + albumID + ext;
+	var albumPath = "./photos/" + albumID;
+	//var photoPath = albumPath + ext;
 
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
@@ -121,22 +129,16 @@ function insertPhoto(albumID, filename, description, date, photos_dir, result){
 	db.serialize(function(){
 		console.log("INFO: Creating photo with the following information");
 		console.log("-> albumID: " + albumID);
-		console.log("-> filename: " + ext);
+		console.log("-> filename: " + newPath);
 		console.log("-> description: " + description);
 		console.log("-> date: " + date);
 		
-		db.run(query, albumID, ext, description, date);
+		db.run(query, albumID, newPath, description, date);
 		
 		console.log("INFO: Photo added");
 		
 		db.close();
-	});	
-	
-	//upload da foto para a pasta	
-	var oldPath = photos_dir + ext;
-	var newPath =  photos_dir + albumID + ext;
-	var albumPath = photos_dir + albumID;
-	//var photoPath = albumPath + ext;
+	});		
 	
 	//criar pasta com o id do album
 	mkdirp(albumPath, function(err) {});
@@ -204,11 +206,6 @@ function deletePhoto(photoID, result){
     //abrir instância da db
 	var db = new sqlite3.Database(file);
 
-	//directorio do ficheiro para a eliminação.
-	var dir = "./photos/";
-	var albumID = "";	
-	var photo = "";
-
 	//executar query
     db.get(query_select, function(err,row){
 		if(err){
@@ -226,13 +223,9 @@ function deletePhoto(photoID, result){
                     db.close();
 				});
 
-				//criar diretorio para eliminar a photo.
-				albumID = row.albumID;
-				photo = row.photo;
-				dir = dir + albumID + photo;
-
 				//eliminar o ficheiro
-				fs.unlinkSync(dir);
+				fs.unlinkSync(row.photo);
+				
 
 			}, 3000);
 		} else {
