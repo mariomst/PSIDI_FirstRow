@@ -402,7 +402,7 @@ app.route("/users/:userID/albums/:albumID/photos/:photoID")
         res.status(405).send("Not allowed.");
     })
     .delete(function(req, res) {
-        photosHandler.deletePhoto(req.albumID, function(result){
+        photosHandler.deletePhoto(req.photoID, function(result){
             setTimeout(function(){
                 if(result === "true"){
                     res.status(200).send('Photo was deleted');
