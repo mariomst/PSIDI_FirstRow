@@ -1,0 +1,137 @@
+<h2>Prescrição</h2>
+<hr>
+
+<table width="100%">
+    <tr>
+        <td width="15%"><b>Prescrição: </b></td>
+        <td>{{prescription.id}}</td>
+
+        <td rowspan="9" valign="top">
+            <b>Observações:</b> {{prescription.comment}}
+        </td>
+    </tr>
+    <tr>
+        <td width="15%"><b>Clínica: </b></td>
+        <td>{{prescription.prescriber.clinic.name}}</td>
+    </tr>
+    <tr>
+        <td><b>Paciente: </b></td>
+        <td>{{prescription.patient_name}}</td>
+    </tr>
+    <tr>
+        <td><b>Nº de Obra: </b></td>
+        <td>{{prescription.external_code}}</td>
+    </tr>
+    <tr>
+        <td><b>Prescritor: </b></td>
+        <td>{{prescription.prescriber.first_name}} {{ prescription.prescriber.last_name }}</td>
+    </tr>
+    <tr>
+        <td><b>Cédula Profissional: </b></td>
+        <td valign="bottom">{{prescription.prescriber.professional_id}}</td>
+    </tr>
+    <tr>
+        <td><b>Fase: </b></td>
+        <td>{{prescription.objective_phase | objectivePhase }}</td>
+    </tr>
+    <tr>
+        <td><b>Data: </b></td>
+        <td>{{prescription.prescription_date | date:'dd/MM/yyyy'}}</td>
+    </tr>
+    <tr>
+        <td><b>Entrega: </b></td>
+        <td>{{prescription.delivery_date | date:'dd/MM/yyyy'}}</td>
+    </tr>
+</table>
+
+<hr>
+
+<table width="100%">
+    <tr>
+        <td>
+            Arcada Superior:
+        </td>
+        <td ng-repeat="i in superior">
+            {{ i }}
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Dentes:
+        </td>
+        <td ng-repeat="i in superior">
+            <input type="checkbox" ng-model="prescription.arch_teeth[i]" disabled=""/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Cor:
+        </td>
+        <td ng-repeat="i in superior">
+            <input type="text" ng-model="prescription.arch_colors[i]" maxlength="2" class="form-control input-sm" style="padding: 0; min-width: 25px; max-width: 25px;" disabled="" size="2"/>
+        </td>
+    </tr>
+</table>
+<hr>
+<table width="100%">
+    <tr>
+        <td>
+            Cor:
+        </td>
+        <td ng-repeat="i in inferior">
+            <input type="text" ng-model="prescription.arch_colors[i]" maxlength="2" class="form-control input-sm" style="padding: 0; min-width: 25px; max-width: 25px;" disabled="" size="2"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Dentes:
+        </td>
+        <td ng-repeat="i in inferior">
+            <input type="checkbox" ng-model="prescription.arch_teeth[i]" disabled=""/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Arcada Inferior:
+        </td>
+        <td ng-repeat="i in inferior">
+            {{ i }}
+        </td>
+    </tr>
+</table>
+
+
+<hr>
+
+<h3>Produtos</h3>
+<table class="table table-striped table-hover" width="100%" border="1" cellspacing="0">
+    <thead>
+    <th>Código</th>
+    <th>Descrição</th>
+    <th>Quantidade</th>
+    <th>Observações</th>
+    <th width="5%">IS</th>
+    <th width="5%">II</th>
+    <th width="5%">RM</th>
+    <th width="5%">Côr</th>
+    </thead>
+    <tbody>
+    <tr ng-repeat="p in prescription.products">
+        <td>{{p.product.code}}</td>
+        <td>{{p.product.name}}</td>
+        <td>{{p.quantity}}</td>
+        <td>{{p.comment}}</td>
+        <td>{{ p.upper | productDetails }}</td>
+        <td>{{ p.lower | productDetails  }}</td>
+        <td>{{ p.bite | productDetails  }}</td>
+        <td>{{ p.color | productDetails  }}</td>
+    </tr>
+    </tbody>
+</table>
+
+<br>
+<br>
+
+<table width="100%">
+
+</table>

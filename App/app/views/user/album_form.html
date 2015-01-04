@@ -1,0 +1,88 @@
+<div ng-include src="'views/common/menu.html'"></div>
+
+<div ng-include src="'views/common/loading.html'" ng-init="spinner_name = 'spinner'"></div>
+
+<br>
+
+<div class="well bs-component">
+  <form class="form-horizontal">
+    <fieldset>
+      <legend>New Album</legend>
+
+      <div class="form-group">
+        <label for="album_title" class="col-md-2 control-label">Title: </label>
+
+        <div class="col-md-10">
+          <input type="text" class="form-control input-sm" id="album_title" ng-model="album.title" autofocus>
+          <div ng-show="album_title==true" >
+            <span class="label label-danger danger-span">Album title is mandatory</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="album_start_date" class="col-md-2 control-label">Start date: </label>
+
+        <div class="col-md-4">
+          <div class="dropdown">
+            <a class="dropdown-toggle my-toggle-select" id="album_start_date" role="button" data-toggle="dropdown" data-target="#" href="" data-disabled="true">
+              <div class="input-append">
+                <input type="text" class="form-control col-md-8 input-sm" data-ng-model="album.start_date_pretty" placeholder="Start date...">
+              </div>
+            </a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="album.start_date_pretty">
+              <datetimepicker data-ng-model="album.start_date_pretty"
+                              data-datetimepicker-config="{ dropdownSelector: '.my-toggle-select', minView: 'day' }">
+              </datetimepicker>
+            </ul>
+          </div>
+
+          <div ng-show="album_start_date==true" >
+            <span class="label label-danger danger-span">Album start date is mandatory</span>
+          </div>
+        </div>
+
+
+
+        <label for="album_end_date" class="col-md-2 control-label">End date: </label>
+
+        <div class="col-md-4">
+
+          <div class="dropdown">
+            <a class="dropdown-toggle my-toggle-select2" id="album_end_date" role="button" data-toggle="dropdown" data-target="#" href="" data-disabled="true">
+              <div class="input-append">
+                <input type="text" class="form-control col-md-8 input-sm" data-ng-model="album.end_date_pretty" placeholder="End date...">
+              </div>
+            </a>
+            <ul class="dropdown-menu" role="menu" aria-labelledby="album.end_date_pretty">
+              <datetimepicker data-ng-model="album.end_date_pretty"
+                              data-datetimepicker-config="{ dropdownSelector: '.my-toggle-select2', minView: 'day' }">
+              </datetimepicker>
+            </ul>
+          </div>
+
+        </div>
+        <div ng-show="album_end_date==true" >
+          <span class="label label-danger danger-span">Album end date is mandatory</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="album_description" class="col-md-2 control-label">Album description:</label>
+
+        <div class="col-md-10">
+            <textarea class="form-control" id="album_description" rows="3" ng-model="album.description" maxlength="250">
+            </textarea>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-lg-10 col-lg-offset-2">
+          <button type="submit" class="btn btn-primary" ng-click="f.submit()">Submit</button>
+          <button class="btn btn-default" ng-click="f.go_back()">Cancel</button>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+  <div id="source-button" class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div>
+</div>

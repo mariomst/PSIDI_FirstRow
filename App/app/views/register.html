@@ -1,0 +1,13 @@
+<div ng-include src="'views/common/loading.html'" ng-init="spinner_name = 'spinner'"></div>
+<!-- Register Form -->
+<div id="login-holder">
+  <div class='container' style='padding-top:30px'>
+    <form class='form-signin' role='form'>
+      <h2 class='form-signin-heading'>Registar em iPhoto</h2>
+      <input type='text' class='form-control' placeholder=' Utilizador' required autofocus ng-model='user_data.username'>
+      <input type='password' class='form-control' placeholder='Password' required ng-model='user_data.password'>
+      <input type='password' class='form-control' placeholder='Confirmar password' required ng-model='user_data.confirm_password'>
+      <button class='btn btn-lg btn-primary btn-block' type='submit' ng-click="f.submit()">Submeter</button>
+    </form>
+  </div>
+</div>

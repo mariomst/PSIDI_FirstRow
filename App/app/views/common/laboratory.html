@@ -1,0 +1,52 @@
+
+<div ng-include src="'views/common/menu.html'"></div>
+
+<div ng-include src="'views/common/notifications.html'"></div>
+
+<div ng-include src="'views/common/errors.html'"></div>
+
+<div ng-include src="'views/common/loading.html'" ng-init="spinner_name = 'spinner'"></div>
+
+
+<div class="well bs-component">
+    <fieldset>
+        <legend>Informações do Laboratório</legend>
+
+        <div class="row">
+            <div class="col-md-2">Nome: </div>
+            <div class="col-md-4">{{laboratory.name}}</div>
+
+            <div class="col-md-2">Email: </div>
+            <div class="col-md-4">{{laboratory.email}}</div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">Morada: </div>
+            <div class="col-md-10">{{laboratory.address}}</div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">Código Postal: </div>
+            <div class="col-md-4">{{laboratory.zipcode1}}-{{laboratory.zipcode2}}</div>
+
+            <div class="col-md-2">Localidade: </div>
+            <div class="col-md-4">{{laboratory.city}}</div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">Telefone: </div>
+            <div class="col-md-4">{{laboratory.phone}}</div>
+
+            <div class="col-md-2">Fax: </div>
+            <div class="col-md-4">{{laboratory.fax}}</div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-2">Contribuinte: </div>
+            <div class="col-md-4">{{laboratory.tax_number}}</div>
+
+            <div class="col-md-2">Código: </div>
+            <div class="col-md-4"> {{laboratory.external_code}} </div>
+        </div>
+    </fieldset>
+</div>

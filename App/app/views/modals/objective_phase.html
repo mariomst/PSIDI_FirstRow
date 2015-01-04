@@ -1,0 +1,27 @@
+<div class="modal-content">
+    <div class="modal-header ng-scope">
+        <h3 class="modal-title">Número de obra</h3>
+    </div>
+    <div class="modal-body ng-scope">
+<div class="form-group">
+        <label for="objective_phase" class="col-md-3 control-label">
+            Fase-Objetivo:
+        </label>
+        <div class="col-md-5">
+            <select
+                    ui-select2="{ allowClear: true}"
+                    ng-model="object.objective_phase"
+                    data-placeholder="Definir a fase objectivo"
+                    id="objective_phase"
+                    style="width: 100%;">
+                <option value=""></option>
+                <option ng-repeat="o in objective_phases" value="{{o.id}}">{{o.name}}</option>
+            </select>
+        </div>
+    </div>    </div>
+    <div class="modal-footer ng-scope">
+        <button class="btn btn-primary" ng-click="ok()">Ok</button>
+        <button class="btn btn-default" ng-click="cancel()">Cancelar</button>
+    </div>
+</div>
+

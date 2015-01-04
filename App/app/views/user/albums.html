@@ -1,0 +1,35 @@
+<h2>Albums</h2>
+
+<div ng-include src="'views/common/menu.html'"></div>
+
+<div ng-include src="'views/common/notifications.html'"></div>
+
+<div ng-include src="'views/common/errors.html'"></div>
+
+<div ng-include src="'views/common/loading.html'" ng-init="spinner_name = 'spinner'"></div>
+
+<table class="table table-striped table-hover ">
+  <thead>
+  <tr>
+    <th>#</th>
+    <th>Title</th>
+    <th>Description</th>
+    <th>Start Date</th>
+    <th>End Date</th>
+    <th width="10%">Options</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr ng-repeat="object in albums">
+    <td>{{object.albumID}}</td>
+    <td>{{object.title}}</td>
+    <td>{{object.description}}</td>
+    <td>{{object.start_date | date:'dd/MM/yyyy' }}</td>
+    <td>{{object.end_date | date:'dd/MM/yyyy' }}</td>
+    <td>
+      <div ng-include src="'views/common/buttons.html'" ng-init="type = 'album'"></div>
+    </td>
+  </tr>
+  <tr ng-show="!albums.length" ng-include src="'views/common/no_data.html'" ng-init="table_size=6"></tr>
+  </tbody>
+</table>

@@ -1,0 +1,45 @@
+<div class="modal-header">
+    <h3 class="modal-title">Clínica</h3>
+</div>
+
+<div class="modal-body">
+
+    <div class="row">
+        <div class="col-md-2">Nome: </div>
+        <div class="col-md-10">{{object.name}}</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">Morada: </div>
+        <div class="col-md-10">{{object.address}}</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">Código Postal: </div>
+        <div class="col-md-4">{{object.zipcode1}}-{{object.zipcode2}}</div>
+
+        <div class="col-md-2">Localidade: </div>
+        <div class="col-md-4">{{object.city}}</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">Telefone: </div>
+        <div class="col-md-4">{{object.phone}}</div>
+
+        <div class="col-md-2">Fax: </div>
+        <div class="col-md-4">{{object.fax}}</div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">Contribuinte: </div>
+        <div class="col-md-4">{{object.tax_number}}</div>
+
+        <div class="col-md-2">Código: </div>
+        <div class="col-md-4"> {{object.external_code}} </div>
+    </div>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="ok()">Ok</button>
+</div>
+

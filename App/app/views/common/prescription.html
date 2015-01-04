@@ -1,0 +1,10 @@
+<td>{{p.id}}</td>
+<td>{{p.patient_name}}</td>
+<td ng-show="prescription_type=='complex'"><a href="" ng-click="f.clinic(p.prescriber.clinic)">{{p.prescriber.clinic.name}}</a></td>
+<td ng-show="prescription_type=='complex'">{{p.prescriber.first_name}} {{p.prescriber.last_name}}</td>
+<td ng-show="prescription_type=='complex'">{{p.urgent | productDetails}}</td>
+<td>{{p.delivery_date | date:'dd/MM/yyyy'}}</td>
+<td ng-show="prescription_type=='complex'">{{ p.external_code }}</td>
+<td align="right">
+    <div ng-include src="'views/common/buttons.html'"></div>
+</td>

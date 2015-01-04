@@ -1,0 +1,33 @@
+.no-padding-top{
+    padding-top: 0 !important;
+}
+
+.danger-span{
+    display: flex;
+    /*border-radius: 0 0 .25em .25em;*/
+    margin-top: 1px;
+    font-weight: normal;
+}
+
+.danger-span-datetimepicker{
+    display: flex;
+    /*border-radius: 0 0 .25em .25em;*/
+    margin-top: 5px;
+    font-weight: normal;
+}
+
+p {
+    margin:0;
+}
+
+legend {
+    margin-bottom: 5px;
+}
+
+.padding-top-5{
+    padding-top: 5px !important;
+}
+
+.big-modal .modal-dialog{
+    width: 900px;
+}

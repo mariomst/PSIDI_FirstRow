@@ -1,0 +1,197 @@
+<div ng-include src="'views/common/menu.html'"></div>
+
+<div ng-include src="'views/common/errors.html'"></div>
+
+<div ng-include src="'views/common/loading.html'" ng-init="spinner_name = 'spinner'"></div>
+
+<div class="well bs-component">
+    <form class="form-horizontal">
+        <fieldset>
+            <legend>Novo Utilizador</legend>
+            <div class="form-group">
+                <label for="user_first_name" class="col-md-2 control-label">Primeiro Nome: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="user_first_name" ng-model="form_user.first_name" ng-blur="f.evaluate()" autofocus>
+                    <div ng-show="user_first_name==true" >
+                        <span class="label label-danger danger-span">É necessário o primeiro nome do utilizador</span>
+                    </div>
+                </div>
+
+                <label for="form_user.last_name" class="col-md-2 control-label">Último Nome: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="form_user.last_name" ng-model="form_user.last_name" ng-blur="f.evaluate()">
+                    <div ng-show="user_last_name==true" >
+                        <span class="label label-danger danger-span">É necessário o último nome do utilizador</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="form_user.username" class="col-md-2 control-label">Utilizador: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="form_user.username" ng-model="form_user.username" ng-blur="f.evaluate()">
+                    <div ng-show="user_username==true" >
+                        <span class="label label-danger danger-span">É necessário o nome do utilizador</span>
+                    </div>
+                </div>
+
+                <label for="form_user.email" class="col-md-2 control-label">Email: </label>
+
+                <div class="col-md-4">
+                    <input type="email" class="form-control input-sm" id="form_user.email" ng-model="form_user.email" ng-blur="f.evaluate()">
+                    <div ng-show="user_email==true" >
+                        <span class="label label-danger danger-span">É necessário um email para o utilizador</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="form_user.password" class="col-md-2 control-label">Password: </label>
+
+                <div class="col-md-4">
+                    <input type="password" class="form-control input-sm" id="form_user.password" ng-model="form_user.password" ng-blur="f.evaluate()">
+                    <div ng-show="user_password==true" >
+                        <span class="label label-danger danger-span">É necessário uma password para o utilizador</span>
+                    </div>
+                </div>
+
+                <label for="form_user.password_confirm" class="col-md-2 control-label">Confirmar a password: </label>
+
+                <div class="col-md-4">
+                    <input type="password" class="form-control input-sm" id="form_user.password_confirm" ng-model="form_user.password_confirm" ng-blur="f.evaluate()">
+                    <div ng-show="user_password_confirm==true" >
+                        <span class="label label-danger danger-span">É necessário confirmar a password para o utilizador</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+
+                <label for="form_user.user_type" class="col-md-2 control-label">Tipo de utilizador: </label>
+
+                <div class="col-md-4">
+                    <select
+                            ui-select2="{ allowClear: true}"
+                            ng-model="form_user.user_type"
+                            data-placeholder="Escolha a tipo"
+                            id="form_user.user_type"
+                            style="width: 100%;">
+                        <option value=""></option>
+                        <option ng-repeat="d in details" value="{{d.value}}">{{d.description}}</option>
+                    </select>
+                    <div ng-show="user_user_type==true" >
+                        <span class="label label-danger danger-span">É necessário um tipo de utilizador para o utilizador</span>
+                    </div>
+                </div>
+
+                <div ng-show="form_user.user_type == 'P'">
+                    <label for="form_user.professional_id" class="col-md-2 control-label">Cédula Profissional: </label>
+
+                    <div class="col-md-4">
+                        <input type="text" class="form-control input-sm" id="form_user.professional_id" ng-model="form_user.professional_id" ng-blur="f.evaluate()">
+                        <div ng-show="user_professional_id==true" >
+                            <span class="label label-danger danger-span">É necessário a cédula profissional do prescritor.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div ng-show="(form_user.user_type == 'CA' || form_user.user_type == 'P' || form_user.user_type == 'CR') && user.user_type=='admin'" >
+                <div class="form-group">
+
+                    <label for="form_user.laboratory" class="col-md-2 control-label">Laboratório: </label>
+                    <div class="col-md-4">
+                        <select
+                                ui-select2="{ allowClear: true}"
+                                ng-model="form_user.laboratory"
+                                data-placeholder="Escolha o laboratório"
+                                id="form_user.laboratory"
+                                style="width: 100%;">
+                            <option value=""></option>
+                            <option ng-repeat="l in laboratories" value="{{l.id}}">{{l.name}}</option>
+                        </select>
+                        <div ng-show="user_laboratory==true" >
+                            <span class="label label-danger danger-span">É necessário um laboratório para o utilizador</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="form_user.clinic" class="col-md-2 control-label">Clínica: </label>
+
+                    <div class="col-md-4">
+                        <select
+                                ui-select2="{ allowClear: true}"
+                                ng-model="form_user.clinic"
+                                data-placeholder="Escolha a clínica"
+                                ng-disabled="!form_user.laboratory"
+                                id="form_user.clinic"
+                                style="width: 100%;">
+                            <option value=""></option>
+                            <option ng-repeat="c in clinics" value="{{c.id}}" ng-if="form_user.laboratory==c.laboratory">{{c.name}}</option>
+                        </select>
+                        <div ng-show="user_clinic==true" >
+                            <span class="label label-danger danger-span">É necessário uma clínica para o utilizador</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div ng-show="(form_user.user_type == 'LR' || form_user.user_type == 'T' || form_user.user_type == 'LA' ) && user.user_type=='admin'">
+                <div class="form-group">
+                    <label for="form_user.laboratory" class="col-md-2 control-label">Laboratório: </label>
+                    <div class="col-md-4">
+                        <select
+                                ui-select2="{ allowClear: true}"
+                                ng-model="form_user.laboratory"
+                                data-placeholder="Escolha o laboratório"
+                                id="form_user.laboratory"
+                                style="width: 100%;">
+                            <option value=""></option>
+                            <option ng-repeat="l in laboratories" value="{{l.id}}">{{l.name}}</option>
+                        </select>
+                        <div ng-show="user_laboratory==true" >
+                            <span class="label label-danger danger-span">É necessário um laboratório para o utilizador</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div ng-show="(form_user.user_type == 'CA' || form_user.user_type == 'P' || form_user.user_type == 'CR') && user.user_type=='lab_admin'">
+                <div class="form-group">
+                    <label for="form_user.clinic" class="col-md-2 control-label">Clínica: </label>
+                    <div class="col-md-4">
+                        <select
+                                ui-select2="{ allowClear: true}"
+                                ng-model="form_user.clinic"
+                                data-placeholder="Escolha a clínica"
+                                style="width: 100%;"
+
+                                id="form_user.clinic">
+
+                            <option value=""></option>
+                            <option ng-repeat="c in clinics" value="{{c.id}}">{{c.name}}</option>
+                        </select>
+                        <div ng-show="user_clinic==true" >
+                            <span class="label label-danger danger-span">É necessário uma clínica para o utilizador</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <div class="col-lg-10 col-lg-offset-2">
+                    <button type="submit" class="btn btn-primary" ng-click="f.submit()">Submeter</button>
+                    <button class="btn btn-default" ng-click="f.go_back()">Cancelar</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <div id="source-button" class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div>
+</div>

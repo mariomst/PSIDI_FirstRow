@@ -1,0 +1,36 @@
+<div class="navbar navbar-default navbar-fixed-top">
+  <div class="container">
+    <div class="navbar-header">
+      <a ng-href="#/user" class="navbar-brand">iPhoto</a>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar-main">
+      <ul class="nav navbar-nav">
+        <li class="divider-vertical"></li>
+        <!--left-->
+        <li class>
+          <a ng-href="#user/{{user.userID}}/album/create">New Album</a>
+        </li>
+        <li class="dropdown">
+          <a href="" class="dropdown-toggle" data-toggle="dropdown">Orders<b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a ng-href="#user/1/order">List Orders</a></li>
+            <li><a ng-href="#user/1/print_album/create">New Print Album</a></li>
+            <li><a ng-href="#user/1/order/create">Order Album</a></li>
+          </ul>
+        </li>
+      </ul>
+
+
+      <!--right-->
+      <ul class="nav navbar-nav navbar-right">
+        <li class="dropdown">
+          <a href="" class="dropdown-toggle" data-toggle="dropdown"> {{ user.name }} ({{ user.username }}) <b class="caret"></b></a>
+          <ul class="dropdown-menu">
+            <li><a href="#/user/edit">Actualizar conta</a></li>
+            <li><a ng-href="#/logout">Sair</a></li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

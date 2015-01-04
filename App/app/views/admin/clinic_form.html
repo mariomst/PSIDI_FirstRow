@@ -1,0 +1,121 @@
+<div ng-include src="'views/common/menu.html'"></div>
+
+<div ng-include src="'views/common/loading.html'" ng-init="spinner_name = 'spinner'"></div>
+
+<br>
+
+<div class="well bs-component">
+    <form class="form-horizontal">
+        <fieldset>
+            <legend>Nova Clínica</legend>
+
+            <div class="form-group">
+                <label for="clinic_name" class="col-md-2 control-label">Nome: </label>
+
+                <div class="col-md-10">
+                    <input type="text" class="form-control input-sm" id="clinic_name" ng-model="clinic.name" ng-blur="f.evaluate()" autofocus>
+                    <div ng-show="clinic_name==true" >
+                        <span class="label label-danger danger-span">É necessário o nome da clínica</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="clinic.address" class="col-md-2 control-label">Morada: </label>
+
+                <div class="col-md-10">
+                    <input type="text" class="form-control input-sm" id="clinic.address" ng-model="clinic.address" ng-blur="f.evaluate()">
+                    <div ng-show="clinic_address==true" >
+                        <span class="label label-danger danger-span">É necessário a morada da clínica</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="clinic.zipcode1" class="col-md-2 control-label">Código Postal: </label>
+
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control input-sm" id="clinic.zipcode1" ng-model="clinic.zipcode1" maxlength="4" ng-blur="f.evaluate()">
+                        </div>
+                        <div class="col-md-1">
+                            -
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control input-sm" id="clinic.zipcode2" ng-model="clinic.zipcode2" maxlength="3" ng-blur="f.evaluate()">
+                        </div>
+                    </div>
+                    <div ng-show="clinic_zipcode2==true" >
+                        <span class="label label-danger danger-span">É necessário o código postal da clínica</span>
+                    </div>
+                </div>
+
+                <label for="clinic.city" class="col-md-2 control-label">Localidade: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="clinic.city" ng-model="clinic.city" ng-blur="f.evaluate()">
+                    <div ng-show="clinic_city==true" >
+                        <span class="label label-danger danger-span">É necessário a localidade da clínica</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="clinic.phone" class="col-md-2 control-label">Telefone: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="clinic.phone" ng-model="clinic.phone" maxlength="9">
+                </div>
+
+                <label for="clinic.fax" class="col-md-2 control-label">Fax: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="clinic.fax" ng-model="clinic.fax" maxlength="9">
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="clinic.tax_number" class="col-md-2 control-label">Contribuinte: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="clinic.tax_number" ng-model="clinic.tax_number" maxlength="9">
+                </div>
+
+                <label for="clinic.external_code" class="col-md-2 control-label">Código: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="clinic.external_code" ng-model="clinic.external_code">
+                </div>
+
+            </div>
+
+            <div class="form-group" ng-show="user.user_type=='admin'">
+                <label for="clinic.laboratory" class="col-md-2 control-label">Laboratório: </label>
+                <div class="col-md-4">
+                    <select
+                            ui-select2="{ allowClear: true}"
+                            ng-model="clinic.laboratory"
+                            data-placeholder="Escolha o laboratório"
+                            id="clinic.laboratory"
+                            style="width:100%">
+                        <option value=""></option>
+                        <option ng-repeat="l in laboratories" value="{{l.id}}">{{l.name}}</option>
+                    </select>
+                    <div ng-show="clinic_laboratory==true" >
+                        <span class="label label-danger danger-span">É necessário o laboratório da clínica</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-lg-10 col-lg-offset-2">
+                    <button type="submit" class="btn btn-primary" ng-click="f.submit()">Submeter</button>
+                    <button class="btn btn-default" ng-click="f.go_back()">Cancelar</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <div id="source-button" class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div>
+</div>

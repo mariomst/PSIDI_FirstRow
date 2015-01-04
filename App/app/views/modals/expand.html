@@ -1,0 +1,173 @@
+﻿<div class="modal-header">
+    <h3 class="modal-title">Prescrição</h3>
+</div>
+<div class="modal-body">
+
+    <div class="row">
+        <div class="col-md-2">Nr: {{object.id}}</div>
+        <div class="col-md-4">Data: {{object.prescription_date | date:'dd/MM/yyyy'}}</div>
+        <div class="col-md-4">Prescriber: {{object.prescriber.username}}</div>
+        <div class="col-md-2">Clínica: {{object.prescriber.clinic.name}}</div>
+    </div>
+
+    <br>
+
+    <div class="row">
+        <label class="col-md-2 control-label">Paciente: </label>
+        <div class="col-md-4"> {{object.patient_name}} </div>
+
+        <label class="col-md-2 control-label">Fase-Objetivo: </label>
+        <div class="col-md-4"> {{object.objective_phase | objectivePhase }} </div>
+    </div>
+
+    <div class="row">
+        <label class="col-md-2 control-label"> Nr Obra: </label>
+        <div class="col-md-4"> {{ object.external_code }} </div>
+    </div>
+
+    <div class="row">
+        <label class="col-md-2 control-label"> Data Entrega: </label>
+        <div class="col-md-4"> {{object.delivery_date | date:'dd/MM/yyyy'}} </div>
+
+        <label class="col-md-2 control-label"> Data Protocolada: </label>
+        <div class="col-md-4"> {{object.estimated_date | date:'dd/MM/yyyy'}} </div>
+    </div>
+
+    <div class="row">
+        <div class="form-group">
+            <label class="col-md-2 control-label">Observações Gerais:</label>
+            <div class="col-md-10"> {{object.comment}} </div>
+        </div>
+    </div>
+
+
+    <div class="well bs-component" style="padding-left: 40px; padding-right: 50px;">
+        <legend>Arcada</legend>
+
+        <div class="form-group" style="padding-left: 15px;">
+            <div class="row">
+                <div class="col-md-2">
+                    <p>Superior:</p>
+                    <p>Dentes:</p>
+                    <p>Cor:</p>
+                </div>
+                <div class="col-md-10">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-2" ng-repeat="i in superior_small">
+                                    <p align="center">{{i}}</p>
+                                    <p align="center"><input type="checkbox" ng-model="object.arch_teeth[i]" disabled=""/></p>
+                                    <p><input type="text" ng-model="object.arch_colors[i]" maxlength="2" class="form-control input-sm" style="padding: 0; min-width: 25px;" disabled=""/> </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-2" ng-repeat="i in superior_middle">
+                                    <p align="center">{{i}}</p>
+                                    <p align="center"><input type="checkbox" ng-model="object.arch_teeth[i]" disabled=""/></p>
+                                    <p><input type="text" ng-model="object.arch_colors[i]" maxlength="2" class="form-control input-sm" style="padding: 0; min-width: 25px;" disabled=""/> </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-2" ng-repeat="i in superior_big">
+                                    <p align="center">{{i}}</p>
+                                    <p align="center"><input type="checkbox" ng-model="object.arch_teeth[i]" disabled=""/></p>
+                                    <p><input type="text" ng-model="object.arch_colors[i]" maxlength="2" class="form-control input-sm" style="padding: 0; min-width: 25px;" disabled=""/> </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <br>
+
+            <!-- Inferior-->
+
+            <div class="row" style="border-top:1px solid #36414b;">
+                <br>
+                <div class="col-md-2">
+                    <p>Inferior:</p>
+                    <p>Dentes:</p>
+                    <p>Cor:</p>
+                </div>
+                <div class="col-md-10">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-2" ng-repeat="i in inferior_small">
+                                    <p align="center">{{i}}</p>
+                                    <p align="center"><input type="checkbox" ng-model="object.arch_teeth[i]" disabled=""/></p>
+                                    <p><input type="text" ng-model="object.arch_colors[i]" maxlength="2" class="form-control input-sm" style="padding: 0; min-width: 25px;" disabled=""/> </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-2" ng-repeat="i in inferior_middle">
+                                    <p align="center">{{i}}</p>
+                                    <p align="center"><input type="checkbox" ng-model="object.arch_teeth[i]" disabled=""/></p>
+                                    <p><input type="text" ng-model="object.arch_colors[i]" maxlength="2" class="form-control input-sm" style="padding: 0; min-width: 25px;" disabled=""/> </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="row">
+                                <div class="col-md-2" ng-repeat="i in inferior_big">
+                                    <p align="center">{{i}}</p>
+                                    <p align="center"><input type="checkbox" ng-model="object.arch_teeth[i]" disabled=""/></p>
+                                    <p><input type="text" ng-model="object.arch_colors[i]" maxlength="2" class="form-control input-sm" style="padding: 0; min-width: 25px;" disabled=""/> </p>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="well bs-component">
+        <legend>Artigos</legend>
+
+        <div class="form-group" style="padding-left: 25px; padding-right: 25px;">
+            <div class="row">
+                <table class="table table-striped table-hover">
+                    <thead>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th width="5%">Quantidade</th>
+                    <th>Observações</th>
+                    <th width="5%"><a href="" tooltip-html-unsafe="Impressão Superior">IS</a></th>
+                    <th width="5%"><a href="" tooltip-html-unsafe="Impressão Inferior">II</a></th>
+                    <th width="5%"><a href="" tooltip-html-unsafe="Registo de Mordida">RM</a></th>
+                    <th width="5%">Côr</th>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="p in object.products">
+                        <td>{{p.product.code}}</td>
+                        <td>{{p.product.name}}</td>
+                        <td>{{p.quantity}}</td>
+                        <td>{{p.comment}}</td>
+                        <td>{{ p.upper | productDetails }}</td>
+                        <td>{{ p.lower | productDetails }}</td>
+                        <td>{{ p.bite | productDetails }}</td>
+                        <td>{{ p.color | productDetails }}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div class="modal-footer">
+    <button class="btn btn-primary" ng-click="ok()">Ok</button>
+</div>

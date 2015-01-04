@@ -1,0 +1,111 @@
+<div ng-include src="'views/common/menu.html'"></div>
+
+<br>
+
+<div class="well bs-component">
+    <form class="form-horizontal">
+        <fieldset>
+            <legend>Novo Laboratório</legend>
+
+            <div class="form-group">
+                <label for="laboratory_name" class="col-md-2 control-label">Nome: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="laboratory_name" ng-model="laboratory.name" ng-blur="f.evaluate()" autofocus>
+                    <div ng-show="laboratory_name==true" >
+                        <span class="label label-danger danger-span">É necessário o nome do laboratório</span>
+                    </div>
+                </div>
+
+                <label for="laboratory.email" class="col-md-2 control-label">Email: </label>
+
+                <div class="col-md-4">
+                    <input type="email" class="form-control input-sm" id="laboratory.email" ng-model="laboratory.email" ng-blur="f.evaluate()">
+                    <div ng-show="laboratory_email==true" >
+                        <span class="label label-danger danger-span">É necessário o email do laboratório</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="laboratory.address" class="col-md-2 control-label">Morada: </label>
+
+                <div class="col-md-10">
+                    <input type="text" class="form-control input-sm" id="laboratory.address" ng-model="laboratory.address" ng-blur="f.evaluate()">
+                    <div ng-show="laboratory_address==true" >
+                        <span class="label label-danger danger-span">É necessário a morada do laboratório</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="laboratory.zipcode1" class="col-md-2 control-label">Código Postal: </label>
+
+                <div class="col-md-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" class="form-control input-sm" id="laboratory.zipcode1" ng-model="laboratory.zipcode1" maxlength="4" ng-blur="f.evaluate()">
+                        </div>
+                        <div class="col-md-1">
+                            -
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control input-sm" id="laboratory.zipcode2" ng-model="laboratory.zipcode2" maxlength="3" ng-blur="f.evaluate()">
+                        </div>
+                    </div>
+                    <div ng-show="laboratory_zipcode1==true" >
+                        <span class="label label-danger danger-span">É necessário o código postal do laboratório</span>
+                    </div>
+                </div>
+
+
+                <label for="laboratory.city" class="col-md-2 control-label">Localidade: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="laboratory.city" ng-model="laboratory.city" ng-blur="f.evaluate()">
+                    <div ng-show="laboratory_city==true" >
+                        <span class="label label-danger danger-span">É necessário a localidade do laboratório</span>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label for="laboratory.phone" class="col-md-2 control-label">Telefone: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="laboratory.phone" ng-model="laboratory.phone" maxlength="9" >
+                </div>
+
+                <label for="laboratory.fax" class="col-md-2 control-label">Fax: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="laboratory.fax" ng-model="laboratory.fax"  maxlength="9" >
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="laboratory.tax_number" class="col-md-2 control-label">Contribuinte: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="laboratory.tax_number" ng-model="laboratory.tax_number" maxlength="9" >
+                </div>
+
+                <label for="laboratory.external_code" class="col-md-2 control-label">Código: </label>
+
+                <div class="col-md-4">
+                    <input type="text" class="form-control input-sm" id="laboratory.external_code" ng-model="laboratory.external_code">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-lg-10 col-lg-offset-2">
+
+                    <button type="submit" class="btn btn-primary" ng-click="f.submit()">Submeter</button>
+                    <button class="btn btn-default" ng-click="f.go_back()">Cancelar</button>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+    <div id="source-button" class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div>
+</div>

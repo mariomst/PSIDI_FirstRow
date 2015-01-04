@@ -1,0 +1,66 @@
+<div ng-include src="'views/common/menu.html'"></div>
+
+<div ng-include src="'views/common/loading.html'" ng-init="spinner_name = 'spinner'"></div>
+
+<br>
+
+<div class="well bs-component">
+  <form class="form-horizontal">
+    <fieldset>
+      <legend>New Print Album</legend>
+
+      <div class="form-group">
+        <label for="print_album_title" class="col-md-2 control-label">Title: </label>
+
+        <div class="col-md-4">
+          <input type="text" class="form-control input-sm" id="print_album_title" ng-model="print_album.title" autofocus>
+          <div ng-show="print_album_title==true" >
+            <span class="label label-danger danger-span">Print album title is mandatory</span>
+          </div>
+        </div>
+
+        <label for="print_album_theme" class="col-md-2 control-label">Theme: </label>
+
+        <div class="col-md-4">
+          <input type="text" class="form-control input-sm" id="print_album_theme" ng-model="print_album.theme">
+          <div ng-show="print_album_theme==true" >
+            <span class="label label-danger danger-span">Print album theme is mandatory</span>
+          </div>
+        </div>
+      </div>
+
+
+
+      <div class="row">
+
+        <accordion close-others="oneAtATime">
+          <accordion-group ng-repeat="p in print_albums" heading="{{p.title}}" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
+
+            <table class="table table-hover" width="100%" cellpadding="3" cellspacing="3">
+              <tr ng-repeat="tr in p.tr">
+                <td ng-repeat="td in tr">
+                  <div class="checkbox">
+                  <img ng-src="{{td.photo}}" width="250px" height="250px">
+                    <label>
+                  <input type="checkbox" ng-model="print_album.photos[td.id]" id="prescription.urgent"/>
+                      </label>
+                    </div>
+                </td>
+              </tr>
+            </table>
+
+          </accordion-group>
+        </accordion>
+      </div>
+
+
+      <div class="form-group">
+        <div class="col-lg-10 col-lg-offset-2">
+          <button type="submit" class="btn btn-primary" ng-click="f.submit()">Submit</button>
+          <button class="btn btn-default" ng-click="f.go_back()">Cancel</button>
+        </div>
+      </div>
+    </fieldset>
+  </form>
+  <div id="source-button" class="btn btn-primary btn-xs" style="display: none;">&lt; &gt;</div>
+</div>

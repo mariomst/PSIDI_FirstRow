@@ -1,0 +1,8 @@
+<td>{{object.id}}</td>
+<td><a ng-href="#/{{user.user_type}}/users?clinic={{object.id}}">{{object.name}}</a></td>
+<td>{{object.city}}</td>
+<td>{{object.zipcode1}}-{{object.zipcode2}}</td>
+<td>{{object.phone}}</td>
+<td>
+    <div ng-include src="'views/common/buttons.html'" ng-init="type = 'clinic'"></div>
+</td>

@@ -1,0 +1,18 @@
+<div class="modal-content">
+    <div class="modal-header ng-scope">
+        <h3 class="modal-title">Número de obra</h3>
+    </div>
+    <div class="modal-body ng-scope">
+        <div class="form-group">
+            <label for="object.external_code" class="col-md-3 control-label">Nrº de Obra: </label>
+
+            <div class="col-md-5">
+                <input type="text" class="form-control input-sm" id="object.external_code" ng-model="object.temp_external_code" autofocus>
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer ng-scope">
+        <button class="btn btn-primary" ng-click="ok()">Ok</button>
+        <button class="btn btn-default" ng-click="cancel()">Cancelar</button>
+    </div>
+</div>

@@ -1,0 +1,43 @@
+﻿<div class="modal-header">
+    <h3 class="modal-title">Logs</h3>
+</div>
+
+<div class="modal-body">
+
+    <div ng-include src="'views/common/notifications.html'"></div>
+
+    <div ng-include src="'views/common/errors.html'"></div>
+
+    <table class="table table-striped table-hover">
+        <thead>
+        <th>Utilizador</th>
+        <th>Data</th>
+        <th>Fase</th>
+        <th>Fase-Objetivo</th>
+        <th>Comentario</th>
+        </thead>
+        <tbody>
+        <tr ng-repeat="l in logs">
+            <td>{{ l.user.first_name }} {{ l.user.last_name }}</td>
+            <td>{{ l.date | date:'dd/MM/yyyy HH:mm'}}</td>
+            <td>{{ l.phase | phase }}</td>
+            <td>{{ l.objective_phase | objectivePhase }}</td>
+            <td>{{ l.comment }}</td>
+        </tr>
+        </tbody>
+    </table>
+    <br>
+    <textarea
+            class="form-control"
+            id="log_comment"
+            ng-model="log.comment"
+            rows="3"
+            autofocus>
+    </textarea>
+</div>
+
+<div class="modal-footer">
+    <button class="btn btn-success" ng-click="comment()">Comentar</button>
+    <!--Imprimir--><a  target="_blank" class="btn btn-info" ng-href="#/prescription_logs/print?prescription={{ object.id }}">Imprimir</a>
+    <button class="btn btn-primary" ng-click="ok()">Ok</button>
+</div>

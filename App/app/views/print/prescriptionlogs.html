@@ -1,0 +1,65 @@
+<h2>Histórico da Prescrição</h2>
+<hr>
+
+<table width="100%">
+    <tr>
+        <td width="15%"><b>Prescrição: </b></td>
+        <td>{{prescription.id}}</td>
+
+        <td rowspan="9" valign="top">
+            <b>Observações:</b> {{prescription.comment}}
+        </td>
+    </tr>
+    <tr>
+        <td width="15%"><b>Clínica: </b></td>
+        <td>{{prescription.prescriber.clinic.name}}</td>
+    </tr>
+    <tr>
+        <td><b>Paciente: </b></td>
+        <td>{{prescription.patient_name}}</td>
+    </tr>
+    <tr>
+        <td><b>Nº de Obra: </b></td>
+        <td>{{prescription.external_code}}</td>
+    </tr>
+    <tr>
+        <td><b>Prescritor: </b></td>
+        <td>{{prescription.prescriber.first_name}} {{ prescription.prescriber.last_name }}</td>
+    </tr>
+    <tr>
+        <td><b>Cédula Profissional: </b></td>
+        <td valign="bottom">{{prescription.prescriber.professional_id}}</td>
+    </tr>
+    <tr>
+        <td><b>Fase: </b></td>
+        <td>{{prescription.objective_phase | objectivePhase }}</td>
+    </tr>
+    <tr>
+        <td><b>Data: </b></td>
+        <td>{{prescription.prescription_date | date:'dd/MM/yyyy'}}</td>
+    </tr>
+    <tr>
+        <td><b>Entrega: </b></td>
+        <td>{{prescription.delivery_date | date:'dd/MM/yyyy'}}</td>
+    </tr>
+</table>
+
+<hr>
+
+<table width="100%" border="1" cellspacing="0" cellpadding="4">
+    <tr>
+        <td>Utilizador</td>
+        <td>Data</td>
+        <td>Fase</td>
+        <td>Fase-Objetivo</td>
+        <td>Comentario</td>
+    </tr>
+    <tr ng-repeat="l in logs">
+        <td>{{ l.user.first_name }} {{ l.user.last_name }}</td>
+        <td>{{ l.date | date:'dd/MM/yyyy HH:mm'}}</td>
+        <td>{{ l.phase | phase }}</td>
+        <td>{{ l.objective_phase | objectivePhase }}</td>
+        <td>{{ l.comment }}</td>
+    </tr>
+
+</table>
