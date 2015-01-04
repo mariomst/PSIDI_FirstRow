@@ -336,9 +336,12 @@ app.route("/users/:userID/albums/:albumID/photos")
             res.status(200).send(result);
         });
 	})
-	.post(function(req,res){        
+	.post(function(req,res){		
+		console.log(req.files);        
 		//chamar função para upload de foto
-		var filename = req.files.displayImage.path;
+		//var filename = req.files.displayImage.path;
+		var filename = req.files.file.path;
+		console.log(filename);
 		photosHandler.insertPhoto(req.albumID, filename, req.body.description, req.body.date, photos_dir, function(result){
 			setTimeout(function () {
 				if(result === "true"){
