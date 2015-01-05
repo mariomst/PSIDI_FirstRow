@@ -69,7 +69,7 @@ function getPhotos(albumID, result){
 
 		//fechar a db
 		db.close();
-	}, 5000);
+	}, 2000);
 }
 
 function getPhoto(photoID, result){
