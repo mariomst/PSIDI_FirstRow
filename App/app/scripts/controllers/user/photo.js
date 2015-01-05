@@ -12,7 +12,7 @@ angular.module('iPhotoApp')
     $routeProvider
       .when('/user/:user/album/:album/photo', {templateUrl: 'views/user/photo_form.html', controller: 'UserPhotoCtrl' })
   })
-  .controller('UserPhotoCtrl', function ($scope, $controller, $routeParams, FileUploader, Iphotoshare) {
+  .controller('UserPhotoCtrl', function ($scope, $controller, $location, $routeParams, FileUploader, Iphotoshare) {
 
     angular.extend(this, $controller('CommonFunctionsCtrl', {$scope: $scope}));
 
@@ -23,6 +23,7 @@ angular.module('iPhotoApp')
     $scope.f = {
 
       submit: function () {
+        $scope.spinner = true;
         for (var i = 0; i < $scope.uploader.queue.length; i++) {
           $scope.uploader.queue[i].upload();
         }
@@ -37,4 +38,9 @@ angular.module('iPhotoApp')
       item.formData.push({date: moment()._d.getTime()});
     };
 
-    });
+    $scope.uploader.onCompleteAll = function() {
+      $scope.spinner = false;
+      $location.path('/user');
+    };
+
+  });

@@ -21,20 +21,16 @@ angular.module('iPhotoApp')
     $scope.f = {
 
       submit: function(){
-        //for(var i = 0; i < $scope.uploader.queue.length; i++){
-        //  console.log(i + "º try");
-        //  $scope.uploader.queue[i].upload();
-        //}
-        //console.log($scope.uploader);
-        //console.log($scope.uploader.queue);
-        console.log($scope.album);
+        $scope.spinner = true;
         $http.post(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/albums', $scope.album)
           .success(function(data){
+            $scope.spinner = false;
             console.log("created", data);
             $location.path('/user/' + $scope.user.userID + '/album/' + data.albumID + '/photo');
             //TODO: redirect to users/x/albums/ "data.id" /photos
           })
           .error(function(error){
+            $scope.spinner = false;
             console.log("error", error);
           });
       },

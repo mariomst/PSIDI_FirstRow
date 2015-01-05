@@ -1,39 +1,8 @@
-<div ng-show="(user.user_type == 'admin' || user.user_type == 'lab_admin') && (type == 'clinic' || type == 'laboratory' || type == 'users') ">
-    <!--Editar-->
-    <a class="btn btn-warning btn-sm" ng-href="#{{user.user_type}}/{{type}}/add?{{type}}={{object.id}}" tooltip="Editar">
-        <span class="glyphicon glyphicon-pencil"></span>
-    </a>
-    <!--Apagar-->
-    <button class="btn btn-danger btn-sm" ng-click="f.open(object)" tooltip="Remover">
-        <span class="glyphicon glyphicon-remove"></span>
-    </button>
-</div>
 <!--Expandir-->
-<button class="btn btn-warning btn-sm" ng-click="f.expand('lg', p)" tooltip="Expandir" ng-show="(user.user_type=='clinic_prescriber' || user.user_type=='lab_tec' || user.user_type=='clinic_admin') && (type == 'prescriptions')">
+<button class="btn btn-warning btn-xs" ng-click="f.expand('lg', p)" tooltip="View photos" >
     <span class="glyphicon glyphicon-eye-open"></span>
 </button>
-<!--Actualizar-->
-<button class="btn btn-danger btn-sm" ng-click="f.edit_prescription(p)" ng-if="p.phase==this_phase" tooltip="Actualizar fase objectivo" ng-show="(user.user_type=='clinic_prescriber' || user.user_type=='lab_tec' || user.user_type=='lab_rec') && (type == 'prescriptions') && (p.phase== 'CE' || p.phase== 'LT' || p.phase== 'LC' || p.phase== 'CR')">
-    <span class="glyphicon glyphicon-pencil"></span>
-</button>
-<!--Imprimir-->
-<a  target="_blank" class="btn btn-primary btn-sm" ng-href="#/prescription/print?prescription={{ p.id }}" tooltip="Imprimir" ng-show="(user.user_type!='admin' && user.user_type!='lab_admin')">
-    <span class="glyphicon glyphicon-print"></span>
+<!--Add photo-->
+<a class="btn btn-primary btn-xs" ng-href="#/user/{{user.userID}}/album/{{object.albumID}}/photo" tooltip="Add photos">
+    <span class="glyphicon glyphicon-plus"></span>
 </a>
-<!--Historico-->
-<button class="btn btn-info btn-sm" ng-click="f.logs('lg', p)" tooltip="Histórico" ng-show="user.user_type=='clinic_prescriber' || user.user_type=='lab_tec' || user.user_type=='clinic_rec' || user.user_type=='lab_rec' || user.user_type=='clinic_admin' ">
-    <span class="glyphicon glyphicon-time"></span>
-</button>
-<!--Concluido-->
-<button class="btn btn-success btn-sm" ng-click="f.complete(p)" ng-if="p.phase==this_phase" tooltip="Concluir prescrição" ng-show="(user.user_type=='clinic_prescriber' || user.user_type=='lab_tec') && (type == 'prescriptions')">
-    <span class="glyphicon glyphicon-ok" ng-show="user.user_type=='clinic_prescriber'"></span>
-    <span class="glyphicon glyphicon-send" ng-show="user.user_type!='clinic_prescriber'"></span>
-</button>
-<!--Entregue-->
-<button class="btn btn-success btn-sm" ng-click="f.delivered(p)" tooltip="Entregue ao estafeta" ng-show="(user.user_type=='clinic_rec' || user.user_type=='lab_rec') && (p.phase=='PI' || p.phase=='LC' || p.phase=='LT')">
-    <span class="glyphicon glyphicon-send"></span>
-</button>
-<!--Recebido-->
-<button class="btn btn-success btn-sm" ng-click="f.arrived(p)" tooltip="Recebido do estafeta" ng-show="(user.user_type=='clinic_rec' || user.user_type=='lab_rec') && (p.phase=='CE' || p.phase=='LE')">
-    <span class="glyphicon glyphicon-send"></span>
-</button>
