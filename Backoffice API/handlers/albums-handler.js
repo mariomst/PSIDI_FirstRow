@@ -51,14 +51,12 @@ function createAlbum(title, userID, description, start_date, end_date, result){
 }
 
 function getUserAlbums(userID, result){
-	//função para obter as informações de todos os álbuns do utilizador
+	//query para obter todos os álbuns de um utilizador
 	var query = "SELECT * FROM ALBUMS WHERE userID=" + userID;
 	
-	//variavéis para armazenar as strings json
-	var albums = [];
-	var albumsID = [];
-    var album_json = "";
-    var albums_json = "";  
+	//variavéis para armazenar a string json
+    var albums_json = "[";  
+    var photos_json = "";
 	
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
@@ -66,47 +64,63 @@ function getUserAlbums(userID, result){
 	console.log("\nINFO: Getting all albums of the user with id " + userID + ".");  
 	
 	//obter o álbum
-	db.each(query, function(err, row){
-		if(err) {
-			throw err;
-		}			
-		
-		if(row !== undefined){
-			
-            //criar string json para cada album 
-            album_json = "{\"albumID\":" + row.albumID + ",\"title\":\"" + row.title + "\",\"userID\":" + row.userID + ",\"description\":\"" + row.description + "\",\"start_date\":\"" + row.start_date + "\",\"end_date\":\"" + row.end_date + "\"}";
+	db.each(query, 
+		function(err, row){
+			if(err) return callback(err);
+		},
+		function(err, row){
+			if(err) return callback(err);
+			if(row !== undefined){
+				//criar string json para cada album 
+				var album_json = "{\"albumID\":" + row.albumID 
+						+ ",\"title\":\"" + row.title 
+						+ "\",\"userID\":" + row.userID 
+						+ ",\"description\":\"" + row.description 
+						+ "\",\"start_date\":\"" + row.start_date 
+						+ "\",\"end_date\":\"" + row.end_date 
+						+ "\",\"photos\":";
 
-            //armazenar no array
-            albumsID.push(row.albumID);
-            albums.push(album_json); 
+				photosHandler.getPhotos(row.albumID, function(photos){
+					photos_json = photos;
+					album_json += photos_json + "}";
+					handler(album_json);
+				});		
+			}
+		},
+		function(err, row){
+			setTimeout(function(){
+				completed();
+			},1000);
+		}		
+	);	
+
+	var first = true;
+	
+	var handler = function(json){		
+		if(!first){
+			albums_json += ",";
+		} else {
+			first = false;
 		}
-	});
-	
-	db.close();
-	
-	setTimeout(function(){
-	    albums_json = "[";    	
-    	
-    	for(var i = 0; i < albums.length; i++){
-    	    albums_json += albums[i];    	      	    
+		albums_json += json;
+	};
 
-    	    if(i !== (albums.length-1)){
-    	        albums_json += ",";
-    	    }
-    	}
-
-    	albums_json += "]";    	
-	
+	var completed = function(){
+		albums_json += "]";
 		result(albums_json);
-	}, 5000);
+	};
+
+	//fechar instância da db.
+	db.close();
 }
 
-function getAlbum(albumID, res){
-    //função para obter as informações de um álbum especifico
+function getAlbum(albumID, result){
+    //query para obter todos um álbum de um utilizador
     var query = "SELECT * FROM ALBUMS WHERE albumID=" + albumID;
     
-    var album_json = "";
-    var result = "";
+    //variavéis para armazenar a string json
+    var album_json = "";  
+    var photo_json = "";
     
     //abrir instância da db.
 	var db = new sqlite3.Database(file);
@@ -114,26 +128,34 @@ function getAlbum(albumID, res){
 	console.log("\nINFO: Getting album of the user.");  
 	
 	//obter o álbum
-	db.get(query, function(err, row){
-		if(err) {
-			throw err;
-		}			
-		
-		if(row !== undefined){
-            //criar string json para o album 
-            console.log("albumID: " + row.albumID + "; Title: " + row.title + "; userID: " + row.userID + "; Description: " + row.description + "; Start Date: " + row.start_date + "; End Date: " + row.end_date);
-            album_json = "{\"albumID\":" + row.albumID + ",\"title\":\"" + row.title + "\",\"userID\":" + row.userID + ",\"description\":\"" + row.description + "\",\"start_date\":\"" + row.start_date + "\",\"end_date\":\"" + row.end_date + "\",\"photos\":";
-		}
-	});
+	db.get(query, 
+		function(err, row){
+			if(err) return callback(err);
+		},	
+		function(err, row){
+			if(err) return callback(err);
+			if(row !== undefined){
+            	//criar string json para o album 
+            	album_json = "{\"albumID\":" + row.albumID 
+            			+ ",\"title\":\"" + row.title 
+            			+ "\",\"userID\":" + row.userID 
+            			+ ",\"description\":\"" + row.description 
+            			+ "\",\"start_date\":\"" + row.start_date 
+            			+ "\",\"end_date\":\"" + row.end_date 
+            			+ "\",\"photos\":";
+
+            	photosHandler.getPhotos(row.albumID, function(photos){
+					photos_json = photos;
+					album_json += photos_json + "}";
+					completed(album_json);
+				});	
+			}
+		}	
+	);
 	
-	setTimeout(function(){
-		photosHandler.getPhotos(albumID, function(result){
-			album_json = album_json + result + "}";
-			res(album_json);
-		});
-		//fechar a db
-        db.close();
-	},2000);
+	var completed = function(json){
+		result(json);
+	};
 }
 
 function getAlbumWithInfo(title, userID, description, start_date, end_date, result){

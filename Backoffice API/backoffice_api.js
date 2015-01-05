@@ -18,6 +18,7 @@ var multer = require('multer');
 var usersHandler = require('./handlers/users-handler');
 var albumsHandler = require('./handlers/albums-handler');
 var photosHandler = require('./handlers/photos-handler');
+var printAlbumsHandler = require('./handlers/printAlbums-handler');
 
 var app = express();
 
@@ -416,7 +417,41 @@ app.route("/users/:userID/albums/:albumID/photos/:photoID")
         });  
     }); 
 
-	
+/***************************************************************/
+/*    Colecção printAlbums                                     */
+/*                                                             */
+/*    URL:    /users/:userID/printAlbums                       */
+/*                                                             */
+/*    GET     Retornar todos os printAlbums                    */
+/*    POST    Criar novo printAlbums                           */
+/*                                                             */
+/*    Estado: -                                                */
+/***************************************************************/
+
+app.route("/users/:userID/printAlbums")
+    .get(function(req,res){
+        //função para obter todos os printAlbums de um utilizador
+        printAlbumsHandler.getPrintAlbumsByUserID(req.userID, function(result){
+            res.status(200).send(result);
+        });
+    })
+    .post(function(req,res){        
+        //função para criar um novo printAlbum
+        printAlbumsHandler.createPrintAlbum(req.userID, req.body.theme, req.body.title, req.body.message, function(result){
+            setTimeout(function () {
+                if(result === "true"){
+                    res.status(201).send('Album created');                    
+                }
+            }, 4000);
+        });
+    })
+    .put(function(req,res){
+        res.status(405).send("Cannot overwrite the entire collection.");
+    })
+    .delete(function(req,res){
+        res.status(405).send("Cannot delete the entire collection.");
+    }); 
+
 /***************************************************************/
 /*  Starting...                                                */
 /***************************************************************/
