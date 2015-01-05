@@ -84,6 +84,9 @@ db.serialize(function(){
         db.run("CREATE TABLE USERS (userID INTEGER PRIMARY KEY, user TEXT, password TEXT)");
         db.run("CREATE TABLE ALBUMS (albumID INTEGER PRIMARY KEY, title TEXT, userID INTEGER, description TEXT, start_date LONG, end_date LONG)");
         db.run("CREATE TABLE PHOTOS (photoID INTEGER PRIMARY KEY, albumID INTEGER, photo TEXT, description TEXT, date LONG)");
+        db.run("CREATE TABLE PRINTALBUMS (albumID INTEGER PRIMARY KEY, userID INTEGER, theme TEXT, title TEXT, message TEXT)");
+        db.run("CREATE TABLE PRINTPHOTOS (photoID INTEGER, albumID INTEGER)");
+        db.run("CREATE TABLE ORDERS (orderID INTEGER PRIMARY KEY, printPrice FLOAT, transportPrice FLOAT, address TEXT, confirmed BOOLEAN, state TEXT)");
     }   
 });
 

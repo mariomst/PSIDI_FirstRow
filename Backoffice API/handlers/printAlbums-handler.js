@@ -1,7 +1,7 @@
 /***************************************************************/
 /*                                                             */
 /*  Trabalho Prático                                           */
-/*  Node module to handle orders resource              		   */
+/*  Node module to handle print albums resource                */
 /*  PSIDI / MEI / ISEP                                         */
 /*  (c) 2014                                                   */
 /*                                                             */
@@ -23,25 +23,25 @@ var file = "./database/myphotoalbum.db";
 /*  Helper Functions                                           */
 /***************************************************************/
 
-function createOrder(){}
+function createPrintAlbum(){}
 
-function getAllOrders(){}
+function getPrintAlbums(){}
 
-function getOrdersByUserID(){}
+function getPrintAlbumsByUserID(){}
 
-function getSpecificOrder(){}
+function getSpecificPrintAlbum(){}
  
-function updateOrder(){}
+function updatePrintAlbum(){}
 
-function deleteOrder(){}
+function deletePrintAlbum(){}
 
 /***************************************************************/
 /*  Module Exports		                                       */
 /***************************************************************/
 
-exports.createOrder = createOrder;
-exports.getAllOrders = getAllOrders;
-exports.getOrdersByUserID = getOrdersByUserID
-exports.getSpecificOrder = getSpecificOrder;
-exports.updateOrder = updateOrder;
-exports.deleteOrder = deleteOrder;
+exports.createPrintAlbum = createPrintAlbum;
+exports.getPrintAlbums = getPrintAlbums;
+exports.getPrintAlbumsByUserID = getPrintAlbumsByUserID
+exports.getPrintAlbumByUserID = getPrintAlbumByUserID;
+exports.updatePrintAlbum = updatePrintAlbum;
+exports.deletePrintAlbum = deletePrintAlbum;
