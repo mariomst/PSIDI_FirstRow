@@ -453,6 +453,39 @@ app.route("/users/:userID/printAlbums")
     }); 
 
 /***************************************************************/
+/*    PrintAlbums individuais                                  */
+/*                                                             */
+/*    URL:    /users/:userID/printAlbums/:printAlbumID         */
+/*                                                             */
+/*    GET     retornar printAlbums especifico                  */
+/*    POST    atualizar printAlbums especifico                 */
+/*    DELETE  apagar printAlbums especifico                    */
+/*                                                             */
+/*    Estado: -                                                */
+/***************************************************************/
+
+app.param('printAlbumID', function(req, res, next, printAlbumID){
+    req.printAlbumID = printAlbumID;
+    return next()
+})
+
+app.route("/users/:userID/printAlbums/:printAlbumID")
+    .get(function(req, res){ 
+        printAlbumsHandler.getSpecificPrintAlbum(req.printAlbumID, function(result){
+            res.status(200).send(result);
+        }); 
+    })
+    .post(function(req, res){
+        res.status(404).send("Not yet implemented.");
+    })
+    .put(function(req, res){
+        res.status(405).send("Not allowed.");
+    })
+    .delete(function(req, res) {
+        res.status(404).send("Not yet implemented.");
+    }); 
+
+/***************************************************************/
 /*  Starting...                                                */
 /***************************************************************/
 

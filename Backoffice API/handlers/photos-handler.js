@@ -97,13 +97,17 @@ function getPhoto(photoID, result){
 			if(err) return callback(err);
 		},				
 		function(err, row){
-			//criar string json para cada foto
-			var photo_json = "{\"photoID\":" + row.photoID 
+			if(row !== undefined){
+				//criar string json para cada foto
+				var photo_json = "{\"photoID\":" + row.photoID 
             			+ ",\"albumID\":" + row.albumID 
             			+ ",\"photo\":\"" + row.photo 
             			+ "\",\"description\":\"" + row.description 
             			+ "\",\"date\":\"" + row.date + "\"}";
-			completed(photo_json);
+				completed(photo_json);
+			} else {
+				completed("");
+			}
 		}
 	);
 

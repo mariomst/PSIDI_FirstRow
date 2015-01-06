@@ -12,6 +12,8 @@
 /***************************************************************/
 
 var sqlite3 = require('sqlite3').verbose();
+var photosHandler = require('./photos-handler');
+var http = require('http');
 
 /***************************************************************/
 /*  Database                                                   */
@@ -25,30 +27,64 @@ var file = "./database/myphotoalbum.db";
 
 function createPrintAlbum(userID, theme, title, photos, result){
 	//query para inserção de um novo PrintAlbum.
-	var query = "INSERT INTO PRINTALBUMS (userID, theme, title) VALUES (?,?,?)";
+	var query = "INSERT INTO PRINTALBUMS (userID, theme, title, message) VALUES (?,?,?,?)";
+
+	//adquirir citação.
+	var citation = "";
+	
+	getCitation(function(res){
+		citation = res;
+		console.log("->" + citation);
+	});
+	
 
 	//abrir instância da db.
-	var db = new sqlite3.Database(file);
-
-	console.log(photos.length);
+	var db = new sqlite3.Database(file);	
 
 	//criar novo PrintAlbum.
+	setTimeout(function(){
 	db.serialize(function(){
 		console.log("INFO: Creating new PrintAlbum.");
 		console.log("NOTE: Message will be added later with the citations plugin.");
 		//executar query.
-		db.run(query, userID, theme, title);
+		console.log("->" + citation);
+		db.run(query, userID, theme, title, citation);
 		console.log("INFO: PrintAlbum created.");
 		result("true");
 		//fechar instância da db.
 		db.close();
 	}); 
+	}, 500);
 
 	setTimeout(function(){
 		getCreatedPrintAlbumID(userID, function(printAlbumID){
 			addPhotostoPrintAlbum(photos, printAlbumID);
 		});
 	}, 1500);
+}
+
+function getCitation(result){
+	//obter uma citação
+ 	var options = { 
+ 		host: 'iheartquotes.com',
+ 		path: '/api/v1/random?format=json&max_lines=2&max_characters=320', 
+ 		method: 'GET'
+ 	};
+
+ 	callback = function(response){
+ 		var str = '';
+
+ 		response.on('data', function(chunk){
+ 			str += chunk;
+ 		});
+
+		response.on('end', function(){
+			var res = JSON.parse(str);
+			result(res.quote);
+		});
+	}
+
+	http.request(options, callback).end();
 }
 
 function getCreatedPrintAlbumID(userID, result){
@@ -100,6 +136,54 @@ function addPhotostoPrintAlbum(photosID, printAlbumID){
 	db.close();
 }
 
+function getPhotosPrintAlbum(printAlbumID, result){
+	//query para obter o id das fotos associadas ao printalbum
+	var query_photosID = "SELECT * FROM PRINTPHOTOS WHERE printAlbumID=" + printAlbumID;
+
+	//variavel para armazenar a string json
+	var photos_json = "[";
+
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+
+	//obter as fotos
+	db.each(query_photosID,
+		function(err, row){
+			if(err) return callback(err);
+		},
+		function(err, row){
+			if(err) return callback(err);
+			photosHandler.getPhoto(row.photoID, function(photo){
+				handler(photo);
+			});				
+		},
+		function(err, row){
+			setTimeout(function(){
+				completed();
+			},1000);
+		}
+	);
+
+	var first = true;
+
+	var handler = function(json){		
+		if(!first){
+			photos_json += ",";
+		} else {
+			first = false;
+		}
+		photos_json += json;
+	}
+
+	var completed = function(){
+		photos_json += "]";
+		result(photos_json);
+	}
+
+	//fechar instância da db.
+	db.close();
+}
+
 function getPrintAlbumsByUserID(userID, result){
 	//query para obter as informações de todos os PrintAlbums de um utilizador.
 	var query = "SELECT * FROM PRINTALBUMS WHERE userID=" + userID;
@@ -124,12 +208,18 @@ function getPrintAlbumsByUserID(userID, result){
 						+ ",\"theme\":\"" + row.theme
 						+ "\",\"title\":\"" + row.title
 						+ "\",\"message\":\"" + row.message
-						+ "\"}"; 
-				handler(album_json);
+						+ "\",\"photos\":"; 
+
+				getPhotosPrintAlbum(row.printAlbumID, function(photos){
+					album_json += photos + "}";					
+					handler(album_json);
+				});		
 			}
 		}
 		,function(err,row){
-			completed();
+			setTimeout(function(){
+				completed();
+			},3000);
 		}
 	);
 
@@ -177,8 +267,12 @@ function getSpecificPrintAlbum(printAlbumID, result){
 						+ ",\"theme\":\"" + row.theme
 						+ "\",\"title\":\"" + row.title
 						+ "\",\"message\":\"" + row.message
-						+ "\"}"; 
-				completed(album_json);
+						+ "\",\"photos\":"; 
+
+				getPhotosPrintAlbum(row.printAlbumID, function(photos){
+					album_json += photos + "}";
+					completed(album_json);
+				});				
 			} else {
 				completed(album_json);
 			}
