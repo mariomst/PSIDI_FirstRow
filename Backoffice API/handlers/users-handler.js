@@ -128,114 +128,148 @@ function login(user, password, result){
 }
 
 function showAllUsers(result){
-    var db = new sqlite3.Database(file);
+    //query para obter todos os utilizadores
     var query = "SELECT * FROM USERS";
-    var users = [];
-    var user_json = "";
-    var users_json = "";  
+
+    //variavéil para armazenar a string json
+    var users_json = "[";  
+
+    //abrir instância da db.
+    var db = new sqlite3.Database(file);
     
     console.log("\nINFO: Showing all users.");  
 
-    db.each(query, function(err, row){
-        if (err) {
-            throw err;
+    db.each(query, 
+        function(err, row){ 
+            if(err) return callback(err);
+        },
+        function(err, row){
+            if(err) return callback(err);
+            if(row !== undefined){
+                //criar string json para cada utilizador
+                user_json = "{\"userID\":" + row.userID
+                    + ",\"username\":\"" + row.user 
+                    + "\",\"password\":\"" + row.password 
+                    + "\"}";
+
+                handler(user_json);
+            }
+        },
+        function(err, row){
+            completed();
         }
-        
-        if(row !== null)
-        {
-            console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
-            
-            user_json = "{\"userID\":" + row.userID + ",\"username\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
-            
-            users.push(user_json);                        
+    );
+
+    var first = true;
+
+    var handler = function(json){
+        if(!first){
+            users_json += ",";
+        } else {
+            first = false;
         }
-    });
-    
-    setTimeout(function(){
-    	users_json = "[";
-    	
-    	for(var i = 0; i < users.length; i++){
-    	    users_json += users[i];
-    	    if(i !== (users.length-1)){
-    	        users_json += ",";
-    	    }
-    	}
-    	
-    	users_json += "]";
-    	
-    	//fechar a db
-        db.close();
-    	result(users_json);
-    },1000);    	
+        users_json += json;
+    }
+
+    var completed = function(json){
+        users_json += "]";
+        result(users_json);
+    }
+
+    //fechar instância da db.
+    db.close();  	
 }
 
-function getUser(userID, res){
-	//função para obter informações de um determinado utilizador na db.
-	var db = new sqlite3.Database(file);
+function getUser(userID, result){
+	//query para obter um utilizador especifico	
 	var query = "SELECT * FROM USERS WHERE userID=" + userID;
-	var user_json = "";
-	var result = "";
+
+    //variavéis para armazenar a string json
+    var user_json = "";
+	var result_json = "[";
+
+    //abrir instância da db.
+    var db = new sqlite3.Database(file);
 	
 	console.log("\nINFO: Getting user information.");
 	
-	db.get(query, function(err, row){
-		if(err) {
-			throw err;
-		} 
-		
-		if(row !== undefined){
-			console.log("ID: " + row.userID + "; Utilizador: " + row.user + "; Password: " + row.password);
-			user_json = "{\"userID\":" + row.userID + ",\"username\":\"" + row.user + "\",\"password\":\"" + row.password + "\"}";
-		}
-	});
-	
-	setTimeout(function(){
-		result = "[" + user_json + "]";
-		res(result);
-		
-		//fechar a db
-        db.close();
-	},1000);
+	db.get(query, 
+        function(err, row){ 
+            if(err) return callback(err);
+		},
+        function(err, row){
+            if(err) return callback(err);
+            if(row !== undefined){
+                //criar string json para o utilizador
+                user_json = "{\"userID\":" + row.userID 
+                        + ",\"username\":\"" + row.user 
+                        + "\",\"password\":\"" + row.password 
+                        + "\"}";
+                completed(user_json);
+            } else {
+                completed(user_json);
+            }
+            
+        }
+	);
+
+    var completed = function(json){
+        result_json += json + "]";
+        result(result_json);
+    };
+
+    //fechar instância da db.
+    db.close();
 }
 
 function getUserbyName(username, result){
     //query para obter um user específico.
     var query = "SELECT * FROM USERS WHERE user=\"" + username + "\"";
 
-    //strings json para retornar
+    //string json para retornar
     var user_json = "";
-    var result_json = "";
+    var result_json = "[";
 
     console.log("\nINFO: Getting user information.");
 
     //abrir instância da db.
     var db = new sqlite3.Database(file);
 
-    db.get(query, function(err, row){
-        if(err) {
-            throw err;
+    db.get(query, 
+        function(err, row){
+            if(err) return callback(err);
+        },
+        function(err, row){
+            if(err) return callback(err);
+            if(row !== undefined){
+                //criar string json para o utilizador
+                user_json = "{\"userID\":" + row.userID 
+                    + ",\"username\":\"" + row.user 
+                    + "\"}";
+                completed(user_json);
+            } else {
+                completed(user_json);
+            }
+            
         } 
-        
-        if(row !== undefined){
-            console.log("ID: " + row.userID + "; Utilizador: " + row.user);
-            user_json = "{\"userID\":" + row.userID + ",\"username\":\"" + row.user + "\"}";
-        }
-    });
+    );
     
-    setTimeout(function(){
-        result_json = "[" + user_json + "]";
+    var completed = function(json){
+        result_json += json + "]";
         result(result_json);
-        
-        //fechar a db
-        db.close();
-    },1000);
+    };
+
+    //fechar instância da db.
+    db.close();
 }
 
 function updateUserPass(userID, newPass, res){
-	//função para atualizar a password de um utilizador.
-	var db = new sqlite3.Database(file);
-	var query_select = "SELECT * FROM USERS WHERE userID=" + userID;
-	var query_update = "UPDATE USERS SET password=\""+ newPass +"\" where userID=" + userID; 
+	//query para atualizar a password de um utilizador.
+    var query_select = "SELECT * FROM USERS WHERE userID=" + userID;
+    var query_update = "UPDATE USERS SET password=\""+ newPass +"\" where userID=" + userID;
+
+    //abrir instância da db.
+    var db = new sqlite3.Database(file);	 
 	
 	db.get(query_select, function(err,row){
 		if(err){
@@ -261,10 +295,12 @@ function updateUserPass(userID, newPass, res){
 }
 
 function deleteUser(userID, res){
-    //função para eliminar um utilizador.
-    var db = new sqlite3.Database(file);
+    //query para eliminar um utilizador
     var query_select = "SELECT * FROM USERS WHERE userID=" + userID;
     var query_delete = "DELETE FROM USERS WHERE userID=" + userID;
+    
+    //abrir instância da db.
+    var db = new sqlite3.Database(file);   
     
     db.get(query_select, function(err,row){
 		if(err){
