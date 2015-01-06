@@ -23,23 +23,81 @@ var file = "./database/myphotoalbum.db";
 /*  Helper Functions                                           */
 /***************************************************************/
 
-function createPrintAlbum(userID, theme, title, message, result){
+function createPrintAlbum(userID, theme, title, photos, result){
 	//query para inserção de um novo PrintAlbum.
-	var query = "INSERT INTO PRINTALBUMS (userID, theme, title, message) VALUES (?,?,?,?)";
+	var query = "INSERT INTO PRINTALBUMS (userID, theme, title) VALUES (?,?,?)";
 
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
 
+	console.log(photos.length);
+
 	//criar novo PrintAlbum.
 	db.serialize(function(){
 		console.log("INFO: Creating new PrintAlbum.");
+		console.log("NOTE: Message will be added later with the citations plugin.");
 		//executar query.
-		db.run(query, userID, theme, title, message);
+		db.run(query, userID, theme, title);
 		console.log("INFO: PrintAlbum created.");
 		result("true");
 		//fechar instância da db.
 		db.close();
 	}); 
+
+	setTimeout(function(){
+		getCreatedPrintAlbumID(userID, function(printAlbumID){
+			addPhotostoPrintAlbum(photos, printAlbumID);
+		});
+	}, 1500);
+}
+
+function getCreatedPrintAlbumID(userID, result){
+	//query para obter o printalbum criado.
+	var query = "SELECT * FROM PRINTALBUMS WHERE userID=" + userID + " ORDER BY printAlbumID DESC";
+
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+
+	var printAlbumID = 0;
+
+	//obter o ID do printAlbum.
+	db.get(query,
+		function(err, row){
+			if(err) return callback(err);
+		},
+		function(err, row){
+			if(err) return callback(err);
+			if(row !== undefined){
+				printAlbumID = row.printAlbumID;
+				completed(printAlbumID);
+			} else {
+				completed(printAlbumID);
+			}
+		}
+	);
+
+	var completed = function(id){
+		result(id);
+	}
+}
+
+function addPhotostoPrintAlbum(photosID, printAlbumID){
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+
+	//executar as inserções num ciclo
+	for(var i=0; i < photosID.length; i++){
+		db.serialize(function(){
+			var query_insert = "INSERT INTO PRINTPHOTOS (photoID, printAlbumID) VALUES (?,?)";
+			console.log("INFO: Associating photos with a printAlbum");
+			//executar query.
+			db.run(query_insert, photosID[i], printAlbumID);
+			console.log("-> Photo " + (i+1) + " of " + photosID.length + " associated.");			
+		});
+	}
+
+	//fechar instância da db.
+	db.close();
 }
 
 function getPrintAlbumsByUserID(userID, result){
@@ -61,10 +119,10 @@ function getPrintAlbumsByUserID(userID, result){
 			if(err) return callback(err);
 			//criar string json para cada printalbum.
 			if(row !== undefined){
-				var album_json = "{\"albumID\":" + row.albumID 
+				var album_json = "{\"printAlbumID\":" + row.printAlbumID 
 						+ ",\"userID\":" + row.userID
 						+ ",\"theme\":\"" + row.theme
-						+ "\",\"title\":\"" + row.title;
+						+ "\",\"title\":\"" + row.title
 						+ "\",\"message\":\"" + row.message
 						+ "\"}"; 
 				handler(album_json);
@@ -95,9 +153,9 @@ function getPrintAlbumsByUserID(userID, result){
 	db.close();
 }
 
-function getSpecificPrintAlbum(albumID, result){
+function getSpecificPrintAlbum(printAlbumID, result){
 	//query para obter PrintAlbum especifico
-	var query = "SELECT * FROM PRINTALBUMS WHERE albumID=" + albumID;
+	var query = "SELECT * FROM PRINTALBUMS WHERE printAlbumID=" + printAlbumID;
 
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
@@ -114,10 +172,10 @@ function getSpecificPrintAlbum(albumID, result){
 			if(err) return callback(err);
 			//criar string json para o printalbum.
 			if(row !== undefined){
-				var album_json = "{\"albumID\":" + row.albumID 
+				var album_json = "{\"printAlbumID\":" + row.printAlbumID 
 						+ ",\"userID\":" + row.userID
 						+ ",\"theme\":\"" + row.theme
-						+ "\",\"title\":\"" + row.title;
+						+ "\",\"title\":\"" + row.title
 						+ "\",\"message\":\"" + row.message
 						+ "\"}"; 
 				completed(album_json);

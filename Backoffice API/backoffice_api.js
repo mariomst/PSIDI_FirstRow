@@ -80,13 +80,13 @@ var db = new sqlite3.Database(file);
 
 db.serialize(function(){
     if(!exists){
-        console.log("INFO: Creating tables.\n->PUBLICURI\n->USERS\n->ALBUMS\n->PHOTOS");
+        console.log("INFO: Creating tables.\n->PUBLICURI\n->USERS\n->ALBUMS\n->PHOTOS\n->PRINTALBUMS\n->PRINTPHOTOS\n->ORDERS");
         db.run("CREATE TABLE PUBLICURI (uri TEXT, userID INTEGER)");
         db.run("CREATE TABLE USERS (userID INTEGER PRIMARY KEY, user TEXT, password TEXT)");
         db.run("CREATE TABLE ALBUMS (albumID INTEGER PRIMARY KEY, title TEXT, userID INTEGER, description TEXT, start_date LONG, end_date LONG)");
         db.run("CREATE TABLE PHOTOS (photoID INTEGER PRIMARY KEY, albumID INTEGER, photo TEXT, description TEXT, date LONG)");
-        db.run("CREATE TABLE PRINTALBUMS (albumID INTEGER PRIMARY KEY, userID INTEGER, theme TEXT, title TEXT, message TEXT)");
-        db.run("CREATE TABLE PRINTPHOTOS (photoID INTEGER, albumID INTEGER)");
+        db.run("CREATE TABLE PRINTALBUMS (printAlbumID INTEGER PRIMARY KEY, userID INTEGER, theme TEXT, title TEXT, message TEXT)");
+        db.run("CREATE TABLE PRINTPHOTOS (photoID INTEGER, printAlbumID INTEGER)");
         db.run("CREATE TABLE ORDERS (orderID INTEGER PRIMARY KEY, printPrice FLOAT, transportPrice FLOAT, address TEXT, confirmed BOOLEAN, state TEXT)");
     }   
 });
@@ -437,7 +437,7 @@ app.route("/users/:userID/printAlbums")
     })
     .post(function(req,res){        
         //função para criar um novo printAlbum
-        printAlbumsHandler.createPrintAlbum(req.userID, req.body.theme, req.body.title, req.body.message, function(result){
+        printAlbumsHandler.createPrintAlbum(req.userID, req.body.theme, req.body.title, req.body.photos, function(result){
             setTimeout(function () {
                 if(result === "true"){
                     res.status(201).send('Album created');                    
