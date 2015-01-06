@@ -287,75 +287,96 @@ function getSpecificPrintAlbum(printAlbumID, result){
 	db.close();
 }
  
-function updatePrintAlbum(albumID, theme, title, message, result){
+function updatePrintAlbum(printAlbumID, theme, title, message, photos, result){
 	//queries para atualizar um álbum
-	var query_select = "SELECT * FROM PRINTALBUMS WHERE albumID=" + albumID;
-    var query_update_theme = "UPDATE PRINTALBUMS SET theme=\"" + theme + "\" where albumID=" + albumID;
-    var query_update_title = "UPDATE PRINTALBUMS SET title=\"" + title + "\" where albumID=" + albumID;
-    var query_update_message = "UPDATE PRINTALBUMS SET message=\"" + message + "\" where albumID=" + albumID;
+	var query_select = "SELECT * FROM PRINTALBUMS WHERE printAlbumID=" + printAlbumID;
+    var query_update_theme = "UPDATE PRINTALBUMS SET theme=\"" + theme + "\" where printAlbumID=" + printAlbumID;
+    var query_update_title = "UPDATE PRINTALBUMS SET title=\"" + title + "\" where printAlbumID=" + printAlbumID;
+    var query_update_message = "UPDATE PRINTALBUMS SET message=\"" + message + "\" where printAlbumID=" + printAlbumID;
     
     //abrir instância da db
 	var db = new sqlite3.Database(file);
 
-	db.get(query_select, function(err,row){
-		if(err){
-			throw err;
+	db.get(query_select, 
+		function(err,row){ 
+			if(err) return callback(err);
+		},
+		function(err,row){
+			if(err) return callback(err);
+			if(row !== undefined){
+				setTimeout(function(){
+					db.serialize(function(){
+				    	if(theme !== undefined){
+					    	console.log("INFO: Updating printalbum's theme.");
+					    	db.run(query_update_theme);
+						}
+						if(title !== undefined){
+					    	console.log("INFO: Updating printalbum's title.");
+					    	db.run(query_update_title);
+						}
+						if(message !== undefined){
+					    	console.log("INFO: Updating printalbum's message.");
+					    	db.run(query_update_message);
+						}
+					});
+					completed("true");
+				}, 4000);
+			} else {
+				completed("false");
+			}
 		}
+	);		
 
-		if(row !== undefined){
-			setTimeout(function(){
-				db.serialize(function(){
-				    if(theme !== undefined){
-					    console.log("\nINFO: Updating printalbum's theme.");
-					    db.run(query_update_theme);
-					}
-					if(title !== undefined){
-					    console.log("\nINFO: Updating printalbum's title.");
-					    db.run(query_update_title);
-					}
-					if(message !== undefined){
-					    console.log("\nINFO: Updating printalbum's message.");
-					    db.run(query_update_message);
-					}
-					res("true");
-					//fechar a db
-                    db.close();
-				});
-			}, 4000);
-		} else {
-			res("false");
-			//fechar a db
-            db.close();
-		}
-	});		
+	if(photos.length > 0){
+    	setTimeout(function(){
+			addPhotostoPrintAlbum(photos, printAlbumID);
+		}, 1500);
+    }
+
+    var completed = function(status){
+    	result(status);
+    	//fechar instância da db.
+		db.close();
+    }
 }
 
-function deletePrintAlbum(albumID, result){
-	//query para eliminar um printalbum
-	var query_select = "SELECT * FROM PRINTALBUMS WHERE albumID=" + albumID;
-    var query_delete = "DELETE FROM PRINTALBUMS WHERE albumID=" + albumID;
+function deletePrintAlbum(printAlbumID, result){
+	//queries para eliminar um printalbum
+	var query_select = "SELECT * FROM PRINTALBUMS WHERE printAlbumID=" + printAlbumID;
+    var query_delete_printalbum = "DELETE FROM PRINTALBUMS WHERE printAlbumID=" + printAlbumID;
+    var query_delete_printphotos = "DELETE FROM PRINTPHOTOS WHERE printAlbumID=" + printAlbumID;
 
-    db.get(query_select, function(err,row){
-		if(err){
-			throw err;
+    //abrir instância da db
+	var db = new sqlite3.Database(file);
+
+	//verificar se printalbum existe
+    db.get(query_select, 
+    	function(err,row){ 
+    		if(err) return callback(err);    		
+		},
+		function(err,row){
+			if(err) return callback(err);
+			if(row !== undefined){
+				setTimeout(function(){
+					db.serialize(function(){
+						console.log("INFO: Deleting printalbum with id: " + printAlbumID);
+						db.run(query_delete_printalbum);
+						console.log("INFO: Deleting photos associations with the deleted printAlbum.");
+						db.run(query_delete_printphotos);
+					});
+					completed("true");
+				}, 2000);
+			} else {
+				completed("false");
+			}
 		}
-		
-		if(row !== undefined){
-			setTimeout(function(){
-				db.serialize(function(){
-					console.log("\nINFO: Deleting printalbum.");
-					db.run(query_delete);
-					res("true");
-					//fechar a db
-                    db.close();
-				});
-			}, 1000);
-		} else {
-			res("false");
-			//fechar a db
-            db.close();
-		}
-	});
+	);
+	
+	var completed = function(status){
+		result(status);
+		//fechar instância da db.
+		db.close();
+	};	
 }
 
 function exportToPDF(){}

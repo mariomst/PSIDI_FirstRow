@@ -482,7 +482,15 @@ app.route("/users/:userID/printAlbums/:printAlbumID")
         res.status(405).send("Not allowed.");
     })
     .delete(function(req, res) {
-        res.status(404).send("Not yet implemented.");
+        printAlbumsHandler.deletePrintAlbum(req.printAlbumID, function(result){
+            setTimeout(function(){
+                if(result === "true"){
+                    res.status(200).send('INFO: PrintAlbum was deleted');
+                } else {
+                    res.status(204).send('INFO: PrintAlbum was not found');
+                }            
+            }, 4000);  
+        });  
     }); 
 
 /***************************************************************/
