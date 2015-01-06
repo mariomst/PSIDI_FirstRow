@@ -12,80 +12,67 @@ angular.module('iPhotoApp')
     $routeProvider
       .when('/user/:id/print_album/create', {templateUrl: 'views/user/print_album_form.html', controller: 'UserPrintAlbumCtrl' })
   })
-  .controller('UserPrintAlbumCtrl', function ($scope, $controller) {
+  .controller('UserPrintAlbumCtrl', function ($scope, $controller, $location, $http, Iphotoshare) {
 
     angular.extend(this, $controller('CommonFunctionsCtrl', {$scope: $scope}));
 
     $scope.print_album = {};
     $scope.print_album.photos = [];
-
-
-    $scope.print_albums = [
-      {
-        "id": 1,
-        "theme": "Férias",
-        "title": "Melhores das férias",
-        "message": "I will get a Triforce, like I said",
-        "photos": [
-          {
-            "id": 1,
-            "albumId": 1,
-            "photo": "images/abc.jpg",
-            "date": 1418066023321
-          },
-          {
-            "id": 2,
-            "albumId": 1,
-            "photo": "images/abcd.jpg",
-            "date": 1418066023321
-          },
-          {
-            "id": 3,
-            "albumId": 1,
-            "photo": "images/abcde.jpg",
-            "date": 1418066023321
-          },
-          {
-            "id": 4,
-            "albumId": 1,
-            "photo": "images/abcdef.jpg",
-            "date": 1418066023321
-          },
-          {
-            "id": 5,
-            "albumId": 1,
-            "photo": "images/abcdefg.jpg",
-            "date": 1418066023321
-          }
-        ]
-      },
-      {
-        "title": "cenas",
-        "photos": []
-      }
-    ];
-
-
+    $scope.chosen_photos = [];
 
     $scope.f = {
+      get: function(){
+        $scope.spinner = true;
+        $http.get(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/albums')
+          .success(function(data){
+            $scope.spinner = false;
+            $scope.albums = data;
+            $scope.f.makeTable();
+          })
+          .error(function(error){
+            $scope.spinner = false;
+            console.log("Error getting albums ", error);
+            $scope.albums = [];
+          });
+      },
+
+
       makeTable: function(){
-        for(var i = 0; i < $scope.print_albums.length; i++) {
-          $scope.print_albums[i].tr = [];
-          for (var j = 0; j < $scope.print_albums[i].photos.length; j++) {
-            var td = [$scope.print_albums[i].photos[j]];
-            if($scope.print_albums[i].photos[j +1 ]){
-              td.push($scope.print_albums[i].photos[j + 1]);
+        for(var i = 0; i < $scope.albums.length; i++) {
+          $scope.albums[i].tr = [];
+          for (var j = 0; j < $scope.albums[i].photos.length; j++) {
+            var td = [$scope.albums[i].photos[j]];
+            if($scope.albums[i].photos[j +1 ]){
+              td.push($scope.albums[i].photos[j + 1]);
               j++;
             }
-            $scope.print_albums[i].tr.push(td);
+            $scope.albums[i].tr.push(td);
           }
         }
 
       },
       submit: function(){
-        console.log($scope.print_album);
+        var photos = [];
+        for(var i = 0; i < $scope.albums.length; i++) {
+          for (var j = 0; j < $scope.albums[i].photos.length; j++) {
+            if($scope.chosen_photos[$scope.albums[i].photos[j].photoID]){
+              //console.log("chosen photo = " + $scope.albums[i].photos[j].photoID);
+              photos.push($scope.albums[i].photos[j].photoID);
+            }
+          }
+        }
+
+        $scope.print_album.photos = photos;
+        console.log(JSON.stringify($scope.print_album));
+        $http.post(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/printAlbums', $scope.print_album)
+          .success(function(data){
+            console.log("successfuly saved printalbum ", data);
+          })
+          .error(function(error){
+            console.log("error saving printalbum ", error);
+          });
       }
     };
 
-    $scope.f.makeTable();
+    $scope.f.get();
   });

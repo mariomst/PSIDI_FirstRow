@@ -34,15 +34,15 @@
       <div class="row">
 
         <accordion close-others="oneAtATime">
-          <accordion-group ng-repeat="p in print_albums" heading="{{p.title}}" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
+          <accordion-group ng-repeat="a in albums" heading="{{a.title}}" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
 
             <table class="table table-hover" width="100%" cellpadding="3" cellspacing="3">
-              <tr ng-repeat="tr in p.tr">
+              <tr ng-repeat="tr in a.tr">
                 <td ng-repeat="td in tr">
                   <div class="checkbox">
-                  <img ng-src="{{td.photo}}" width="250px" height="250px">
+                  <img ng-src="images/{{td.photo}}" width="250px" height="250px">
                     <label>
-                  <input type="checkbox" ng-model="print_album.photos[td.id]" id="prescription.urgent"/>
+                  <input type="checkbox" ng-model="chosen_photos[td.photoID]" />
                       </label>
                     </div>
                 </td>
