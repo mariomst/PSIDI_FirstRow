@@ -104,31 +104,10 @@ db.close();
 /***************************************************************/
 
 app.route("/signup")
-    .get(function(req,res){
-        res.status(405).send("Not allowed.");
-    })
-    .post(function(req,res){
-        //chamar função para criar utilizador
-    	usersHandler.createUser(req.body.username, req.body.password, function(result){
-        	setTimeout(function () {        		
-        		if(result === "true"){
-        			usersHandler.getUserbyName(req.body.username, function(result){
-                        setTimeout(function(){
-                            res.status(201).send(result);
-                        }, 2000)
-                    })
-        		} else {
-        			res.status(406).send('User already exists');
-        		}
-        	}, 4000);
-        });
-    })
-    .put(function(req,res){
-        res.status(405).send("Not allowed.");
-    })
-    .delete(function(req,res){
-        res.status(405).send("Not allowed.");
-    });
+    .get(usersHandler.handleGetRegister)
+    .post(usersHandler.handlePostRegister)
+    .put(usersHandler.handlePutRegister)
+    .delete(usersHandler.handleDeleteRegister);
 
 /***************************************************************/
 /*    Autenticação de um utilizador                            */
@@ -141,27 +120,10 @@ app.route("/signup")
 /***************************************************************/
 
 app.route("/login")
-	.get(function(req,res){
-		res.status(405).send("Not allowed.");
-	})
-	.post(function(req,res){
-	    //chamar função para autenticar o utilizador
-		usersHandler.login(req.body.username, req.body.password, function(result){
-	        setTimeout(function(){
-	            if(result !== "false"){
-	                res.status(202).send(result);
-	            } else {
-	                res.status(400).send("Authentication failed, please check username and password");
-	            }	            
-	        }, 4000);
-	    });	  
-	})
-	.put(function(req,res){
-		res.status(405).send("Not allowed.");
-	})
-	.delete(function(req,res){
-		res.status(405).send("Not allowed.");
-	});	
+	.get(usersHandler.handleGetLogin)
+	.post(usersHandler.handlePostLogin)
+	.put(usersHandler.handlePutLogin)
+	.delete(usersHandler.handleDeleteLogin);	
 
 /***************************************************************/
 /*    Colecção de utilizadores                                 */
@@ -174,20 +136,10 @@ app.route("/login")
 /***************************************************************/
 
 app.route("/users")
-	.get(function(req,res){
-		usersHandler.showAllUsers(function(result){
-			res.status(200).send(result);
-		});
-	})
-	.post(function(req,res){
-		res.status(405).send("Not allowed.");
-	})
-	.put(function(req,res){
-		res.status(405).send("Cannot overwrite the entire collection.");
-	})
-	.delete(function(req,res){
-		res.status(405).send("Cannot delete the entire collection.");
-	});	
+	.get(usersHandler.handleGetUsers)
+	.post(usersHandler.handlePostUsers)
+	.put(usersHandler.handlePutUsers)
+	.delete(usersHandler.handleDeleteUsers);	
 
 /***************************************************************/
 /* 	  Utilizadores individuais                                 */
@@ -207,37 +159,10 @@ app.param('userID', function(req, res, next, userID){
 })
 
 app.route("/users/:userID")
-    .get(function(req, res){ 
-    	usersHandler.getUser(req.userID, function(result){
-    		res.status(200).send(result);
-    	});
-    })
-    .post(function(req, res){
-    	//chamar função para atualizar password de utilizador
-    	usersHandler.updateUserPass(req.userID, req.body.password, function(result){
-    		setTimeout(function () {
-    			if(result === "true"){
-    				res.status(200).send('Password was updated');
-    			} else {
-    				res.status(204).send('User was not found');
-    			}
-    		}, 4000);    		
-    	});   	
-    })
-    .put(function(req, res){
-    	res.status(405).send("Not allowed.");
-    })
-    .delete(function(req, res) {
-    	usersHandler.deleteUser(req.userID, function(result){
-            setTimeout(function(){
-                if(result === "true"){
-                    res.status(200).send('User was deleted');
-                } else {
-                    res.status(204).send('User was not found');
-                }            
-            }, 4000);  
-        });  
-	});	
+    .get(usersHandler.handleGetUserItem)
+    .post(usersHandler.handlePostUserItem)
+    .put(usersHandler.handlePutUserItem)
+    .delete(usersHandler.handleDeleteUserItem);
 
 /***************************************************************/
 /*	  Colecção de álbuns		                               */
@@ -251,32 +176,10 @@ app.route("/users/:userID")
 /***************************************************************/	
 
 app.route("/users/:userID/albums")
-	.get(function(req,res){
-		albumsHandler.getUserAlbums(req.userID, function(result){
-			res.status(200).send(result);
-		});
-	})
-	.post(function(req,res){        
-        //chamar função para criar álbum
-		albumsHandler.createAlbum(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
-        	setTimeout(function () {
-        		if(result === "true"){
-        			//res.status(201).send('Album created');
-                    albumsHandler.getAlbumWithInfo(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
-                        setTimeout(function(){
-                            res.status(201).send(result);
-                        }, 2000)
-                    });
-        		}
-        	}, 4000);
-        });
-    })
-	.put(function(req,res){
-		res.status(405).send("Cannot overwrite the entire collection.");
-	})
-	.delete(function(req,res){
-		res.status(405).send("Cannot delete the entire collection.");
-	});	
+	.get(albumsHandler.handleGetAlbums)
+	.post(albumsHandler.handlePostAlbums)
+	.put(albumsHandler.handlePutAlbums)
+	.delete(albumsHandler.handleDeleteAlbums);	
 	
 /***************************************************************/
 /*	  Álbuns individuais		                               */
@@ -296,37 +199,10 @@ app.param('albumID', function(req, res, next, albumID){
 })
 
 app.route("/users/:userID/albums/:albumID")
-    .get(function(req, res){ 
-    	albumsHandler.getAlbum(req.albumID, function(result){
-    		res.status(200).send(result);
-    	});
-    })
-    .post(function(req, res){
-    	//chamar função para atualizar um album
-    	albumsHandler.updateAlbum(req.albumID, req.body.title, req.body.description, req.body.start_date, req.body.end_date, function(result){
-    	    setTimeout(function(){
-    	        if(result === "true"){
-    				res.status(200).send('Album was updated');
-    			} else {
-    				res.status(204).send('Album was not found');
-    			}
-    	    }, 8000);
-    	});
-    })
-    .put(function(req, res){
-    	res.status(405).send("Not allowed.");
-    })
-    .delete(function(req, res) {
-    	albumsHandler.deleteAlbum(req.albumID, function(result){
-            setTimeout(function(){
-                if(result === "true"){
-                    res.status(200).send('Album was deleted');
-                } else {
-                    res.status(204).send('Album was not found');
-                }            
-            }, 4000);  
-        });  
-	});	
+    .get(albumsHandler.handleGetAlbumItem)
+    .post(albumsHandler.handlePostAlbumItem)
+    .put(albumsHandler.handlePutAlbumItem)
+    .delete(albumsHandler.handleDeleteAlbumItem);	
 
 /***************************************************************/
 /*	  Colecção de fotos			                               */
@@ -340,33 +216,10 @@ app.route("/users/:userID/albums/:albumID")
 /***************************************************************/
 
 app.route("/users/:userID/albums/:albumID/photos")
-	.get(function(req,res){
-		photosHandler.getPhotos(req.albumID, function(result){
-            res.status(200).send(result);
-        });
-	})
-	.post(function(req,res){		
-		console.log(req.files);        
-		//chamar função para upload de foto
-		//var filename = req.files.displayImage.path;
-		var filename = req.files.file.path;
-		console.log(filename);
-		photosHandler.insertPhoto(req.albumID, filename, req.body.description, req.body.date, photos_dir, function(result){
-			setTimeout(function () {
-				if(result === "true"){
-					res.status(201).send('Photo uploaded');
-				} else {
-					res.status(500).send('Error uploading the photo');
-				}
-			}, 10000);
-		});    	
-	})
-	.put(function(req,res){
-		res.status(405).send("Cannot overwrite the entire collection.");
-	})
-	.delete(function(req,res){
-		res.status(405).send("Cannot delete the entire collection.");
-	});	
+	.get(photosHandler.handleGetPhotos)
+	.post(photosHandler.handlePostPhotos)
+	.put(photosHandler.handlePutPhotos)
+	.delete(photosHandler.handleDeletePhotos);	
 
 /***************************************************************/
 /*    Fotos individuais                                        */
@@ -386,36 +239,10 @@ app.param('photoID', function(req, res, next, photoID){
 })
 
 app.route("/users/:userID/albums/:albumID/photos/:photoID")
-    .get(function(req, res){ 
-        photosHandler.getPhoto(req.photoID, function(result){
-            res.status(200).send(result);
-        }); 
-    })
-    .post(function(req, res){
-        photosHandler.updatePhoto(req.photoID, req.body.description, req.body.date, function(result){
-            setTimeout(function(){
-                if(result === "true"){
-                    res.status(200).send("Photo's information was updated");
-                } else {
-                    res.status(204).send('Photo was not found');
-                }
-            }, 8000);
-        });
-    })
-    .put(function(req, res){
-        res.status(405).send("Not allowed.");
-    })
-    .delete(function(req, res) {
-        photosHandler.deletePhoto(req.photoID, function(result){
-            setTimeout(function(){
-                if(result === "true"){
-                    res.status(200).send('Photo was deleted');
-                } else {
-                    res.status(204).send('Photo was not found');
-                }            
-            }, 4000);  
-        });  
-    }); 
+    .get(photosHandler.handleGetPhotoItem)
+    .post(photosHandler.handlePostPhotoItem)
+    .put(photosHandler.handlePutPhotoItem)
+    .delete(photosHandler.handleDeletePhotoItem); 
 
 /***************************************************************/
 /*    Colecção printAlbums                                     */
@@ -423,34 +250,16 @@ app.route("/users/:userID/albums/:albumID/photos/:photoID")
 /*    URL:    /users/:userID/printAlbums                       */
 /*                                                             */
 /*    GET     Retornar todos os printAlbums                    */
-/*    POST    Criar novo printAlbums                           */
+/*    POST    Criar novo printAlbum                            */
 /*                                                             */
 /*    Estado: -                                                */
 /***************************************************************/
 
 app.route("/users/:userID/printAlbums")
-    .get(function(req,res){
-        //função para obter todos os printAlbums de um utilizador
-        printAlbumsHandler.getPrintAlbumsByUserID(req.userID, function(result){
-            res.status(200).send(result);
-        });
-    })
-    .post(function(req,res){        
-        //função para criar um novo printAlbum
-        printAlbumsHandler.createPrintAlbum(req.userID, req.body.theme, req.body.title, req.body.photos, function(result){
-            setTimeout(function () {
-                if(result === "true"){
-                    res.status(201).send('Album created');                    
-                }
-            }, 4000);
-        });
-    })
-    .put(function(req,res){
-        res.status(405).send("Cannot overwrite the entire collection.");
-    })
-    .delete(function(req,res){
-        res.status(405).send("Cannot delete the entire collection.");
-    }); 
+    .get(printAlbumsHandler.handleGetPrintAlbums)
+    .post(printAlbumsHandler.handlePostPrintAlbums)
+    .put(printAlbumsHandler.handlePutPrintAlbums)
+    .delete(printAlbumsHandler.handleDeletePrintAlbums);
 
 /***************************************************************/
 /*    PrintAlbums individuais                                  */
@@ -470,28 +279,10 @@ app.param('printAlbumID', function(req, res, next, printAlbumID){
 })
 
 app.route("/users/:userID/printAlbums/:printAlbumID")
-    .get(function(req, res){ 
-        printAlbumsHandler.getSpecificPrintAlbum(req.printAlbumID, function(result){
-            res.status(200).send(result);
-        }); 
-    })
-    .post(function(req, res){
-        res.status(404).send("Not yet implemented.");
-    })
-    .put(function(req, res){
-        res.status(405).send("Not allowed.");
-    })
-    .delete(function(req, res) {
-        printAlbumsHandler.deletePrintAlbum(req.printAlbumID, function(result){
-            setTimeout(function(){
-                if(result === "true"){
-                    res.status(200).send('INFO: PrintAlbum was deleted');
-                } else {
-                    res.status(204).send('INFO: PrintAlbum was not found');
-                }            
-            }, 4000);  
-        });  
-    }); 
+    .get(printAlbumsHandler.handleGetPrintAlbumItem)
+    .post(printAlbumsHandler.handlePostPrintAlbumItem)
+    .put(printAlbumsHandler.handlePutPrintAlbumItem)
+    .delete(printAlbumsHandler.handleDeletePrintAlbumItem); 
 
 /***************************************************************/
 /*  Starting...                                                */

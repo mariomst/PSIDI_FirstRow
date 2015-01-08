@@ -250,6 +250,73 @@ function deletePhoto(photoID, result){
 }
 
 /***************************************************************/
+/*  Handler Functions                                          */
+/***************************************************************/
+
+function handleGetPhotos(req, res){
+	getPhotos(req.albumID, function(result){
+        res.status(200).send(result);
+    });
+};
+
+function handlePostPhotos(req, res, photos_dir){
+	console.log(req.files);        
+	//chamar função para upload de foto
+	var filename = req.files.file.path;
+	insertPhoto(req.albumID, filename, req.body.description, req.body.date, photos_dir, function(result){
+		setTimeout(function () {
+			if(result === "true"){
+				res.status(201).send('Photo uploaded');
+			} else {
+				res.status(500).send('Error uploading the photo');
+			}
+		}, 10000);
+	});
+};
+
+function handlePutPhotos(req, res){
+	res.status(405).send("Cannot overwrite the entire collection.");
+};
+
+function handleDeletePhotos(req, res){
+	res.status(405).send("Cannot delete the entire collection.");
+};
+
+function handleGetPhotoItem(req, res){
+	getPhoto(req.photoID, function(result){
+        res.status(200).send(result);
+    }); 
+};
+
+function handlePostPhotoItem(req, res){
+	updatePhoto(req.photoID, req.body.description, req.body.date, function(result){
+        setTimeout(function(){
+            if(result === "true"){
+                res.status(200).send("Photo's information was updated");
+            } else {
+                res.status(204).send('Photo was not found');
+            }
+        }, 8000);
+    });
+};
+
+function handlePutPhotoItem(req, res){
+	res.status(405).send("Not allowed.");
+};
+
+function handleDeletePhotoItem(req, res){
+	deletePhoto(req.photoID, function(result){
+        setTimeout(function(){
+            if(result === "true"){
+                res.status(200).send('Photo was deleted');
+            } else {
+                res.status(204).send('Photo was not found');
+            }            
+        }, 4000);  
+    });  
+}
+
+/***************************************************************/
 /*  Module Exports		                                       */
 /***************************************************************/
 
@@ -258,3 +325,13 @@ exports.getPhoto = getPhoto;
 exports.insertPhoto = insertPhoto;
 exports.updatePhoto = updatePhoto;
 exports.deletePhoto = deletePhoto;
+
+exports.handleGetPhotos = handleGetPhotos;
+exports.handlePostPhotos = handlePostPhotos;
+exports.handlePutPhotos = handlePutPhotos;
+exports.handleDeletePhotos = handleDeletePhotos;
+
+exports.handleGetPhotoItem = handleGetPhotoItem;
+exports.handlePostPhotoItem = handlePostPhotoItem;
+exports.handlePutPhotoItem = handlePutPhotoItem;
+exports.handleDeletePhotoItem = handleDeletePhotoItem;

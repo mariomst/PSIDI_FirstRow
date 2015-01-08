@@ -34,33 +34,28 @@ function createPrintAlbum(userID, theme, title, photos, result){
 	
 	getCitation(function(res){
 		citation = res;
-		console.log("->" + citation);
-	});
-	
+	});	
 
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);	
 
 	//criar novo PrintAlbum.
 	setTimeout(function(){
-	db.serialize(function(){
-		console.log("INFO: Creating new PrintAlbum.");
-		console.log("NOTE: Message will be added later with the citations plugin.");
-		//executar query.
-		console.log("->" + citation);
-		db.run(query, userID, theme, title, citation);
-		console.log("INFO: PrintAlbum created.");
-		result("true");
-		//fechar instância da db.
-		db.close();
-	}); 
-	}, 500);
+		db.serialize(function(){
+			console.log("INFO: Creating new PrintAlbum.");
+			db.run(query, userID, theme, title, citation);
+			console.log("INFO: PrintAlbum created.");
+			result("true");
+			//fechar instância da db.
+			db.close();
+		}); 
+	}, 3000);
 
 	setTimeout(function(){
 		getCreatedPrintAlbumID(userID, function(printAlbumID){
 			addPhotostoPrintAlbum(photos, printAlbumID);
 		});
-	}, 1500);
+	}, 4000);
 }
 
 function getCitation(result){
@@ -78,11 +73,14 @@ function getCitation(result){
  			str += chunk;
  		});
 
-		response.on('end', function(){
+		response.on('end', function(){			
 			var res = JSON.parse(str);
-			result(res.quote);
+			var quote = res.quote;
+			var quote_clean = quote.replace('"', ""); 
+			var quote_clean = quote_clean.replace('\n', " ");
+			result(quote_clean);
 		});
-	}
+	};
 
 	http.request(options, callback).end();
 }
@@ -114,7 +112,9 @@ function getCreatedPrintAlbumID(userID, result){
 
 	var completed = function(id){
 		result(id);
-	}
+		//fechar instância da db.
+		db.close();
+	};
 }
 
 function addPhotostoPrintAlbum(photosID, printAlbumID){
@@ -153,9 +153,13 @@ function getPhotosPrintAlbum(printAlbumID, result){
 		},
 		function(err, row){
 			if(err) return callback(err);
-			photosHandler.getPhoto(row.photoID, function(photo){
-				handler(photo);
-			});				
+			if(row !== undefined && row !== ""){
+				photosHandler.getPhoto(row.photoID, function(photo){
+					handler(photo);
+				});				
+			} else {
+				completed();
+			}
 		},
 		function(err, row){
 			setTimeout(function(){
@@ -237,10 +241,9 @@ function getPrintAlbumsByUserID(userID, result){
 	var completed = function(){
 		albums_json += "]";
 		result(albums_json);
-	};
-
-	//fechar instância da db.
-	db.close();
+		//fechar instância da db.
+		db.close();
+	};	
 }
 
 function getSpecificPrintAlbum(printAlbumID, result){
@@ -257,8 +260,8 @@ function getSpecificPrintAlbum(printAlbumID, result){
 	db.get(query, 
 		function(err, row){
 			if(err) return callback(err);
-		}
-		,function(err, row){
+		},
+		function(err, row){
 			if(err) return callback(err);
 			//criar string json para o printalbum.
 			if(row !== undefined){
@@ -271,7 +274,8 @@ function getSpecificPrintAlbum(printAlbumID, result){
 
 				getPhotosPrintAlbum(row.printAlbumID, function(photos){
 					album_json += photos + "}";
-					completed(album_json);
+					var result_json = JSON.parse(album_json);
+					completed(result_json);
 				});				
 			} else {
 				completed(album_json);
@@ -281,10 +285,9 @@ function getSpecificPrintAlbum(printAlbumID, result){
 
 	var completed = function(json){
 		result(json);
+		//fechar instância da db.
+		db.close();
 	};
-
-	//fechar instância da db.
-	db.close();
 }
  
 function updatePrintAlbum(printAlbumID, theme, title, message, photos, result){
@@ -330,7 +333,7 @@ function updatePrintAlbum(printAlbumID, theme, title, message, photos, result){
 	if(photos.length > 0){
     	setTimeout(function(){
 			addPhotostoPrintAlbum(photos, printAlbumID);
-		}, 1500);
+		}, 5000);
     }
 
     var completed = function(status){
@@ -379,7 +382,67 @@ function deletePrintAlbum(printAlbumID, result){
 	};	
 }
 
-function exportToPDF(){}
+function exportToPDF(){
+	//Ainda não implementado
+}
+
+/***************************************************************/
+/*  Handler Functions                                          */
+/***************************************************************/
+
+function handleGetPrintAlbums(req, res){
+	getPrintAlbumsByUserID(req.userID, function(result){
+		var result_json = JSON.parse(result);
+    	res.status(200).send(result_json);
+    });
+};
+
+function handlePostPrintAlbums(req, res){
+	createPrintAlbum(req.userID, req.body.theme, req.body.title, req.body.photos, function(result){
+        if(result === "true"){      
+        	setTimeout(function(){
+        		getCreatedPrintAlbumID(req.userID, function(id){
+        		 	console.log("INFO: Done creating printAlbum");
+        		 	var result = "{\"printAlbumID\":" + id + "}";
+        		 	var result_json = JSON.parse(result);
+        			res.status(201).send(result_json);        		
+        		});
+        	}, 6000);               
+        }
+    });
+};
+
+function handlePutPrintAlbums(req, res){
+	res.status(405).send("Cannot overwrite the entire collection.");
+};
+
+function handleDeletePrintAlbums(req, res){
+	res.status(405).send("Cannot delete the entire collection.");
+};
+
+function handleGetPrintAlbumItem(req, res){
+	getSpecificPrintAlbum(req.printAlbumID, function(result){
+            res.status(200).send(result);
+    }); 
+};
+
+function handlePostPrintAlbumItem(req, res){
+	res.status(405).send("Not allowed.");
+};
+
+function handlePutPrintAlbumItem(req, res){
+	res.status(405).send("Not allowed.");
+};
+
+function handleDeletePrintAlbumItem(req, res){
+	deletePrintAlbum(req.printAlbumID, function(result){
+		if(result === "true"){
+			res.status(200).send('PrintAlbum with ID ' + req.printAlbumID + ' was deleted.');
+		} else {
+			res.status(204).send('PrintAlbum with ID ' + req.printAlbumID + ' was not found');
+		}
+	});
+};
 
 /***************************************************************/
 /*  Module Exports		                                       */
@@ -390,3 +453,13 @@ exports.getPrintAlbumsByUserID = getPrintAlbumsByUserID
 exports.getSpecificPrintAlbum = getSpecificPrintAlbum;
 exports.updatePrintAlbum = updatePrintAlbum;
 exports.deletePrintAlbum = deletePrintAlbum;
+
+exports.handleGetPrintAlbums = handleGetPrintAlbums;
+exports.handlePostPrintAlbums = handlePostPrintAlbums;
+exports.handlePutPrintAlbums = handlePutPrintAlbums;
+exports.handleDeletePrintAlbums = handleDeletePrintAlbums;
+
+exports.handleGetPrintAlbumItem = handleGetPrintAlbumItem;
+exports.handlePostPrintAlbumItem = handlePostPrintAlbumItem;
+exports.handlePutPrintAlbumItem = handlePutPrintAlbumItem;
+exports.handleDeletePrintAlbumItem = handleDeletePrintAlbumItem;

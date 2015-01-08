@@ -326,6 +326,114 @@ function deleteUser(userID, res){
 }
 
 /***************************************************************/
+/*  Handler Functions                                          */
+/***************************************************************/
+
+function handleGetRegister(req, res){
+    res.status(405).send("Not allowed.");
+};
+
+function handlePostRegister(req, res){
+    createUser(req.body.username, req.body.password, function(result){
+        setTimeout(function () {                
+            if(result === "true"){
+                getUserbyName(req.body.username, function(result){
+                    setTimeout(function(){
+                        res.status(201).send(result);
+                    }, 2000)
+                })
+            } else {
+                res.status(406).send('User already exists');
+            }
+        }, 4000);
+    });
+};
+
+function handlePutRegister(req, res){
+    res.status(405).send("Not allowed.");
+};
+
+function handleDeleteRegister(req, res){
+    res.status(405).send("Not allowed.");
+};
+
+function handleGetLogin(req, res){
+    res.status(405).send("Not allowed.");
+};
+
+function handlePostLogin(req, res){
+    login(req.body.username, req.body.password, function(result){
+        setTimeout(function(){
+            if(result !== "false"){
+                res.status(202).send(result);
+            } else {
+                res.status(400).send("Authentication failed, please check username and password");
+            }               
+        }, 4000);
+    });
+};
+
+function handlePutLogin(req, res){
+    res.status(405).send("Not allowed.");
+};
+
+function handleDeleteLogin(req, res){
+    res.status(405).send("Not allowed.");
+};
+
+function handleGetUsers(req, res){
+    showAllUsers(function(result){
+        res.status(200).send(result);
+    });
+};
+
+function handlePostUsers(req, res){
+    res.status(405).send("Not allowed.");
+};
+
+function handlePutUsers(req, res){
+    res.status(405).send("Cannot overwrite the entire collection.");
+};
+
+function handleDeleteUsers(req, res){
+    res.status(405).send("Cannot delete the entire collection.");
+};
+
+function handleGetUserItem(req, res){
+    getUser(req.userID, function(result){
+        res.status(200).send(result);
+    });
+};
+
+function handlePostUserItem(req, res){
+    updateUserPass(req.userID, req.body.password, function(result){
+        setTimeout(function () {
+            if(result === "true"){
+                res.status(200).send('Password was updated');
+            } else {
+                res.status(204).send('User was not found');
+            }
+        }, 4000);           
+    }); 
+};
+
+function handlePutUserItem(req, res){
+    res.status(405).send("Not allowed.");
+};
+
+function handleDeleteUserItem(req, res){
+    deleteUser(req.userID, function(result){
+        setTimeout(function(){
+            if(result === "true"){
+                res.status(200).send('User was deleted');
+            } else {
+                res.status(204).send('User was not found');
+            }            
+        }, 4000);  
+    });  
+};
+
+/***************************************************************/
 /*  Module Exports		                                       */
 /***************************************************************/
 
@@ -337,3 +445,23 @@ exports.getUser = getUser;
 exports.getUserbyName = getUserbyName;
 exports.updateUserPass = updateUserPass;
 exports.deleteUser = deleteUser;
+
+exports.handleGetRegister = handleGetRegister;
+exports.handlePostRegister = handlePostRegister;
+exports.handlePutRegister = handlePutRegister;
+exports.handleDeleteRegister = handleDeleteRegister;
+
+exports.handleGetLogin = handleGetLogin;
+exports.handlePostLogin = handlePostLogin;
+exports.handlePutLogin = handlePutLogin;
+exports.handleDeleteLogin = handleDeleteLogin;
+
+exports.handleGetUsers = handleGetUsers;
+exports.handlePostUsers = handlePostUsers;
+exports.handlePutUsers = handlePutUsers;
+exports.handleDeleteUsers = handleDeleteUsers;
+
+exports.handleGetUserItem = handleGetUserItem;
+exports.handlePostUserItem = handlePostUserItem;
+exports.handlePutUserItem = handlePutUserItem;
+exports.handleDeleteUserItem = handleDeleteUserItem;

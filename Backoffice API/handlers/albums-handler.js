@@ -290,6 +290,72 @@ function deleteAlbum(albumID, res){
             db.close();
 		}
 	});
+}
+
+/***************************************************************/
+/*  Handler Functions                                          */
+/***************************************************************/
+
+function handleGetAlbums(req, res){
+	getUserAlbums(req.userID, function(result){
+		res.status(200).send(result);
+	});
+};
+
+function handlePostAlbums(req, res){
+	createAlbum(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
+       	setTimeout(function () {
+       		if(result === "true"){
+                getAlbumWithInfo(req.body.title, req.userID, req.body.description, req.body.start_date, req.body.end_date, function(result){
+                    setTimeout(function(){
+                        res.status(201).send(result);
+                    }, 2000)
+                });
+        	}
+        }, 4000);
+    });
+};
+
+function handlePutAlbums(req, res){
+	res.status(405).send("Cannot overwrite the entire collection.");
+};
+
+function handleDeleteAlbums(req, res){
+	res.status(405).send("Cannot delete the entire collection.");
+};
+
+function handleGetAlbumItem(req, res){
+	getAlbum(req.albumID, function(result){
+    	res.status(200).send(result);
+    });
+};
+
+function handlePostAlbumItem(req, res){
+	updateAlbum(req.albumID, req.body.title, req.body.description, req.body.start_date, req.body.end_date, function(result){
+    	setTimeout(function(){
+    	    if(result === "true"){
+    			res.status(200).send('Album was updated');
+    		} else {
+    			res.status(204).send('Album was not found');
+    		}
+    	}, 8000);
+    });
+};
+
+function handlePutAlbumItem(req, res){
+	res.status(405).send("Not allowed.");
+};
+
+function handleDeleteAlbumItem(req, res){
+	deleteAlbum(req.albumID, function(result){
+        setTimeout(function(){
+            if(result === "true"){
+                res.status(200).send('Album was deleted');
+            } else {
+                res.status(204).send('Album was not found');
+            }            
+        }, 4000);  
+    });  
 }	
 
 /***************************************************************/
@@ -302,3 +368,13 @@ exports.getAlbum = getAlbum;
 exports.getAlbumWithInfo = getAlbumWithInfo;
 exports.updateAlbum = updateAlbum;
 exports.deleteAlbum = deleteAlbum;
+
+exports.handleGetAlbums = handleGetAlbums;
+exports.handlePostAlbums = handlePostAlbums;
+exports.handlePutAlbums = handlePutAlbums;
+exports.handleDeleteAlbums = handleDeleteAlbums;
+
+exports.handleGetAlbumItem = handleGetAlbumItem;
+exports.handlePostAlbumItem = handlePostAlbumItem;
+exports.handlePutAlbumItem = handlePutAlbumItem;
+exports.handleDeleteAlbumItem = handleDeleteAlbumItem;
