@@ -354,22 +354,72 @@ app.route("/user/:userID/order")
 
         }else{                          // Store order only and calculate best prices
 
+
+            // Input params
             var address = req.body.address;
             var printAlbumID = req.body.printAlbum;
 
+
             // Verificar se o printAlbumID existe
 
-            // Calculate distance
+
+            /*
+            Calculate distance
             geohandler.calcEstimatedDistance(address, '38.7436266','-9.1602037',function(distance){
                 console.log("Distance is " + distance);
             });
+            */
 
-            // Calculate dealed prices
-            // Generate new order
-            // Respond to App
-            // Calculate real prices
-            // Pick best price
-            // Store order
+
+            /*
+            Calculate dealed prices
+            */
+            var printAlbum = {
+                'userID': 1,
+                'theme': 'pissas',
+                'message': 'mensagem',
+                'photos': [
+                    {
+                        'id': 1,
+                        'albumid': 1,
+                        'photo': 'abcde',
+                        'date': '12345'
+                    }
+                ]
+            };
+
+            var n_photos = printAlbum.photos.length;
+            var dist = 155;
+            var totalCost = dealedAlbumCost + dealedTransportCost;
+
+
+            /*
+            Generate new order
+            */
+            var userID = req.userID;
+            var dealedPrinterShopID = 0;
+            var distance = 123;
+            var realPrintPrice = 0;
+            var dealedPrintPrice = util.calculateAlbumPrice(n_photos);
+            var dealedTransportPrice = util.calculatePriceByDistance(dist);
+            var expirationDate = new Date().getTime();      // Adicionar timeout de 5min para a order
+
+            ordershandler.createOrder(userID, dealedPrinterShopID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, 'false', expirationDate, function(newOrder){
+
+                console.log(newOrder);
+
+                // Respond to App
+                //res.status(405).send("Not allowed.");
+                
+                // Calculate real prices
+                // Pick best price
+                // Store order
+
+            });
+
+            var response = {
+
+            };
 
         }
 

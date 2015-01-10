@@ -41,7 +41,38 @@ function newOrder(orderID, userID, distance, dealedPrinterShopID, realPrintPrice
 	return order;
 }
 
-function createOrder(){}
+function createOrder(orderID, userID, distance, dealedPrinterShopID, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate, result){
+	//query para criar uma order.	
+	var query = "INSERT INTO ORDERS (userID, dealedPrinterShopID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, confirmed, state, expirationDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+	
+	//criar novo álbum
+	db.serialize(function(){
+		console.log("INFO: Creating order with the following information:");
+		console.log("-> userID: " + userID);
+		console.log("-> dealedPrinterShopID: " + dealedPrinterShopID);
+		console.log("-> distance: " + distance);
+		console.log("-> realPrintPrice: " + realPrintPrice);
+		console.log("-> realTransportPrice: " + realTransportPrice);
+		console.log("-> dealedPrintPrice: " + dealedPrintPrice);
+		console.log("-> dealedTransportPrice: " + dealedTransportPrice);
+		console.log("-> address: " + address);
+		console.log("-> confirmed: false");
+		console.log("-> state: " + state);
+		console.log("-> expirationDate: " + expirationDate);
+		
+		db.run(query, userID, dealedPrinterShopID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, 'false', state, expirationDate);
+		
+		console.log("Info: Order created");
+		
+		// Em vez de retornar true, era fixe retornar o novo orderID do recém-inserido para devolver para a App
+		result("true");
+		
+		db.close();
+	});
+}
 
 function getAllOrders(){}
 
