@@ -19,6 +19,11 @@ var usersHandler = require('./handlers/users-handler');
 var albumsHandler = require('./handlers/albums-handler');
 var photosHandler = require('./handlers/photos-handler');
 var printAlbumsHandler = require('./handlers/printAlbums-handler');
+var ordershandler = require('./handlers/orders-handler');
+var printershophandler = require('./handlers/printershop-handler');
+var geohandler = require('./handlers/geolocation-handler');
+
+var util = require('./util/util');
 
 var app = express();
 
@@ -87,7 +92,7 @@ db.serialize(function(){
         db.run("CREATE TABLE PHOTOS (photoID INTEGER PRIMARY KEY, albumID INTEGER, photo TEXT, description TEXT, date LONG)");
         db.run("CREATE TABLE PRINTALBUMS (printAlbumID INTEGER PRIMARY KEY, userID INTEGER, theme TEXT, title TEXT, message TEXT)");
         db.run("CREATE TABLE PRINTPHOTOS (photoID INTEGER, printAlbumID INTEGER)");
-        db.run("CREATE TABLE ORDERS (orderID INTEGER PRIMARY KEY, printPrice FLOAT, transportPrice FLOAT, address TEXT, confirmed BOOLEAN, state TEXT)");
+        db.run("CREATE TABLE ORDERS (orderID INTEGER PRIMARY KEY, userID INTEGER, dealedPrinterShopID INTEGER, distance INTEGER, realPrintPrice FLOAT, realTransportPrice FLOAT, dealedPrintPrice FLOAT, dealedTransportPrice FLOAT, address TEXT, confirmed BOOLEAN, state TEXT, expirationDate LONG)");
     }   
 });
 
@@ -284,10 +289,102 @@ app.route("/users/:userID/printAlbums/:printAlbumID")
     .put(printAlbumsHandler.handlePutPrintAlbumItem)
     .delete(printAlbumsHandler.handleDeletePrintAlbumItem); 
 
+
+
+app.route("/user/:userID/order")
+    .get(function(req,res){
+        res.status(405).send("Not allowed.");
+    })
+    .post(function(req,res){
+
+        // Do not forget to check fields null undefined
+
+        var confirmed = req.body.confirmed;
+
+        if(confirmed == 'true'){        // Process order
+
+            var orderID = req.body.orderID;
+            var userID = req.userID;
+
+            //verificar se existe order
+            ordershandler.getSpecificOrder(orderID, userID, function(order){
+
+                // Mockup
+                order = ordershandler.newOrder('1', '1', '100', '100', '0', '0', '0', '0', 'Porto', 'false', 'estado', '');
+                console.log("Address: " + order.address);
+
+                if(order != 'undefined'){
+                    // Get order's printer album (order.printAlbumID)
+                    printAlbumsHandler.getSpecificPrintAlbum(1, function(printAlbum){
+
+                        printAlbum = {
+                            'userID': 1,
+                            'theme': 'pissas',
+                            'message': 'mensagem',
+                            'photos': [
+                                {
+                                    'id': 1,
+                                    'albumid': 1,
+                                    'photo': 'abcde',
+                                    'date': '12345'
+                                }
+                            ]
+                        };
+
+                        // Request printershop for order
+                        printershophandler.processOrder(printAlbum, order, function(processedOrder){
+                            console.log("Chegou ao backoffice");
+
+                            console.log("ID# " + processedOrder.order_id);
+
+                            // Update order status
+
+                            // Respond to App
+                            res.status(200).send(processedOrder);
+                        });
+
+
+                    });
+
+                }else{
+
+                }
+            });
+
+
+        }else{                          // Store order only and calculate best prices
+
+            var address = req.body.address;
+            var printAlbumID = req.body.printAlbum;
+
+            // Verificar se o printAlbumID existe
+
+            // Calculate distance
+            geohandler.calcEstimatedDistance(address, '38.7436266','-9.1602037',function(distance){
+                console.log("Distance is " + distance);
+            });
+
+            // Calculate dealed prices
+            // Generate new order
+            // Respond to App
+            // Calculate real prices
+            // Pick best price
+            // Store order
+
+        }
+
+    })
+    .put(function(req,res){
+        res.status(405).send("Not allowed.");
+    })
+    .delete(function(req,res){
+        res.status(405).send("Not allowed.");
+    });
+
 /***************************************************************/
 /*  Starting...                                                */
 /***************************************************************/
 
 app.listen(port, function(){
-    console.log("Listening on " + port);
+    console.log("Backoffice has started listening on " + port);
 });
