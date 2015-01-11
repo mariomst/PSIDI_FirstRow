@@ -77,8 +77,9 @@ function getCitation(result){
 			var res = JSON.parse(str);
 			var quote = res.quote;
 			var quote_clean = quote.replace('"', ""); 
-			var quote_clean = quote_clean.replace('\n', " ");
-			result(quote_clean);
+			var quote_clean1 = quote_clean.replace(/\r?\n|\r/g, " ");
+			var quote_clean2 = quote_clean1.replace(/\t/g, " ");
+			result(quote_clean2);
 		});
 	};
 
