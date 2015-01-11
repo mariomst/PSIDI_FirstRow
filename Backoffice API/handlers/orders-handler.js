@@ -442,9 +442,14 @@ function handleGetOrderItem(req, res){
 			});
 
 		}else{
-
+			console.log("OrderID: "+ orderID);
 			getSpecificOrder(orderID, function(order){
-				res.status(200).send(order);
+				console.log(order);
+
+				if(order != 'undefined')
+					res.status(200).send(order);
+				else
+					res.status(404).send('Order not found.');
 			});
 
 		}
@@ -466,7 +471,7 @@ function handlePostOrderItem(req, res){
         console.log(orderID);
         console.log(userID);
 
-        if(confirmed == 'true'){        // Process order
+        if(confirmed){        // Process order
 
             //verificar se existe order
             getSpecificOrder(orderID, function(order){
