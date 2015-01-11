@@ -1,0 +1,46 @@
+<div ng-include src="'views/common/menu.html'"></div>
+
+<div ng-include src="'views/common/loading.html'" ng-init="spinner_name = 'spinner'"></div>
+
+<br>
+
+<div class="well bs-component">
+  <form class="form-horizontal">
+    <fieldset>
+      <legend>Confirm Order</legend>
+      <br>
+
+      <div class="form-group">
+        <div class="col-md-12">
+          Order to {{order.address}}
+          <table class="table table-striped table-hover">
+            <thead>
+            <th>Order</th>
+            <th>Price</th>
+            <th>Transport Price</th>
+            <th>Confirmed</th>
+            </thead>
+            <tbody>
+            <td>{{order.orderID}}</td>
+            <td>{{order.dealedPrintPrice | number : 2 }} €</td>
+            <td>{{order.dealedTransportPrice | number : 2}} €</td>
+            <td>✗</td>
+            </tbody>
+
+          </table>
+        </div>
+
+      </div>
+
+
+      <div class="form-group">
+        <div class="col-lg-10 col-lg-offset-2">
+          <button type="submit" class="btn btn-primary" ng-click="f.submit()">Confirm</button>
+          <button class="btn btn-default" ng-click="f.go_back()">Cancel</button>
+        </div>
+      </div>
+
+    </fieldset>
+  </form>
+</div>
+

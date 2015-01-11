@@ -6,7 +6,7 @@ const PRINTERHOP_3 = 300;
 var geohandler = require('./geolocation-handler');
 
 var ps1_interface = require('./interfaces/ps1interface');
-var ps2_interface = require('./interfaces/ps2interface');
+//var ps2_interface = require('./interfaces/ps2interface');
 //var ps3_interface = require('./interfaces/ps3interface');
 
 
@@ -33,11 +33,13 @@ function calculateBestPrice(point, n_photos, callback){
 
 	    bestPrice.printerShopID = PRINTERHOP_1;
 	    bestPrice.realPrintPrice = price_per_photo * n_photos;
-	    bestPrice.realTransportPrice = geohandler.distance(point.lat, point.lng, ps1_interface.lat, ps1_interface.lng) * price_per_km;
+	    bestPrice.realTransportPrice = 100;
+	    //bestPrice.realTransportPrice = geohandler.distance(point.lat, point.lng, ps1_interface.lat, ps1_interface.lng) * price_per_km;
 
 	    respond(bestPrice);
 
 		// Calculate price for printershop 2
+	    /*
 		ps2_interface.getPrices(n_photos, n_kms, function(res){
 		    console.log("Custo: " + res.cost);
 
@@ -46,7 +48,6 @@ function calculateBestPrice(point, n_photos, callback){
 		    // TESTAR SE O CUSTO É INFERIOR AO QUE JÁ EXISTE
 		    //if()
 
-	    /*
 			// Calculate price for printershop 3
 			ps3_interface.getPrices(function(res){
 			    console.log("Preço: " + res.individualPrice);
@@ -57,9 +58,9 @@ function calculateBestPrice(point, n_photos, callback){
 
 			    
 			});
-	    */
 		    
 		});
+	    */
 
 	});
 
