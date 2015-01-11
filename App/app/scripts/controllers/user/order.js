@@ -17,62 +17,7 @@ angular.module('iPhotoApp')
     angular.extend(this, $controller('CommonFunctionsCtrl', {$scope: $scope}));
 
     $scope.order = {};
-
-    //$scope.print_albums = [
-    //  {
-    //    "id": 1,
-    //    "theme": "Férias",
-    //    "title": "Melhores das férias",
-    //    "message": "I will get a Triforce, like I said",
-    //    "photos": [
-    //      {
-    //        "id": 1,
-    //        "albumId": 1,
-    //        "photo": "images/abc.jpg",
-    //        "date": 1418066023321
-    //      },
-    //      {
-    //        "id": 2,
-    //        "albumId": 1,
-    //        "photo": "images/abcd.jpg",
-    //        "date": 1418066023321
-    //      },
-    //      {
-    //        "id": 3,
-    //        "albumId": 1,
-    //        "photo": "images/abcde.jpg",
-    //        "date": 1418066023321
-    //      },
-    //      {
-    //        "id": 4,
-    //        "albumId": 1,
-    //        "photo": "images/abcdef.jpg",
-    //        "date": 1418066023321
-    //      },
-    //      {
-    //        "id": 5,
-    //        "albumId": 1,
-    //        "photo": "images/abcdefg.jpg",
-    //        "date": 1418066023321
-    //      }
-    //    ]
-    //  },
-    //  {
-    //    "id": 3,
-    //    "title": "cenas",
-    //    "photos": []
-    //  },
-    //  {
-    //    "id": 4,
-    //    "title": "trinta",
-    //    "photos": []
-    //  },
-    //  {
-    //    "id": 5,
-    //    "title": "bom album",
-    //    "photos": []
-    //  }
-    //];
+    $scope.order.confirmed = false;
 
     $scope.f = {
       get: function(){
@@ -88,7 +33,19 @@ angular.module('iPhotoApp')
           });
       },
       submit: function(){
+        $scope.spinner = true;
         console.log($scope.order);
+        $http.post(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/orders', $scope.order)
+          .success(function(data){
+            $scope.spinner = false;
+            console.log("Order placed -> ", data);
+            $location.path('/user/' + $scope.user.userID + '/order/' + data.orderID + '/confirm');
+
+          })
+          .error(function(error){
+            $scope.spinner = false;
+            console.log("Error placing order", error);
+          });
       }
     };
 

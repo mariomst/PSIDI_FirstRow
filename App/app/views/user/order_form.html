@@ -37,9 +37,9 @@
             <tbody>
             <tr ng-repeat="object in print_albums">
               <td>
-                <input type="radio" name="optionsPrintAlbums" id="radioId" value="99" ng-value="object.albumID" ng-model="order.print_album">
+                <input type="radio" name="optionsPrintAlbums" id="radioId" value="99" ng-value="object.printAlbumID" ng-model="order.printAlbum">
               </td>
-              <td>{{object.albumID}}</td>
+              <td>{{object.printAlbumID}}</td>
               <td>{{object.title}}</td>
               <td>{{object.theme}}</td>
               <td>

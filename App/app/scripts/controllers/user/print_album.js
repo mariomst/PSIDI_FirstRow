@@ -52,6 +52,7 @@ angular.module('iPhotoApp')
 
       },
       submit: function(){
+        $scope.spinner = true;
         var photos = [];
         for(var i = 0; i < $scope.albums.length; i++) {
           for (var j = 0; j < $scope.albums[i].photos.length; j++) {
@@ -66,10 +67,13 @@ angular.module('iPhotoApp')
         console.log(JSON.stringify($scope.print_album));
         $http.post(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/printAlbums', $scope.print_album)
           .success(function(data){
+            $scope.spinner = false;
             console.log("successfuly saved printalbum ", data);
+            $location.path('/user');
           })
           .error(function(error){
             console.log("error saving printalbum ", error);
+            $scope.spinner = false;
           });
       }
     };
