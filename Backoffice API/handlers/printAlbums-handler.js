@@ -76,7 +76,7 @@ function getCitation(result){
 		response.on('end', function(){			
 			var res = JSON.parse(str);
 			var quote = res.quote;
-			var quote_clean = quote.replace('"', ""); 
+			var quote_clean = quote.replace(/"/g, ""); 
 			var quote_clean1 = quote_clean.replace(/\r?\n|\r/g, " ");
 			var quote_clean2 = quote_clean1.replace(/\t/g, " ");
 			result(quote_clean2);
