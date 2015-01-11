@@ -87,7 +87,7 @@ function getSpecificProcessOrder(orderID, result){
 				makeProcess(process);	
 
 			} else {
-				makeProcess({});
+				makeProcess('undefined');
 			}
 		}
 	);
@@ -416,20 +416,26 @@ function handleGetOrderItem(req, res){
 	getSpecificProcessOrder(req.orderID, function(processOrder){
 		console.log(processOrder);
 
-		// Hit update link
-		processOrderHandler.checkProcessOrderStatus(processOrder, function(status){
+		if(processOrder != 'undefined'){
 
-			var orderStatus = status.order_status;
+			// Hit update link
+			processOrderHandler.checkProcessOrderStatus(processOrder, function(status){
 
-			// Update order status
-			updateOrderStatus(req.orderID, orderStatus);
+				var orderStatus = status.order_status;
 
-			// Retrieve updated order
-			getSpecificOrder(orderID, function(order){
-				res.status(200).send(order);
+				// Update order status
+				updateOrderStatus(req.orderID, orderStatus);
+
+				// Retrieve updated order
+				getSpecificOrder(orderID, function(order){
+					res.status(200).send(order);
+				});
+
 			});
 
-		});
+		}else{
+			res.status(404).send("Order was not processed.");
+		}
 
 
 	});
@@ -451,36 +457,49 @@ function handlePostOrderItem(req, res){
         if(confirmed == 'true'){        // Process order
 
             //verificar se existe order
-            getSpecificOrder(orderID, userID, function(order){
+            getSpecificOrder(orderID, function(order){
                 console.log(order);
 
                 if(order != 'undefined'){
-                    // Get order's printer album (order.printAlbumID)
-                    printAlbumsHandler.getSpecificPrintAlbum(order.printAlbumID, function(printAlbum){
 
-                        // Request printershop for order
-                        printershophandler.processOrder(printAlbum, order, function(processedOrder){
-                            console.log("ID# " + processedOrder.order_id);
+		        	// Cant process an order already processed
+					getSpecificProcessOrder(req.orderID, function(processOrder){
+						console.log(processOrder);
 
-                            var processID = processedOrder.order_id;
-                            var carrierHost = processedOrder.carrierHost;
-                            var carrierPort = processedOrder.carrierPort;
-                            var carrierEndPoint = processedOrder.carrierEndPoint;
+						if(processOrder == 'undefined'){
 
-                            // Respond to App
-                            res.status(200).send(order);
+		                    // Get order's printer album (order.printAlbumID)
+		                    printAlbumsHandler.getSpecificPrintAlbum(order.printAlbumID, function(printAlbum){
 
-                            // Create process order
-                            createProcessOrder(order.orderID, processID, carrierHost, carrierPort, carrierEndPoint, function(out){});
+		                        // Request printershop for order
+		                        printershophandler.processOrder(printAlbum, order, function(processedOrder){
+		                            console.log("ID# " + processedOrder.order_id);
 
-                        });
+		                            var processID = processedOrder.order_id;
+		                            var carrierHost = processedOrder.carrierHost;
+		                            var carrierPort = processedOrder.carrierPort;
+		                            var carrierEndPoint = processedOrder.carrierEndPoint;
 
+		                            // Respond to App
+		                            res.status(200).send(order);
 
-                    });
+		                            // Create process order
+		                            createProcessOrder(order.orderID, processID, carrierHost, carrierPort, carrierEndPoint, function(out){});
+
+		                        });
+
+		                    });
+
+						}else{
+							res.status(409).send(order);
+						}
+
+					});
 
                 }else{
-
+                	res.status(404).send("Order was not found.");
                 }
+
             });
         }
 };
