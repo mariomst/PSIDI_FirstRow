@@ -421,7 +421,7 @@ function handleGetOrderItem(req, res){
 	/*
 	// Get updated order
 	*/
-	getSpecificProcessOrder(req.orderID, function(processOrder){
+	getSpecificProcessOrder(orderID, function(processOrder){
 		console.log(processOrder);
 
 		if(processOrder != 'undefined'){
@@ -442,7 +442,11 @@ function handleGetOrderItem(req, res){
 			});
 
 		}else{
-			res.status(404).send("Order was not processed.");
+
+			getSpecificOrder(orderID, function(order){
+				res.status(200).send(order);
+			});
+
 		}
 
 
