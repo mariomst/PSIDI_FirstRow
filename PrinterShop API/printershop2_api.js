@@ -1,7 +1,7 @@
 /***************************************************************/
 /*                                                             */
 /*  Trabalho Prático                                           */
-/*  Printershop1 API                                           */
+/*  Printershop2 API                                           */
 /*  PSIDI / MEI / ISEP                                         */
 /*  (c) 2014                                                   */
 /*                                                             */
@@ -36,25 +36,49 @@ app.use('*', function(req, res, next) {
 /* Global variables                                            */
 /***************************************************************/
 
-const PRICE_PER_PHOTO = 1;
-const PRICE_PER_KM = 10;
+const PRICE_PER_PHOTO = 2.65;
+const PRICE_PER_KM = 0.153;
 
-const carrier_port = 6000;
+const carrier_port = 6001;
 const carrier_host = 'localhost';
-const port = 5000;
+const port = 5001;
 const server_root = "http://localhost:" + port;
 
 
 /***************************************************************/
 /*                                                             */
-/*    URL:    /printershop1                                    */
+/*    URL:    /printershop2                                    */
 /*                                                             */
 /*    GET    Retorna o preço por foto                          */
 /*    POST   Enviar álbum para impressão                       */
 /*															   */
 /*	  Estado: Não testado       							   */
 /***************************************************************/
-app.route("/printershop1")
+
+app.route("/printershop2/cost")
+    .get(function(req,res){
+        res.status(405).send("Not allowed.");
+    })
+    .post(function(req,res){
+
+        var n_photos = req.body.n_photos;
+        var n_kms = req.body.n_kms;
+
+        var totalCost = {
+            'cost': calculatePrice(n_photos, n_kms)
+        };
+
+        res.status(200).send(totalCost);
+
+    })
+    .put(function(req,res){
+        res.status(405).send("Not allowed.");
+    })
+    .delete(function(req,res){
+        res.status(405).send("Not allowed.");
+    });
+
+app.route("/printershop2")
     .get(function(req,res){
 
         var response = {
@@ -83,8 +107,6 @@ app.route("/printershop1")
             res.status(200).send(carrier_res);
         });
 
-
-
     })
     .put(function(req,res){
         res.status(405).send("Not allowed.");
@@ -94,9 +116,17 @@ app.route("/printershop1")
     });
 
 
+function calculatePrice(n_photos, n_kms){
+    var photosPrice = n_photos * PRICE_PER_PHOTO; 
+    var kmPrice = n_kms * PRICE_PER_KM / 1000;
+    var totalPrice = photosPrice + kmPrice;
+
+    return totalPrice;
+}
+
 function orderCarrier(orderID, callback){
 
-    var endpoint = '/carrier1';
+    var endpoint = '/carrier2';
 
     var request = {
         'order_id': orderID
@@ -149,5 +179,5 @@ function orderCarrier(orderID, callback){
 /***************************************************************/
 
 app.listen(port, function(){
-    console.log("Printershop1 has started listening on port " + port);
+    console.log("Printershop2 has started listening on port " + port);
 });

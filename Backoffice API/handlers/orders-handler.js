@@ -102,9 +102,9 @@ function getSpecificProcessOrder(orderID, result){
 }
 
 
-function createOrder(userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate, result){
+function createOrder(userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, confirmed, state, expirationDate, result){
 	//query para criar uma order.	
-	var query = "INSERT INTO ORDERS (userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	var query = "INSERT INTO ORDERS (userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, confirmed, state, expirationDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
@@ -123,10 +123,11 @@ function createOrder(userID, dealedPrinterShopID, printAlbumID, distance, realPr
 		console.log("-> dealedPrintPrice: " + dealedPrintPrice);
 		console.log("-> dealedTransportPrice: " + dealedTransportPrice);
 		console.log("-> address: " + address);
+		console.log("-> confirmed: " + confirmed);
 		console.log("-> state: " + state);
 		console.log("-> expirationDate: " + expirationDate);
 		
-		db.run(query, userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate, function(err){
+		db.run(query, userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, confirmed, state, expirationDate, function(err){
 			//assumindo que isto contem o ID;
 			orderID = "{\"orderID\":" + this.lastID + "}";
 			result(JSON.parse(orderID));
@@ -214,7 +215,7 @@ function getSpecificOrder(orderID, callback){
 			if(err) return callback(err);
 		},
 		function(err, row){			
-			if(err) return callback(err);			
+			//if(err) return callback(err);		
 			if(row !== undefined){
 				var order_json = "{\"orderID\":" + row.orderID
 					 + ",\"userID\":" + row.userID
@@ -234,7 +235,7 @@ function getSpecificOrder(orderID, callback){
 				returnOrder(orderByID);	
 
 			} else {
-				returnOrder({});
+				returnOrder('undefined');
 			}
 		}
 	);
@@ -343,7 +344,7 @@ function handlePostOrders(req, res){
 		        /*
 		        Generate new order
 		        */
-		        createOrder(userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, 'Em processamento', expirationDate, function(newOrder){
+		        createOrder(userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, 'false', 'Em processamento', expirationDate, function(newOrder){
 		            console.log(newOrder);
 
 		            newOrderCache = newOrder;

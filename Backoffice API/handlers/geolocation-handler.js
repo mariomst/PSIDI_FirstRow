@@ -127,3 +127,5 @@ getCoordinates("Porto", function(point){
 
 
 exports.calcEstimatedDistance = calcEstimatedDistance
+exports.getCoordinates = getCoordinates;
+exports.distance = distance;

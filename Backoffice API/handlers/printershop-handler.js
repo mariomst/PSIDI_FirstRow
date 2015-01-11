@@ -3,12 +3,14 @@ const PRINTERHOP_1 = 100;
 const PRINTERHOP_2 = 200;
 const PRINTERHOP_3 = 300;
 
+var geohandler = require('./geolocation-handler');
+
 var ps1_interface = require('./interfaces/ps1interface');
-//var ps2_interface = require('./interfaces/ps2interface');
+var ps2_interface = require('./interfaces/ps2interface');
 //var ps3_interface = require('./interfaces/ps3interface');
 
 
-function calculateBestPrice(address, n_photos, callback){
+function calculateBestPrice(point, n_photos, callback){
 
 	var bestPrice = {
 		'printerShopID': 0,
@@ -19,8 +21,6 @@ function calculateBestPrice(address, n_photos, callback){
     respond = function(res){
     	callback(res);
     };
-
-	// Verificar este algoritmo, ha melhor maneira?
 
 
 	// Calculate price for printershop 1
@@ -33,19 +33,20 @@ function calculateBestPrice(address, n_photos, callback){
 
 	    bestPrice.printerShopID = PRINTERHOP_1;
 	    bestPrice.realPrintPrice = price_per_photo * n_photos;
-	    bestPrice.realTransportPrice = 100;	// ALTERAR
+	    bestPrice.realTransportPrice = geohandler.distance(point.lat, point.lng, ps1_interface.lat, ps1_interface.lng) * price_per_km;
 
 	    respond(bestPrice);
 
-	    /*
 		// Calculate price for printershop 2
-		ps2_interface.getPrices(function(res){
-		    console.log("Preço: " + res.individualPrice);
-		    console.log("Km: " + res.kmPrice);
+		ps2_interface.getPrices(n_photos, n_kms, function(res){
+		    console.log("Custo: " + res.cost);
 
-		    var price_per_photo = res.individualPrice;
-		    var price_per_km = res.kmPrice;
+		    var cost = res.cost;
 
+		    // TESTAR SE O CUSTO É INFERIOR AO QUE JÁ EXISTE
+		    //if()
+
+	    /*
 			// Calculate price for printershop 3
 			ps3_interface.getPrices(function(res){
 			    console.log("Preço: " + res.individualPrice);
@@ -56,9 +57,9 @@ function calculateBestPrice(address, n_photos, callback){
 
 			    
 			});
+	    */
 		    
 		});
-	    */
 
 	});
 
