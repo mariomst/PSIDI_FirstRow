@@ -14,6 +14,7 @@
 var sqlite3 = require('sqlite3').verbose();
 var printershophandler = require('./printershop-handler');
 var printAlbumsHandler = require('./printAlbums-handler');
+var processOrderHandler = require('./processOrder-handler');
 var geohandler = require('./geolocation-handler');
 var util = require('./util/util');
 
@@ -27,9 +28,83 @@ var file = "./database/myphotoalbum.db";
 /*  Helper Functions                                           */
 /***************************************************************/
 
-function createOrder(userID, distance, dealedPrinterShopID, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate, result){
+function createProcessOrder(orderID, processID, carrierHost, carrierPort, carrierEndPoint, result){
+
 	//query para criar uma order.	
-	var query = "INSERT INTO ORDERS (userID, dealedPrinterShopID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, confirmed, state, expirationDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+	var query = "INSERT INTO PROCESSED_ORDERS (orderID, processID, carrierHost, carrierPort, carrierEndPoint) VALUES (?, ?, ?, ?, ?)";
+	
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+
+	var processOrderID = "";
+	
+	//criar novo álbum
+	db.serialize(function(){
+		console.log("INFO: Creating process with the following information:");
+		console.log("-> orderID: " + orderID);
+		console.log("-> processID: " + processID);
+		
+		db.run(query, orderID, processID, carrierHost, carrierPort, carrierEndPoint, function(err){
+			//assumindo que isto contem o ID;
+			processOrderID = "{\"processOrderID\":" + this.lastID + "}";
+			result(JSON.parse(processOrderID));
+		});
+		
+		console.log("Info: Process created");		
+		
+		db.close();
+	});
+
+}
+
+function getSpecificProcessOrder(orderID, result){
+	//query para obter uma encomenda especifica
+	var query = "SELECT * FROM PROCESSED_ORDERS WHERE orderID=" + orderID;
+
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+
+	var process_json = "";
+
+	//obter encomenda
+	db.get(query, 
+		function(err, row){
+			if(err) return callback(err);
+		},
+		function(err, row){			
+			if(err) return callback(err);			
+			if(row !== undefined){
+
+				var process = {
+					'orderID': row.orderID,
+					'processID': row.processID,
+					'carrierHost': row.carrierHost,
+					'carrierPort': row.carrierPort,
+					'carrierEndPoint': row.carrierEndPoint
+				};
+
+				//makeProcess(JSON.parse(process_json));
+				makeProcess(process);	
+
+			} else {
+				makeProcess({});
+			}
+		}
+	);
+
+	var makeProcess = function(json){
+		console.log(json);
+		result(json);
+	};
+
+	//fechar instância da db.
+	db.close();
+}
+
+
+function createOrder(userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate, result){
+	//query para criar uma order.	
+	var query = "INSERT INTO ORDERS (userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 	
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
@@ -41,17 +116,17 @@ function createOrder(userID, distance, dealedPrinterShopID, realPrintPrice, real
 		console.log("INFO: Creating order with the following information:");
 		console.log("-> userID: " + userID);
 		console.log("-> dealedPrinterShopID: " + dealedPrinterShopID);
+		console.log("-> printAlbumID: " + printAlbumID);
 		console.log("-> distance: " + distance);
 		console.log("-> realPrintPrice: " + realPrintPrice);
 		console.log("-> realTransportPrice: " + realTransportPrice);
 		console.log("-> dealedPrintPrice: " + dealedPrintPrice);
 		console.log("-> dealedTransportPrice: " + dealedTransportPrice);
 		console.log("-> address: " + address);
-		console.log("-> confirmed: false");
 		console.log("-> state: " + state);
 		console.log("-> expirationDate: " + expirationDate);
 		
-		db.run(query, userID, dealedPrinterShopID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, 'false', state, expirationDate, function(err){
+		db.run(query, userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate, function(err){
 			//assumindo que isto contem o ID;
 			orderID = "{\"orderID\":" + this.lastID + "}";
 			result(JSON.parse(orderID));
@@ -84,6 +159,7 @@ function getAllUserOrders(userID, result){
 				//criar string json para cada encomenda 
 				var order_json = "{\"orderID\":" + row.orderID
 					 + ",\"userID\":" + row.userID
+					 + ",\"printAlbumID\":" + row.printAlbumID
 					 + ",\"distance\":" + row.distance
 					 + ",\"dealedPrinterShopID\":" + row.dealedPrinterShopID
 					 + ",\"realPrintPrice\":" + row.realPrintPrice
@@ -123,7 +199,7 @@ function getAllUserOrders(userID, result){
 	db.close();
 } 
 
-function getSpecificOrder(orderID, result){
+function getSpecificOrder(orderID, callback){
 	//query para obter uma encomenda especifica
 	var query = "SELECT * FROM ORDERS WHERE orderID=" + orderID;
 
@@ -138,10 +214,11 @@ function getSpecificOrder(orderID, result){
 			if(err) return callback(err);
 		},
 		function(err, row){			
-			//if(err) return callback(err);			
+			if(err) return callback(err);			
 			if(row !== undefined){
 				var order_json = "{\"orderID\":" + row.orderID
 					 + ",\"userID\":" + row.userID
+					 + ",\"printAlbumID\":" + row.printAlbumID
 					 + ",\"distance\":" + row.distance
 					 + ",\"dealedPrinterShopID\":" + row.dealedPrinterShopID
 					 + ",\"realPrintPrice\":" + row.realPrintPrice
@@ -152,23 +229,64 @@ function getSpecificOrder(orderID, result){
 					 + ",\"confirmed\":\"" + row.confirmed + "\""
 					 + ",\"state\":\"" + row.state + "\""
 					 + ",\"expirationDate\":\"" + row.expirationDate + "\"}";
-	
-				completed(JSON.parse(order_json));			
+
+				var orderByID = JSON.parse(order_json);
+				returnOrder(orderByID);	
+
 			} else {
-				completed({});
+				returnOrder({});
 			}
 		}
 	);
 
-	var completed = function(json){
-		result(json);
+	var returnOrder = function(order){
+		callback(order);
 	};
 
 	//fechar instância da db.
 	db.close();
 }
+
+
+function updateOrderStatus(orderID, state){
+	//query para criar uma order.	
+	var query = "UPDATE ORDERS SET state = '" + state + "' WHERE orderID = " + orderID;
+
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+	
+	//atualizar album
+	db.serialize(function(){
+		console.log("INFO: Updating orderID = " + orderID);
+		
+		db.run(query);
+		
+		console.log("Info: Order updated");		
+		
+		db.close();
+	});
+
+}
  
-function updateOrder(){}
+function updateOrder(orderID, printerShopID, realPrintPrice, realTransportPrice){
+	//query para criar uma order.	
+	var query = "UPDATE ORDERS SET dealedPrinterShopID = " + printerShopID + ", realPrintPrice = " + realPrintPrice + ", realTransportPrice = " + realTransportPrice + " WHERE orderID = " + orderID;
+	
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+	
+	//atualizar album
+	db.serialize(function(){
+		console.log("INFO: Updating orderID = " + orderID);
+		
+		db.run(query);
+		
+		console.log("Info: Order updated");		
+		
+		db.close();
+	});
+
+}
 
 function deleteOrder(){}
 
@@ -185,7 +303,80 @@ function handleGetOrders(req, res){
 
 //criar nova encomenda
 function handlePostOrders(req, res){
+
+	var confirmed = req.body.confirmed;
+
+	if(confirmed == 'false'){                          // Store order only and calculate best prices
+
+        // Input params
+        var address = req.body.address;
+        var printAlbumID = req.body.printAlbum;
+        var printAlbumCache;
+        var newOrderCache;
+
+        // Verificar se o printAlbumID existe
+		printAlbumsHandler.getSpecificPrintAlbum(printAlbumID, function(printAlbum){
+
+			var n_photos = printAlbum.photos.length;
+			printAlbumCache = printAlbum;
+
+	        /*
+	        Calculate distance
+	        */
+	        geohandler.calcEstimatedDistance(address, '38.7436266','-9.1602037',function(distance){
+	            console.log("Distance is " + distance);
+
+
+		        /*
+		        Calculate dealed prices
+		        */
+		     	var userID = req.userID;
+		        var dealedPrinterShopID = 0;
+		        //var distance = 123;
+		        var realPrintPrice = 0;
+		        var realTransportPrice = 0;
+		        var dealedPrintPrice = util.calculateAlbumPrice(n_photos);
+		        var dealedTransportPrice = util.calculatePriceByDistance(distance);
+		        var expirationDate = new Date().getTime();      // Adicionar timeout de 5min para a order
+
+
+		        /*
+		        Generate new order
+		        */
+		        createOrder(userID, dealedPrinterShopID, printAlbumID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, 'Em processamento', expirationDate, function(newOrder){
+		            console.log(newOrder);
+
+		            newOrderCache = newOrder;
+
+		            // Respond to App
+		            res.status(201).send(newOrder);
+		            
+		            // Calculate real prices and Pick best price
+					printershophandler.calculateBestPrice(address, n_photos, function(bestPrice){
+
+						console.log(bestPrice);
+
+	                    var printerShopID = bestPrice.printerShopID;
+	                    var realPrintPrice = bestPrice.realPrintPrice;
+	                    var realTransportPrice = bestPrice.realTransportPrice;
+
+	                    // Update order status
+	                    updateOrder(newOrderCache.orderID, printerShopID, realPrintPrice, realTransportPrice);
+
+
+					});
+
+		        });
+
+	        });
+
+		});
+
+    }
+
+	/*
 	var userID = req.userID;
+	var printAlbumID = req.body.printAlbumID || 0;
 	var distance = req.body.distance || 0;
 	var dealedPrinterShopID = req.body.dealedPrinterShopID || 0;
 	var realPrintPrice = req.body.realPrintPrice || 0;
@@ -197,9 +388,10 @@ function handlePostOrders(req, res){
 	var expirationDate = req.body.expirationDate || "01-01-2999";
 
 	//create new order
-	createOrder(userID, distance, dealedPrinterShopID, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate, function(result){
+	createOrder(userID, printAlbumID, distance, dealedPrinterShopID, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate, function(result){
 		res.status(201).send(result);
 	});
+	*/
 
 };
 
@@ -215,8 +407,31 @@ function handleDeleteOrders(req, res){
 
 //obter ordem especifica
 function handleGetOrderItem(req, res){
-	getSpecificOrder(req.orderID, function(result){
-		res.status(200).send(result);
+
+	var orderID = req.orderID
+
+	/*
+	// Get updated order
+	*/
+	getSpecificProcessOrder(req.orderID, function(processOrder){
+		console.log(processOrder);
+
+		// Hit update link
+		processOrderHandler.checkProcessOrderStatus(processOrder, function(status){
+
+			var orderStatus = status.order_status;
+
+			// Update order status
+			updateOrderStatus(req.orderID, orderStatus);
+
+			// Retrieve updated order
+			getSpecificOrder(orderID, function(order){
+				res.status(200).send(order);
+			});
+
+		});
+
+
 	});
 };
 
@@ -226,47 +441,38 @@ function handlePostOrderItem(req, res){
         // Do not forget to check fields null undefined
 
         var confirmed = req.body.confirmed;
+        var orderID = req.orderID;
+        var userID = req.userID;
+
+        console.log(confirmed);
+        console.log(orderID);
+        console.log(userID);
 
         if(confirmed == 'true'){        // Process order
 
-            var orderID = req.orderID;
-            var userID = req.userID;
-
             //verificar se existe order
             getSpecificOrder(orderID, userID, function(order){
-
-                // Mockup
-                //order = ordershandler.newOrder('1', '1', '100', '100', '0', '0', '0', '0', 'Porto', 'false', 'estado', '');
-                console.log("Address: " + order.address);
+                console.log(order);
 
                 if(order != 'undefined'){
                     // Get order's printer album (order.printAlbumID)
-                    printAlbumsHandler.getSpecificPrintAlbum(1, function(printAlbum){
-
-                        printAlbum = {
-                            'userID': 1,
-                            'theme': 'pissas',
-                            'message': 'mensagem',
-                            'photos': [
-                                {
-                                    'id': 1,
-                                    'albumid': 1,
-                                    'photo': 'abcde',
-                                    'date': '12345'
-                                }
-                            ]
-                        };
+                    printAlbumsHandler.getSpecificPrintAlbum(order.printAlbumID, function(printAlbum){
 
                         // Request printershop for order
                         printershophandler.processOrder(printAlbum, order, function(processedOrder){
-                            console.log("Chegou ao backoffice");
-
                             console.log("ID# " + processedOrder.order_id);
 
-                            // Update order status
+                            var processID = processedOrder.order_id;
+                            var carrierHost = processedOrder.carrierHost;
+                            var carrierPort = processedOrder.carrierPort;
+                            var carrierEndPoint = processedOrder.carrierEndPoint;
 
                             // Respond to App
-                            res.status(200).send(processedOrder);
+                            res.status(200).send(order);
+
+                            // Create process order
+                            createProcessOrder(order.orderID, processID, carrierHost, carrierPort, carrierEndPoint, function(out){});
+
                         });
 
 
@@ -276,79 +482,6 @@ function handlePostOrderItem(req, res){
 
                 }
             });
-
-
-        }else{                          // Store order only and calculate best prices
-
-
-            // Input params
-            var address = req.body.address;
-            var printAlbumID = req.body.printAlbum;
-
-
-            // Verificar se o printAlbumID existe
-
-
-            /*
-            Calculate distance
-            geohandler.calcEstimatedDistance(address, '38.7436266','-9.1602037',function(distance){
-                console.log("Distance is " + distance);
-            });
-            */
-
-
-            /*
-            Calculate dealed prices
-            */
-          	var printAlbum = {
-                'userID': 1,
-                'theme': 'pissas',
-                'message': 'mensagem',
-                'photos': [
-                    {
-                        'id': 1,
-                        'albumid': 1,
-                        'photo': 'abcde',
-                        'date': '12345'
-                    }
-                ]
-            };
-
-            var n_photos = printAlbum.photos.length;
-            var dist = 155;
-
-
-            /*
-            Generate new order
-            */
-         	var userID = req.userID;
-            var dealedPrinterShopID = 0;
-            var distance = 123;
-            var realPrintPrice = 0;
-            var realTransportPrice = 0;
-            var dealedPrintPrice = util.calculateAlbumPrice(n_photos);
-            var dealedTransportPrice = util.calculatePriceByDistance(dist);
-            var expirationDate = new Date().getTime();      // Adicionar timeout de 5min para a order
-
-            /*
-            createOrder(userID, dealedPrinterShopID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, 'false', expirationDate, function(newOrder){
-
-                console.log(newOrder);
-
-                // Respond to App
-                //res.status(405).send("Not allowed.");
-                
-                // Calculate real prices
-                // Pick best price
-                // Store order
-
-            });
-			*/
-
-            var response = {
-
-            };
-
         }
 };
 

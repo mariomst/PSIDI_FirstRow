@@ -7,7 +7,8 @@ var ps1_interface = require('./interfaces/ps1interface');
 //var ps2_interface = require('./interfaces/ps2interface');
 //var ps3_interface = require('./interfaces/ps3interface');
 
-function calculateBestPrice(order, printAlbum, callback){
+
+function calculateBestPrice(address, n_photos, callback){
 
 	var bestPrice = {
 		'printerShopID': 0,
@@ -15,9 +16,12 @@ function calculateBestPrice(order, printAlbum, callback){
 		'realTransportPrice': 0
 	};
 
+    respond = function(res){
+    	callback(res);
+    };
 
 	// Verificar este algoritmo, ha melhor maneira?
-	
+
 
 	// Calculate price for printershop 1
 	ps1_interface.getPrices(function(res){
@@ -27,6 +31,13 @@ function calculateBestPrice(order, printAlbum, callback){
 	    var price_per_photo = res.individualPrice;
 	    var price_per_km = res.kmPrice;
 
+	    bestPrice.printerShopID = PRINTERHOP_1;
+	    bestPrice.realPrintPrice = price_per_photo * n_photos;
+	    bestPrice.realTransportPrice = 100;	// ALTERAR
+
+	    respond(bestPrice);
+
+	    /*
 		// Calculate price for printershop 2
 		ps2_interface.getPrices(function(res){
 		    console.log("Preço: " + res.individualPrice);
@@ -47,6 +58,7 @@ function calculateBestPrice(order, printAlbum, callback){
 			});
 		    
 		});
+	    */
 
 	});
 
@@ -57,6 +69,7 @@ function processOrder(printAlbum, order, response){
 	var printerShopID = order.dealedPrinterShopID;
 	var ps_interface = null;
 	
+	console.log(printAlbum);
 
 	// Create a process order
 	var processOrder = {
@@ -91,12 +104,12 @@ function processOrder(printAlbum, order, response){
 
 		});
 	}else{
-		error("undefined");
+		//erro("undefined");
 	}
 
 
 	// Handlers
-	error = function(err){
+	erro = function(err){
 		response(err);
 	};
 

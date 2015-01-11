@@ -76,7 +76,7 @@ app.route("/printershop1")
         console.log("Recebido: " + theme);
 
         // Store this order and generate new ID
-        var orderID = 1;
+        var orderID = Math.floor(Math.random()*99999) + 1;
 
         // Prepare order on carrier
         orderCarrier(orderID, function(carrier_res){

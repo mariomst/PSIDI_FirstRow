@@ -81,14 +81,15 @@ var db = new sqlite3.Database(file);
 
 db.serialize(function(){
     if(!exists){
-        console.log("INFO: Creating tables.\n->PUBLICURI\n->USERS\n->ALBUMS\n->PHOTOS\n->PRINTALBUMS\n->PRINTPHOTOS\n->ORDERS");
+        console.log("INFO: Creating tables.\n->PUBLICURI\n->USERS\n->ALBUMS\n->PHOTOS\n->PRINTALBUMS\n->PRINTPHOTOS\n->ORDERS\n->PROCESSED_ORDERS");
         db.run("CREATE TABLE PUBLICURI (uri TEXT, userID INTEGER)");
         db.run("CREATE TABLE USERS (userID INTEGER PRIMARY KEY, user TEXT, password TEXT)");
         db.run("CREATE TABLE ALBUMS (albumID INTEGER PRIMARY KEY, title TEXT, userID INTEGER, description TEXT, start_date LONG, end_date LONG)");
         db.run("CREATE TABLE PHOTOS (photoID INTEGER PRIMARY KEY, albumID INTEGER, photo TEXT, description TEXT, date LONG)");
         db.run("CREATE TABLE PRINTALBUMS (printAlbumID INTEGER PRIMARY KEY, userID INTEGER, theme TEXT, title TEXT, message TEXT)");
         db.run("CREATE TABLE PRINTPHOTOS (photoID INTEGER, printAlbumID INTEGER)");
-        db.run("CREATE TABLE ORDERS (orderID INTEGER PRIMARY KEY, userID INTEGER, dealedPrinterShopID INTEGER, distance INTEGER, realPrintPrice FLOAT, realTransportPrice FLOAT, dealedPrintPrice FLOAT, dealedTransportPrice FLOAT, address TEXT, confirmed BOOLEAN, state TEXT, expirationDate LONG)");
+        db.run("CREATE TABLE ORDERS (orderID INTEGER PRIMARY KEY, userID INTEGER, printAlbumID INTEGER, dealedPrinterShopID INTEGER, distance INTEGER, realPrintPrice FLOAT, realTransportPrice FLOAT, dealedPrintPrice FLOAT, dealedTransportPrice FLOAT, address TEXT, confirmed BOOLEAN, state TEXT, expirationDate LONG)");
+        db.run("CREATE TABLE PROCESSED_ORDERS (processOrderID INTEGER PRIMARY KEY, orderID INTEGER, processID INTEGER, carrierHost TEXT, carrierPort INTEGER, carrierEndPoint TEXT)");
     }   
 });
 

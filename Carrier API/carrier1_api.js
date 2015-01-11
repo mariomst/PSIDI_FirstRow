@@ -39,7 +39,8 @@ const STATE_2 = "Em transporte";
 const STATE_3 = "Entregue";
 
 const port = 6000;
-const server_root = "http://localhost:" + port;
+const server = 'localhost'
+const server_root = "http://" + server + ":" + port;
 const TIMESPAN = 15000;
 
 var orders = [];
@@ -133,6 +134,9 @@ app.route("/carrier1")
             var response = {
                 'order_id': order_id,
                 'check_status': server_root + '/carrier1/' + order_id,
+                'carrierHost': server,
+                'carrierPort': port,
+                'carrierEndPoint': '/carrier1/' + order_id,
                 'error': 'false'
             };
             res.status(200).send(response);
