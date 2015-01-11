@@ -33,9 +33,16 @@ function newPoint(latitude, longitude){
     return point;
 }
 
+function replaceAll(find, replace, str) {
+    return str.replace(new RegExp(find, 'g'), replace);
+}
+
 function getCoordinates(address, result){
    
    var path_str = uri_template.replace("ADDR", address);
+    path_str = replaceAll(" ", "%20", path_str);
+
+    console.log(geo_server + path_str);
 
     // Set request options
     var options = {

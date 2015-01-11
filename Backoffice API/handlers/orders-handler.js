@@ -306,15 +306,22 @@ function handlePostOrders(req, res){
 
 	var confirmed = req.body.confirmed;
 
-	if(confirmed == 'false'){                          // Store order only and calculate best prices
+	console.log("handlePostOrders", confirmed);
 
-        // Input params
+	if(!confirmed){                          // Store order only and calculate best prices
+
+		console.log("INFO: Creating order with the following information:");
+		console.log("-> confirmed: " + confirmed);
+		// Input params
         var address = req.body.address;
         var printAlbumID = req.body.printAlbum;
         var printAlbumCache;
         var newOrderCache;
 
-        // Verificar se o printAlbumID existe
+		console.log("-> address: " + address);
+		console.log("-> printAlbumID: " + printAlbumID);
+
+		// Verificar se o printAlbumID existe
 		printAlbumsHandler.getSpecificPrintAlbum(printAlbumID, function(printAlbum){
 
 			var n_photos = printAlbum.photos.length;
