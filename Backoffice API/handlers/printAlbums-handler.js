@@ -78,6 +78,7 @@ function getCitation(result){
 			var quote = res.quote;
 			var quote_clean = quote.replace('"', ""); 
 			var quote_clean = quote_clean.replace('\n', " ");
+			var quote_clean = quote_clean.replace("\t", " ");
 			result(quote_clean);
 		});
 	};
