@@ -20,10 +20,6 @@ var albumsHandler = require('./handlers/albums-handler');
 var photosHandler = require('./handlers/photos-handler');
 var printAlbumsHandler = require('./handlers/printAlbums-handler');
 var ordershandler = require('./handlers/orders-handler');
-var printershophandler = require('./handlers/printershop-handler');
-var geohandler = require('./handlers/geolocation-handler');
-
-var util = require('./util/util');
 
 var app = express();
 
@@ -289,147 +285,30 @@ app.route("/users/:userID/printAlbums/:printAlbumID")
     .put(printAlbumsHandler.handlePutPrintAlbumItem)
     .delete(printAlbumsHandler.handleDeletePrintAlbumItem); 
 
+/***************************************************************/
+/*    Colecção Encomendas individuais                          */
+/*                                                             */
+/*    URL:    /users/:userID/orders                            */
+/*                                                             */
+/*    Estado: -                                                */
+/***************************************************************/
 
+app.route("/users/:userID/orders")
+    .get(ordershandler.handleGetOrders)
+    .post(ordershandler.handlePostOrders)
+    .put(ordershandler.handlePutOrders)
+    .delete(ordershandler.handleDeleteOrders);
 
-app.route("/user/:userID/order")
-    .get(function(req,res){
-        res.status(405).send("Not allowed.");
-    })
-    .post(function(req,res){
+app.param('orderID', function(req, res, next, orderID){
+    req.orderID = orderID;
+    return next()
+})
 
-        // Do not forget to check fields null undefined
-
-        var confirmed = req.body.confirmed;
-
-        if(confirmed == 'true'){        // Process order
-
-            var orderID = req.body.orderID;
-            var userID = req.userID;
-
-            //verificar se existe order
-            ordershandler.getSpecificOrder(orderID, userID, function(order){
-
-                // Mockup
-                order = ordershandler.newOrder('1', '1', '100', '100', '0', '0', '0', '0', 'Porto', 'false', 'estado', '');
-                console.log("Address: " + order.address);
-
-                if(order != 'undefined'){
-                    // Get order's printer album (order.printAlbumID)
-                    printAlbumsHandler.getSpecificPrintAlbum(1, function(printAlbum){
-
-                        printAlbum = {
-                            'userID': 1,
-                            'theme': 'pissas',
-                            'message': 'mensagem',
-                            'photos': [
-                                {
-                                    'id': 1,
-                                    'albumid': 1,
-                                    'photo': 'abcde',
-                                    'date': '12345'
-                                }
-                            ]
-                        };
-
-                        // Request printershop for order
-                        printershophandler.processOrder(printAlbum, order, function(processedOrder){
-                            console.log("Chegou ao backoffice");
-
-                            console.log("ID# " + processedOrder.order_id);
-
-                            // Update order status
-
-                            // Respond to App
-                            res.status(200).send(processedOrder);
-                        });
-
-
-                    });
-
-                }else{
-
-                }
-            });
-
-
-        }else{                          // Store order only and calculate best prices
-
-
-            // Input params
-            var address = req.body.address;
-            var printAlbumID = req.body.printAlbum;
-
-
-            // Verificar se o printAlbumID existe
-
-
-            /*
-            Calculate distance
-            geohandler.calcEstimatedDistance(address, '38.7436266','-9.1602037',function(distance){
-                console.log("Distance is " + distance);
-            });
-            */
-
-
-            /*
-            Calculate dealed prices
-            */
-            var printAlbum = {
-                'userID': 1,
-                'theme': 'pissas',
-                'message': 'mensagem',
-                'photos': [
-                    {
-                        'id': 1,
-                        'albumid': 1,
-                        'photo': 'abcde',
-                        'date': '12345'
-                    }
-                ]
-            };
-
-            var n_photos = printAlbum.photos.length;
-            var dist = 155;
-            var totalCost = dealedAlbumCost + dealedTransportCost;
-
-
-            /*
-            Generate new order
-            */
-            var userID = req.userID;
-            var dealedPrinterShopID = 0;
-            var distance = 123;
-            var realPrintPrice = 0;
-            var dealedPrintPrice = util.calculateAlbumPrice(n_photos);
-            var dealedTransportPrice = util.calculatePriceByDistance(dist);
-            var expirationDate = new Date().getTime();      // Adicionar timeout de 5min para a order
-
-            ordershandler.createOrder(userID, dealedPrinterShopID, distance, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, 'false', expirationDate, function(newOrder){
-
-                console.log(newOrder);
-
-                // Respond to App
-                //res.status(405).send("Not allowed.");
-                
-                // Calculate real prices
-                // Pick best price
-                // Store order
-
-            });
-
-            var response = {
-
-            };
-
-        }
-
-    })
-    .put(function(req,res){
-        res.status(405).send("Not allowed.");
-    })
-    .delete(function(req,res){
-        res.status(405).send("Not allowed.");
-    });
+app.route("/users/:userID/orders/:orderID")
+    .get(ordershandler.handleGetOrderItem)
+    .post(ordershandler.handlePostOrderItem)
+    .put(ordershandler.handlePutOrderItem)
+    .delete(ordershandler.handleDeleteOrderItem); 
 
 /***************************************************************/
 /*  Starting...                                                */

@@ -7,7 +7,17 @@ var ps1_interface = require('./interfaces/ps1interface');
 //var ps2_interface = require('./interfaces/ps2interface');
 //var ps3_interface = require('./interfaces/ps3interface');
 
-function calculateBestPrice(order, printAlbum){
+function calculateBestPrice(order, printAlbum, callback){
+
+	var bestPrice = {
+		'printerShopID': 0,
+		'realPrintPrice': 0,
+		'realTransportPrice': 0
+	};
+
+
+	// Verificar este algoritmo, ha melhor maneira?
+	
 
 	// Calculate price for printershop 1
 	ps1_interface.getPrices(function(res){
@@ -16,10 +26,29 @@ function calculateBestPrice(order, printAlbum){
 
 	    var price_per_photo = res.individualPrice;
 	    var price_per_km = res.kmPrice;
-	});
 
-	// Calculate price for printershop 2
-	// Calculate price for printershop 3
+		// Calculate price for printershop 2
+		ps2_interface.getPrices(function(res){
+		    console.log("Preço: " + res.individualPrice);
+		    console.log("Km: " + res.kmPrice);
+
+		    var price_per_photo = res.individualPrice;
+		    var price_per_km = res.kmPrice;
+
+			// Calculate price for printershop 3
+			ps3_interface.getPrices(function(res){
+			    console.log("Preço: " + res.individualPrice);
+			    console.log("Km: " + res.kmPrice);
+
+			    var price_per_photo = res.individualPrice;
+			    var price_per_km = res.kmPrice;
+
+			    
+			});
+		    
+		});
+
+	});
 
 }
 
