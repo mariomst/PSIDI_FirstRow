@@ -56,7 +56,7 @@ function processOrder(processOrder, callback){
 
 function getPrices(n_photos, n_kms, result){
 
-    var endpoint = '/printershop2';
+    var endpoint = '/printershop2/cost';
 
     var input = {
         'n_photos': n_photos,
@@ -101,8 +101,11 @@ function getPrices(n_photos, n_kms, result){
         result(point);
     }
 
+    req.write(data);
     req.end();
 }
 
 exports.getPrices = getPrices;
-exports.processOrder = processOrder;
+exports.processOrder = processOrder
+exports.lat = lat;
+exports.lng = lng;

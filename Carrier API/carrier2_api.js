@@ -107,10 +107,17 @@ app.route("/carrier2/:orderID")
 
         var order = getOrder(req.orderID);
 
-        if(order == null)
-            res.status(404).send("Order ID# " + req.orderID + " was not found.");
-        else
+        if(order == null){
+
+            var resp = {
+                'message': 'Order ID# ' + req.orderID + ' was not found.'
+            };
+
+            res.status(404).send(resp);
+        }
+        else{
             res.status(200).send(order);
+        }
 
     })
 ;
@@ -133,10 +140,10 @@ app.route("/carrier2")
             // Make response
             var response = {
                 'order_id': order_id,
-                'check_status': server_root + '/carrier1/' + order_id,
+                'check_status': server_root + '/carrier2/' + order_id,
                 'carrierHost': server,
                 'carrierPort': port,
-                'carrierEndPoint': '/carrier1/' + order_id,
+                'carrierEndPoint': '/carrier2/' + order_id,
                 'error': 'false'
             };
             res.status(200).send(response);
@@ -165,7 +172,7 @@ app.route("/carrier2")
             // Make response
             var response = {
                 'error': 'true',
-                'check_status': server_root + '/carrier1/' + test_order.order_id,
+                'check_status': server_root + '/carrier2/' + test_order.order_id,
                 'message': 'The order already exists on our system.'
             };
             res.status(406).send(response);

@@ -1,9 +1,9 @@
 
-const server_port = 5000;
+const server_port = 5002;
 const server_root = "localhost";
 
-const lat = 38.7436266;
-const lng = -9.1602037;
+const lat = 40.2254686;
+const lng = -8.4522897;
 
 var http = require('http');
 var querystring = require('querystring');
@@ -11,7 +11,7 @@ var querystring = require('querystring');
 
 function processOrder(processOrder, callback){
 
-    var endpoint = '/printershop1';
+    var endpoint = '/printershop3';
 
     var data = querystring.stringify(processOrder);
     console.log("Sending " + data + " ...");
@@ -54,16 +54,28 @@ function processOrder(processOrder, callback){
     req.end();
 }
 
-function getPrices(result){
+function getPrices(n_photos, n_kms, result){
 
-    var endpoint = '/printershop1';
+    var endpoint = '/printershop3/checkPrices';
+
+    var input = {
+        'n_photos': n_photos,
+        'n_kms': n_kms
+    };
+
+    var data = querystring.stringify(input);
+    console.log("Sending " + data + " ...");
 
     // Set request options
     var options = {
         host: server_root,
         port: server_port,
         path: endpoint,
-        method: 'GET'
+        method: 'POST',
+        headers: {
+           'Content-Type': 'application/x-www-form-urlencoded',
+           'Content-Length': Buffer.byteLength(data)
+        }
     };
 
     console.log("Connecting " + server_root + endpoint);
@@ -89,10 +101,11 @@ function getPrices(result){
         result(point);
     }
 
+    req.write(data);
     req.end();
 }
 
 exports.getPrices = getPrices;
-exports.processOrder = processOrder;
+exports.processOrder = processOrder
 exports.lat = lat;
 exports.lng = lng;

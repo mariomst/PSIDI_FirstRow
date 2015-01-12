@@ -107,10 +107,17 @@ app.route("/carrier1/:orderID")
 
         var order = getOrder(req.orderID);
 
-        if(order == null)
-            res.status(404).send("Order ID# " + req.orderID + " was not found.");
-        else
+        if(order == null){
+
+            var resp = {
+                'message': 'Order ID# ' + req.orderID + ' was not found.'
+            };
+
+            res.status(404).send(resp);
+        }
+        else{
             res.status(200).send(order);
+        }
 
     })
 ;

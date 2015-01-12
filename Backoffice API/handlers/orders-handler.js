@@ -18,6 +18,9 @@ var processOrderHandler = require('./processOrder-handler');
 var geohandler = require('./geolocation-handler');
 var util = require('./util/util');
 
+var backoffice_lat = '38.7436266';
+var backoffice_lng = '-9.1602037';
+
 /***************************************************************/
 /*  Database                                                   */
 /***************************************************************/
@@ -251,7 +254,7 @@ function getSpecificOrder(orderID, callback){
 
 function updateOrderStatus(orderID, state){
 	//query para criar uma order.	
-	var query = "UPDATE ORDERS SET state = '" + state + "' WHERE orderID = " + orderID;
+	var query = "UPDATE ORDERS SET state = '" + state + "', confirmed = 'true' WHERE orderID = " + orderID;
 
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
@@ -309,7 +312,7 @@ function handlePostOrders(req, res){
 
 	console.log("handlePostOrders", confirmed);
 
-	if(!confirmed){                          // Store order only and calculate best prices
+	if(confirmed == 'false'){                          // Store order only and calculate best prices
 
 		console.log("INFO: Creating order with the following information:");
 		console.log("-> confirmed: " + confirmed);
@@ -331,16 +334,23 @@ function handlePostOrders(req, res){
 	        /*
 	        Calculate distance
 	        */
-	        geohandler.calcEstimatedDistance(address, '38.7436266','-9.1602037',function(distance){
-	            console.log("Distance is " + distance);
+	        geohandler.calcEstimatedDistance(address, backoffice_lat, backoffice_lng,function(calcPoint){
+	            console.log("Distance is " + calcPoint.distance);
 
+	            /*
+	        	var distance = 256;
+	        	var point = {
+	        		'lat': 41.3651032,
+	        		'lng': -8.756682
+	        	};
+	        	*/
 
 		        /*
 		        Calculate dealed prices
 		        */
+		        var distance = calcPoint.distance;
 		     	var userID = req.userID;
 		        var dealedPrinterShopID = 0;
-		        //var distance = 123;
 		        var realPrintPrice = 0;
 		        var realTransportPrice = 0;
 		        var dealedPrintPrice = util.calculateAlbumPrice(n_photos);
@@ -360,7 +370,7 @@ function handlePostOrders(req, res){
 		            res.status(201).send(newOrder);
 		            
 		            // Calculate real prices and Pick best price
-					printershophandler.calculateBestPrice(address, n_photos, function(bestPrice){
+					printershophandler.calculateBestPrice(calcPoint, n_photos, function(bestPrice){
 
 						console.log(bestPrice);
 
@@ -381,25 +391,6 @@ function handlePostOrders(req, res){
 		});
 
     }
-
-	/*
-	var userID = req.userID;
-	var printAlbumID = req.body.printAlbumID || 0;
-	var distance = req.body.distance || 0;
-	var dealedPrinterShopID = req.body.dealedPrinterShopID || 0;
-	var realPrintPrice = req.body.realPrintPrice || 0;
-	var realTransportPrice = req.body.realTransportPrice || 0;
-	var dealedPrintPrice = req.body.dealedPrintPrice || 0;
-	var dealedTransportPrice = req.body.dealedTransportPrice || 0;
-	var address = req.body.address || "Unknow";
-	var state = req.body.state || "Lost in Space";
-	var expirationDate = req.body.expirationDate || "01-01-2999";
-
-	//create new order
-	createOrder(userID, printAlbumID, distance, dealedPrinterShopID, realPrintPrice, realTransportPrice, dealedPrintPrice, dealedTransportPrice, address, state, expirationDate, function(result){
-		res.status(201).send(result);
-	});
-	*/
 
 };
 
@@ -467,9 +458,9 @@ function handlePostOrderItem(req, res){
         var orderID = req.orderID;
         var userID = req.userID;
 
-        console.log(confirmed);
-        console.log(orderID);
-        console.log(userID);
+        //console.log(confirmed);
+        //console.log(orderID);
+        //console.log(userID);
 
         if(confirmed){        // Process order
 
@@ -518,6 +509,8 @@ function handlePostOrderItem(req, res){
                 }
 
             });
+        }else{
+        	// confirmed false
         }
 };
 

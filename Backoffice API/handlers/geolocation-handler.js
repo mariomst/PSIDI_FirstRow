@@ -111,9 +111,16 @@ function calcEstimatedDistance(address, lat2, lng2, callback){
 
         var lat1 = point.lat;
         var lng1 = point.lng;
-
         var dist = distance(lat1, lng1, lat2, lng2);
-        completo(dist);
+
+        var point = {
+            'lat': lat1,
+            'lng': lng2,
+            'address': address,
+            'distance': dist
+        };
+
+        completo(point);
     });
 
     completo = function(dist){
