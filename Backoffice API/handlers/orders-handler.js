@@ -171,7 +171,7 @@ function getAllUserOrders(userID, result){
 					 + ",\"dealedPrintPrice\":" + row.dealedPrintPrice
 					 + ",\"dealedTransportPrice\":" + row.dealedTransportPrice
 					 + ",\"address\":\"" + row.address + "\""
-					 + ",\"confirmed\":\"" + row.confirmed + "\""
+					 + ",\"confirmed\":" + row.confirmed
 					 + ",\"state\":\"" + row.state + "\""
 					 + ",\"expirationDate\":\"" + row.expirationDate + "\"}";
 
@@ -312,7 +312,7 @@ function handlePostOrders(req, res){
 
 	console.log("handlePostOrders", confirmed);
 
-	if(confirmed == 'false'){                          // Store order only and calculate best prices
+	if(!confirmed){                          // Store order only and calculate best prices
 
 		console.log("INFO: Creating order with the following information:");
 		console.log("-> confirmed: " + confirmed);
