@@ -251,10 +251,29 @@ function getSpecificOrder(orderID, callback){
 	db.close();
 }
 
+function updateConfirmOrder(orderID){
+	//query para criar uma order.	
+	var query = "UPDATE ORDERS SET confirmed = 'true' WHERE orderID = " + orderID;
+
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+	
+	//atualizar album
+	db.serialize(function(){
+		console.log("INFO: Updating orderID = " + orderID);
+		
+		db.run(query);
+		
+		console.log("Info: Order updated");		
+		
+		db.close();
+	});
+
+}
 
 function updateOrderStatus(orderID, state){
 	//query para criar uma order.	
-	var query = "UPDATE ORDERS SET state = '" + state + "', confirmed = 'true' WHERE orderID = " + orderID;
+	var query = "UPDATE ORDERS SET state = '" + state + "' WHERE orderID = " + orderID;
 
 	//abrir instância da db.
 	var db = new sqlite3.Database(file);
@@ -488,8 +507,14 @@ function handlePostOrderItem(req, res){
 		                            var carrierPort = processedOrder.carrierPort;
 		                            var carrierEndPoint = processedOrder.carrierEndPoint;
 
+		                            // Setting this field to true saves update and get time
+		                            order.confirmed = true;
+
 		                            // Respond to App
 		                            res.status(200).send(order);
+
+		                            // Confirm order
+		                            updateConfirmOrder(orderID);
 
 		                            // Create process order
 		                            createProcessOrder(order.orderID, processID, carrierHost, carrierPort, carrierEndPoint, function(out){});
