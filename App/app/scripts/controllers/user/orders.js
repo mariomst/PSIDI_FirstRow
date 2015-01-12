@@ -13,7 +13,7 @@ angular.module('iPhotoApp')
       .when('/orders', {templateUrl: 'views/user/orders.html', controller: 'UserOrdersCtrl' })
       .when('/user/:id/order', {redirectTo: '/orders'})
   })
-  .controller('UserOrdersCtrl', function ($scope, $location, $controller, Order) {
+  .controller('UserOrdersCtrl', function ($scope, $location, $controller, $http, Iphotoshare) {
 
     angular.extend(this, $controller('CommonFunctionsCtrl', {$scope: $scope}));
 
@@ -21,10 +21,13 @@ angular.module('iPhotoApp')
 
     $scope.f = {
       get: function() {
-        Order.query({'user': search.id}, function(data){
-          $scope.orders = data;
-          console.log($scope.orders);
-        }, function(error){
+        $http.get(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/orders')
+          .success(function(data){
+            $scope.orders = data;
+            console.log($scope.orders);
+          })
+
+          .error(function(error){
           console.log('error getting orders');
         });
       }

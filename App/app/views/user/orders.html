@@ -22,10 +22,10 @@
   </thead>
   <tbody>
   <tr ng-repeat="object in orders">
-    <td>{{object.id}}</td>
-    <td>{{object.printAlbum.title}}</td>
-    <td>{{object.printPrice}}</td>
-    <td>{{object.transportPrice}}</td>
+    <td>{{object.orderID}}</td>
+    <td>{{object.printAlbumID}}</td>
+    <td>{{object.dealedPrintPrice | number: 2}}</td>
+    <td>{{object.dealedTransportPrice | number: 2}}</td>
     <td>{{object.confirmed}}</td>
     <td>{{object.state}}</td>
     <td>

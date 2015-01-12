@@ -32,14 +32,18 @@ angular.module('iPhotoApp')
           });
       },
       submit: function(){
+        $scope.spinner = true;
         $scope.order.confirmed = true;
         console.log($scope.order);
         $http.post(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/orders/' + $scope.order.orderID, $scope.order)
           .success(function(data){
-            console.log("Order confirme<d -> ", data);
+            console.log("Order confirmed -> ", data);
+            $scope.spinner = false;
+            $location.path('/user/' + $scope.user.userID + '/order');
           })
           .error(function(error){
             console.log("Error placing order", error);
+            $scope.spinner = false;
           });
       }
     };
