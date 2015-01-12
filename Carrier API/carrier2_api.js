@@ -146,7 +146,7 @@ app.route("/carrier2")
                 'carrierEndPoint': '/carrier2/' + order_id,
                 'error': 'false'
             };
-            res.status(200).send(response);
+            res.status(201).send(response);
 
 
             // Store order

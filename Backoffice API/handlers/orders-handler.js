@@ -142,6 +142,65 @@ function createOrder(userID, dealedPrinterShopID, printAlbumID, distance, realPr
 	});
 }
 
+function getAllOrders(result){
+	//query para obter todas as encomendas de um utilizador
+	var query = "SELECT * FROM ORDERS";
+
+	var orders_json = "[";
+
+	//abrir instância da db.
+	var db = new sqlite3.Database(file);
+
+	db.each(query, 
+		function(err, row){
+			if(err) return callback(err);
+		},
+		function(err, row){
+			if(err) return callback(err);
+			if(row !== undefined){
+				//criar string json para cada encomenda 
+				var order_json = "{\"orderID\":" + row.orderID
+					 + ",\"userID\":" + row.userID
+					 + ",\"printAlbumID\":" + row.printAlbumID
+					 + ",\"distance\":" + row.distance
+					 + ",\"dealedPrinterShopID\":" + row.dealedPrinterShopID
+					 + ",\"realPrintPrice\":" + row.realPrintPrice
+					 + ",\"realTransportPrice\":" + row.realTransportPrice
+					 + ",\"dealedPrintPrice\":" + row.dealedPrintPrice
+					 + ",\"dealedTransportPrice\":" + row.dealedTransportPrice
+					 + ",\"address\":\"" + row.address + "\""
+					 + ",\"confirmed\":" + row.confirmed
+					 + ",\"state\":\"" + row.state + "\""
+					 + ",\"expirationDate\":\"" + row.expirationDate + "\"}";
+
+				handler(order_json);		
+			}
+		},
+		function(err, row){
+				completed();
+		}		
+	);	
+
+	var first = true;
+	
+	var handler = function(json){		
+		if(!first){
+			orders_json += ",";
+		} else {
+			first = false;
+		}
+		orders_json += json;
+	};
+
+	var completed = function(){
+		orders_json += "]";
+		result(JSON.parse(orders_json));
+	};
+
+	//fechar instância da db.
+	db.close();
+} 
+
 function getAllUserOrders(userID, result){
 	//query para obter todas as encomendas de um utilizador
 	var query = "SELECT * FROM ORDERS WHERE userID=" + userID;
@@ -332,6 +391,7 @@ function handlePostOrders(req, res){
 	console.log("handlePostOrders", confirmed);
 
 	if(!confirmed){                          // Store order only and calculate best prices
+	//if(confirmed == 'false'){
 
 		console.log("INFO: Creating order with the following information:");
 		console.log("-> confirmed: " + confirmed);
@@ -374,8 +434,11 @@ function handlePostOrders(req, res){
 		        var realTransportPrice = 0;
 		        var dealedPrintPrice = util.calculateAlbumPrice(n_photos);
 		        var dealedTransportPrice = util.calculatePriceByDistance(distance);
-		        var expirationDate = new Date().getTime();      // Adicionar timeout de 5min para a order
 
+		        var today = new Date();
+		        today.setMinutes(today.getMinutes() + 2);
+
+		        var expirationDate = today.getTime();      // Adicionar timeout de 5min para a order
 
 		        /*
 		        Generate new order
@@ -464,7 +527,6 @@ function handleGetOrderItem(req, res){
 
 		}
 
-
 	});
 };
 
@@ -477,12 +539,13 @@ function handlePostOrderItem(req, res){
         var orderID = req.orderID;
         var userID = req.userID;
 
-        //console.log(confirmed);
-        //console.log(orderID);
-        //console.log(userID);
+        console.log(confirmed);
+        console.log(orderID);
+        console.log(userID);
 
         if(confirmed){        // Process order
-
+        //if(confirmed == 'true'){        // Process order
+        
             //verificar se existe order
             getSpecificOrder(orderID, function(order){
                 console.log(order);
@@ -562,6 +625,10 @@ exports.handleGetOrderItem = handleGetOrderItem;
 exports.handlePostOrderItem = handlePostOrderItem;
 exports.handlePutOrderItem = handlePutOrderItem;
 exports.handleDeleteOrderItem = handleDeleteOrderItem;
+
+exports.getAllOrders = getAllOrders;
+exports.getSpecificProcessOrder = getSpecificProcessOrder;
+exports.updateOrderStatus = updateOrderStatus;
 
 /*exports.createOrder = createOrder;
 exports.getAllUserOrders = getAllUserOrders;
