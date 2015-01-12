@@ -17,8 +17,6 @@ angular.module('iPhotoApp')
 
     angular.extend(this, $controller('CommonFunctionsCtrl', {$scope: $scope}));
 
-    var search = $location.search();
-
     angular.extend($scope.f, {
       get: function() {
         $scope.spinner = true;
@@ -26,19 +24,10 @@ angular.module('iPhotoApp')
           .success(function(data){
             $scope.spinner = false;
             $scope.albums = data;
-            console.log(data);
-            console.log($scope.albums);
           })
           .error(function(error){
-            $scope.spinner = false;
-            console.log('error getting albums');
+            $scope.f.handle_get_error();
           });
-        //Album.query({'user': search.id}, function(data){
-        //  $scope.albums = data;
-        //  console.log($scope.albums);
-        //}, function(error){
-        //  console.log('error getting albums');
-        //});
       }
     });
 

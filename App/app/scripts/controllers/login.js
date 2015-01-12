@@ -7,21 +7,15 @@ angular.module('iPhotoApp')
   })
   .controller('LoginCtrl', function ($scope, $http, $location, $cookieStore, Iphotoshare) {
 
+    $scope.errors = [];
+
     $scope.f = {
-      //login: function () {
-      //  $http.post(Iphotoshare.getUrl_Prefix() + '/api-token-auth/', $scope.user_data)
-      //    .success($scope.f.login_success)
-      //    .error($scope.f.login_error);
-      //},
 
       login: function() {
-        //$cookieStore.put('djangotoken', response.token);
-        //$http.defaults.headers.common['Authorization'] = 'Token ' + response.token;
         $scope.spinner = true;
         $http.post(Iphotoshare.getUrl_Prefix() + '/login', $scope.user_data)
           .success(function(data, status){
             $scope.spinner = false;
-            //$cookieStore.put('iphoto-user', data);
             Iphotoshare.setUser(data);
             try{
               $location.path('/user');
@@ -32,7 +26,11 @@ angular.module('iPhotoApp')
           })
           .error(function(error, status){
             console.log('error getting things ->', error);
+            $scope.show_error = true;
+            $scope.errors.push("An error happened when attempting login. Or the user/password combination was incorrect, or you have network problems.");
             $scope.spinner = false;
+            $scope.user_data = {};
+            $('#username').focus();
           });
       },
 

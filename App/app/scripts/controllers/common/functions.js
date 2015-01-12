@@ -12,5 +12,18 @@ angular.module('iPhotoApp')
 
     $scope.user = Iphotoshare.getUser();
 
-    $scope.f = {};
+    $scope.errors = [];
+
+    $scope.f = {
+      handle_get_error: function(){
+        $scope.spinner = false;
+        $scope.show_error = true;
+        $scope.errors.push(Iphotoshare.getError());
+      },
+      handle_post_error: function(){
+        $scope.spinner = false;
+        $scope.show_error = true;
+        $scope.errors.push(Iphotoshare.postError());
+      }
+    };
   });

@@ -20,7 +20,7 @@ angular.module('iPhotoApp')
       url: Iphotoshare.getUrl_Prefix() + '/users/' + $routeParams.user + '/albums/' + $routeParams.album + '/photos'
     });
 
-    $scope.f = {
+    angular.extend($scope.f, {
 
       submit: function () {
         $scope.spinner = true;
@@ -28,7 +28,7 @@ angular.module('iPhotoApp')
           $scope.uploader.queue[i].upload();
         }
       }
-    };
+    });
 
 
 

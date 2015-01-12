@@ -30,7 +30,7 @@ angular.module('iPhotoApp')
             $scope.f.makeTable();
           })
           .error(function(error){
-            $scope.spinner = false;
+            $scope.f.handle_get_error();
             console.log("Error getting albums ", error);
             $scope.albums = [];
           });
@@ -57,23 +57,20 @@ angular.module('iPhotoApp')
         for(var i = 0; i < $scope.albums.length; i++) {
           for (var j = 0; j < $scope.albums[i].photos.length; j++) {
             if($scope.chosen_photos[$scope.albums[i].photos[j].photoID]){
-              //console.log("chosen photo = " + $scope.albums[i].photos[j].photoID);
               photos.push($scope.albums[i].photos[j].photoID);
             }
           }
         }
 
         $scope.print_album.photos = photos;
-        console.log(JSON.stringify($scope.print_album));
         $http.post(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/printAlbums', $scope.print_album)
           .success(function(data){
             $scope.spinner = false;
-            console.log("successfuly saved printalbum ", data);
             $location.path('/user');
           })
           .error(function(error){
             console.log("error saving printalbum ", error);
-            $scope.spinner = false;
+            $scope.f.handle_post_error();
           });
       }
     };

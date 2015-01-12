@@ -1,5 +1,7 @@
 <div ng-include src="'views/common/menu.html'"></div>
 
+<div ng-include src="'views/common/errors.html'"></div>
+
 <div ng-include src="'views/common/loading.html'" ng-init="spinner_name = 'spinner'"></div>
 
 <br>
@@ -15,19 +17,6 @@
         <li ng-repeat="item in uploader.queue">
           Name: <span ng-bind="item.file.name"></span><br/>
           <input type="text" class="form-control input-sm" ng-model="item.file.description" placeholder="Description...">
-          <!--<button ng-click="item.upload()">upload</button>-->
-          <!--<div class="dropdown">-->
-            <!--<a class="dropdown-toggle {{item.file.name}}" id="photo_date" role="button" data-toggle="dropdown" data-target="#" href="" data-disabled="true">-->
-              <!--<div class="input-append">-->
-                <!--<input type="text" class="form-control col-md-8 input-sm" data-ng-model="item.file.date_pretty" placeholder="Date...">-->
-              <!--</div>-->
-            <!--</a>-->
-            <!--<ul class="dropdown-menu" role="menu" aria-labelledby="item.file.date_pretty">-->
-              <!--<datetimepicker data-ng-model="item.file.date_pretty"-->
-                              <!--data-datetimepicker-config="{ dropdownSelector: '.' + item.file.name , minView: 'day' }">-->
-              <!--</datetimepicker>-->
-            <!--</ul>-->
-          <!--</div>-->
         </li>
       </ul>
 

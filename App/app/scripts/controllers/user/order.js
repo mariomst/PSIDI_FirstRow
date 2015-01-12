@@ -19,7 +19,7 @@ angular.module('iPhotoApp')
     $scope.order = {};
     $scope.order.confirmed = false;
 
-    $scope.f = {
+    angular.extend($scope.f, {
       get: function(){
         $scope.spinner = true;
         $http.get(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/printAlbums')
@@ -28,7 +28,7 @@ angular.module('iPhotoApp')
             $scope.print_albums = data;
           })
           .error(function(error){
-            $scope.spinner = false;
+            $scope.f.handle_get_error();
             console.log("error getting print_albums");
           });
       },
@@ -38,16 +38,15 @@ angular.module('iPhotoApp')
         $http.post(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/orders', $scope.order)
           .success(function(data){
             $scope.spinner = false;
-            console.log("Order placed -> ", data);
             $location.path('/user/' + $scope.user.userID + '/order/' + data.orderID + '/confirm');
 
           })
           .error(function(error){
-            $scope.spinner = false;
+            $scope.f.handle_post_error();
             console.log("Error placing order", error);
           });
       }
-    };
+    });
 
     $scope.f.get();
   });

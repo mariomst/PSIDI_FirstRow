@@ -26,6 +26,12 @@ angular.module('iPhotoApp')
       },
       getUser: function(){
         return $cookieStore.get("iphoto-user");
+      },
+      getError: function(){
+        return "Error getting information from the server.";
+      },
+      postError: function(){
+        return "Error sending information to the server.";
       }
     };
   });

@@ -17,21 +17,21 @@ angular.module('iPhotoApp')
 
     angular.extend(this, $controller('CommonFunctionsCtrl', {$scope: $scope}));
 
-    var search = $location.search();
-
-    $scope.f = {
+    angular.extend($scope.f, {
       get: function() {
+        $scope.spinner = true;
         $http.get(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/orders')
           .success(function(data){
+            $scope.spinner = false;
             $scope.orders = data;
-            console.log($scope.orders);
           })
 
           .error(function(error){
-          console.log('error getting orders');
-        });
+            $scope.f.handle_get_error();
+            console.log('error getting orders ', error);
+          });
       }
-    };
+    });
 
     $scope.f.get();
   });

@@ -18,20 +18,18 @@ angular.module('iPhotoApp')
 
     $scope.album = {};
 
-    $scope.f = {
+    angular.extend($scope.f, {
 
       submit: function(){
         $scope.spinner = true;
         $http.post(Iphotoshare.getUrl_Prefix() + '/users/' + $scope.user.userID + '/albums', $scope.album)
           .success(function(data){
             $scope.spinner = false;
-            console.log("created", data);
             $location.path('/user/' + $scope.user.userID + '/album/' + data.albumID + '/photo');
-            //TODO: redirect to users/x/albums/ "data.id" /photos
           })
           .error(function(error){
-            $scope.spinner = false;
             console.log("error", error);
+            $scope.f.handle_post_error();
           });
       },
       handle_date: function(field){
@@ -42,7 +40,7 @@ angular.module('iPhotoApp')
         $scope.album[field] = d._d.getTime();
         $scope.album[field + '_pretty'] = date_string(year, month, day);
       }
-    };
+    });
 
 
     $scope.$watchCollection('album.start_date_pretty', function(newVal, oldVal){
