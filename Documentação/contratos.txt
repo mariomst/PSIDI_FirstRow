@@ -1,0 +1,13 @@
+-Interfaces e contratos
+
+--App
+No caso da App existem diversos contratos com o BackOffice, um para cada entidade existente no iPhoto.
+
+--BackOffice
+O BackOffice para além do contrato acima referido, tem também contratos para as comunicações com as Printer shops, quando são enviados os albuns com a fotografias a serem impressas, e com os Carriers, onde será feita uma busca para recolher a informação sobre o estado da encomenda.
+
+--Printer shop
+Além do contrato para a comunicação com o BackOffice, o Printer shop tem um contrato para comunicar com o seu carrier para enviar a informação sobre a encomenda.
+
+--Carrier
+Finalmente, o Carrier tem o contrato para receber a informação do Printer shop, e ainda outro para responder ao BackOffice sobre o estado da encomenda.
